@@ -1,5 +1,11 @@
+use core::fmt::{self, Write};
+
+use crate::get_os;
+
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
+// TODO: make it volatile
+const VGA_BUFFER: *mut u8 = 0xb8000 as *mut u8;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -60,14 +66,17 @@ pub struct Printer {
 
 impl Printer {
     pub fn new() -> Self {
-        Self { row: 1, column: 0 }
+        Self { row: 0, column: 0 }
     }
 
     fn get_buffer_location(self) -> isize {
-        (self.column * self.row) as isize
+        (self.column + self.row * 80) as isize
     }
 
-    fn new_line(self) {}
+    fn new_line(&mut self) {
+        self.row += 1;
+        self.column = 0;
+    }
 
     pub fn print_byte_char(&mut self, cell: VgaCell) {
         if cell.character == b'\n' {
@@ -75,10 +84,9 @@ impl Printer {
             return;
         }
 
-        let vga_buffer = 0xb8000 as *mut u8;
         unsafe {
-            *vga_buffer.offset(self.get_buffer_location() * 2) = cell.character;
-            *vga_buffer.offset(self.get_buffer_location() * 2 + 1) = cell.color.0;
+            *VGA_BUFFER.offset(self.get_buffer_location() * 2) = cell.character;
+            *VGA_BUFFER.offset(self.get_buffer_location() * 2 + 1) = cell.color.0;
         }
 
         if self.column >= BUFFER_WIDTH as u8 {
@@ -97,10 +105,34 @@ impl Printer {
     pub fn print_string(&mut self, string: &str, color: CellColor) {
         for ch in string.bytes() {
             match ch {
-                0x20..=0x7e => self.print_byte_char(VgaCell::new(ch, color)),
+                0x20..=0x7e | b'\n' => self.print_byte_char(VgaCell::new(ch, color)),
                 // write a invalid char if the char is not supported
                 _ => self.print_byte_char(VgaCell::new(0xfe, color)),
             }
         }
     }
+}
+
+impl fmt::Write for Printer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.print_string(s, CellColor::new(VgaColor::White, VgaColor::Black));
+        Ok(())
+    }
+}
+
+// reimplemented print macros
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::vga_print::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+#[doc(hidden)]
+pub fn _print(args: fmt::Arguments) {
+    get_os().printer.write_fmt(args).unwrap();
 }

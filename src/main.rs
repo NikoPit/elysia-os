@@ -3,22 +3,31 @@
 // Disables main function to customize entry point
 #![no_main]
 
-use core::cell::Cell;
+use core::{cell::Cell, fmt::Write};
 
-use crate::vga_print::{CellColor, Printer, VgaCell, VgaColor};
+use crate::{
+    os::OS,
+    vga_print::{CellColor, Printer, VgaCell, VgaColor},
+};
 
+pub mod os;
 pub mod panic_handler;
 pub mod vga_print;
 
-static HELLO: &[u8] = b"Hello World!";
+use lazy_static::lazy_static;
+use spin::{Mutex, MutexGuard};
 
+lazy_static! {
+    pub static ref ELYSIA_OS: Mutex<OS> = Mutex::new(OS::new(Printer::new()));
+}
 // Disables name mangling so the linker can recognize the entry point
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    Printer::new().print_string(
-        "weg沃尔夫看哦沃尔夫",
-        CellColor::new(VgaColor::Black, VgaColor::White),
-    );
+    println!("hello world!");
 
     loop {}
+}
+
+pub fn get_os() -> MutexGuard<'static, OS> {
+    ELYSIA_OS.lock()
 }
