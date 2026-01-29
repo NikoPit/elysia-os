@@ -24,6 +24,13 @@ lazy_static! {
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     println!("hello world!");
+    println!("a");
+    println!("a");
+    println!();
+    println!(
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1e0910ejopisdjdwojowifjwefiwjfioejfoiwjefoiwejfioejfoidajfifjisfjaoisfjsklfjafklsfjasjfalkjfskfjalksfaslkfasjfsaf"
+    );
+    println!("second line wefkowekfpowfkewpofgkeopfokwfkwefkopwfkwpef");
 
     loop {}
 }

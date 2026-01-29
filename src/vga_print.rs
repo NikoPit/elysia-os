@@ -60,8 +60,8 @@ impl VgaCell {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Printer {
-    row: u8,
-    column: u8,
+    row: usize,
+    column: usize,
 }
 
 impl Printer {
@@ -89,13 +89,11 @@ impl Printer {
             *VGA_BUFFER.offset(self.get_buffer_location() * 2 + 1) = cell.color.0;
         }
 
-        if self.column >= BUFFER_WIDTH as u8 {
-            self.column = 0;
-            self.row += 1;
+        if self.column >= BUFFER_WIDTH {
             self.new_line();
         }
 
-        if self.row >= BUFFER_HEIGHT as u8 {
+        if self.row >= BUFFER_HEIGHT {
             // TODO
         }
 
