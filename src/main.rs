@@ -2,6 +2,10 @@
 #![no_std]
 // Disables main function to customize entry point
 #![no_main]
+#![feature(custom_test_frameworks)]
+// renames main function for testing because we disabled main with #[no_main]
+#![reexport_test_harness_main = "test_main"]
+#![test_runner(crate::testing::run_tests)]
 
 use core::{cell::Cell, fmt::Write};
 
@@ -12,6 +16,7 @@ use crate::{
 
 pub mod os;
 pub mod panic_handler;
+pub mod testing;
 pub mod vga_print;
 
 use lazy_static::lazy_static;
@@ -31,6 +36,11 @@ pub extern "C" fn _start() -> ! {
         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1e0910ejopisdjdwojowifjwefiwjfioejfoiwjefoiwejfioejfoidajfifjisfjaoisfjsklfjafklsfjasjfalkjfskfjalksfaslkfasjfsaf"
     );
     println!("second line wefkowekfpowfkewpofgkeopfokwfkwefkopwfkwpef");
+
+    // manually call the main function for testing because we renamed the test main function
+    // because we disabled main with no main
+    #[cfg(test)]
+    test_main();
 
     loop {}
 }
