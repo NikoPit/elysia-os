@@ -14,13 +14,16 @@ use crate::{
     vga_print::{CellColor, Printer, VgaCell, VgaColor},
 };
 
+pub mod debug_exit;
 pub mod os;
 pub mod panic_handler;
+pub mod serial_print;
 pub mod testing;
 pub mod vga_print;
 
 use lazy_static::lazy_static;
 use spin::{Mutex, MutexGuard};
+use uart_16550::SerialPort;
 
 lazy_static! {
     pub static ref ELYSIA_OS: Mutex<OS> = Mutex::new(OS::new(Printer::new()));
@@ -28,14 +31,7 @@ lazy_static! {
 // Disables name mangling so the linker can recognize the entry point
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    println!("hello world!");
-    println!("a");
-    println!("a");
-    println!();
-    println!(
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1e0910ejopisdjdwojowifjwefiwjfioejfoiwjefoiwejfioejfoidajfifjisfjaoisfjsklfjafklsfjasjfalkjfskfjalksfaslkfasjfsaf"
-    );
-    println!("second line wefkowekfpowfkewpofgkeopfokwfkwefkopwfkwpef");
+    println!("Welcome to Elysia-OS v0.1.0");
 
     // manually call the main function for testing because we renamed the test main function
     // because we disabled main with no main

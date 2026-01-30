@@ -1,13 +1,19 @@
-use crate::{print, println};
+use crate::{print, println, s_print, s_println};
 
 #[cfg(test)]
 pub fn run_tests(tests: &[&dyn Fn()]) {
-    use crate::println;
+    use crate::{
+        debug_exit::{QemuExitCode, debug_exit},
+        println, s_println,
+    };
 
-    println!("Running {} tests", tests.len());
+    s_println!("\nRunning {} tests", tests.len());
     for test in tests {
         test();
     }
+
+    s_println!("\nTest success!");
+    debug_exit(QemuExitCode::Success);
 }
 
 pub struct Test {
@@ -20,12 +26,12 @@ impl Test {
         Self { name, test }
     }
 
-    fn run_test(&self) {
-        print!("Testing {} ", self.name);
+    pub fn run_test(&self) {
+        s_print!("{} ", self.name);
 
         ((self.test)());
 
-        println!("[OK]");
+        s_println!("[OK]");
     }
 }
 
@@ -38,6 +44,3 @@ macro_rules! test {
         }
     };
 }
-
-test!("1 = 1?", || assert_eq!(1, 1));
-test!("1 + 1 = 2", || assert_eq!(1 + 1, 2));
