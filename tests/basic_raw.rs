@@ -10,7 +10,6 @@ use elysia_os::testing;
 
 use core::panic::PanicInfo;
 
-use elysia_os::panic_handler;
 use elysia_os::panic_handler::test_handle_panic;
 use elysia_os::println;
 use elysia_os::test;
