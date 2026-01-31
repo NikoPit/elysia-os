@@ -1,9 +1,8 @@
-
 use lazy_static::lazy_static;
 use spin::*;
 use uart_16550::SerialPort;
 
-use crate::{interrupts::init_idt, vga_print::Printer};
+use crate::{gdt::init_gdt, interrupts::init_idt, vga_print::Printer};
 
 lazy_static! {
     pub static ref ELYSIA_OS: Mutex<OS> = Mutex::new(OS::new());
@@ -27,6 +26,7 @@ impl OS {
     }
 
     pub fn init(&self) {
+        init_gdt();
         init_idt();
     }
 }

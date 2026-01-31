@@ -21,7 +21,6 @@ pub extern "C" fn _start() -> ! {
     println!("Welcome to Elysia-OS v0.1.0");
 
     get_os().init();
-    int3();
 
     #[cfg(test)]
     test_main();

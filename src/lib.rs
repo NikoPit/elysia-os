@@ -5,11 +5,13 @@
 #![test_runner(crate::testing::run_tests)]
 
 pub mod debug_exit;
+pub mod gdt;
 pub mod interrupts;
 pub mod os;
 pub mod panic_handler;
 pub mod serial_print;
 pub mod testing;
+pub mod tss;
 pub mod vga_print;
 
 #[cfg(test)]
