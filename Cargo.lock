@@ -72,6 +72,7 @@ dependencies = [
  "const-random",
  "lazy_static",
  "paste",
+ "pic8259",
  "qemu-exit",
  "spin 0.5.2",
  "uart_16550",
@@ -116,6 +117,15 @@ name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
+
+[[package]]
+name = "pic8259"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62d9a86c292b165f757e47e7fd66855def189b2564609bc4203727b27c33db22"
+dependencies = [
+ "x86_64 0.15.4",
+]
 
 [[package]]
 name = "qemu-exit"

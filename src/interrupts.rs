@@ -1,6 +1,9 @@
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
-use crate::{print, println, test, tss::DOUBLE_FAULT_IST_LOCATION};
+use crate::{
+    hardware_interrupt::init_hardware_interrupts, print, println, test,
+    tss::DOUBLE_FAULT_IST_LOCATION,
+};
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -15,6 +18,8 @@ lazy_static! {
                 // to handle double fault when stack overflows
                 .set_stack_index(DOUBLE_FAULT_IST_LOCATION)
         };
+
+        init_hardware_interrupts(&mut idt);
 
         idt
     };

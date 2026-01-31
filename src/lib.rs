@@ -6,6 +6,7 @@
 
 pub mod debug_exit;
 pub mod gdt;
+pub mod hardware_interrupt;
 pub mod interrupts;
 pub mod os;
 pub mod panic_handler;
@@ -16,8 +17,6 @@ pub mod vga_print;
 
 #[cfg(test)]
 use core::panic::PanicInfo;
-
-
 
 #[cfg(test)]
 #[unsafe(no_mangle)]

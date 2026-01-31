@@ -1,0 +1,60 @@
+use core::ops::Index;
+
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+
+use crate::{os::get_os, print};
+
+pub const PIC_1_OFFSET: u8 = 32;
+pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
+
+#[derive(Clone, Copy, Debug)]
+#[repr(u8)]
+pub enum HardwareInterrupt {
+    Timer = PIC_1_OFFSET,
+}
+
+impl HardwareInterrupt {
+    fn as_u8(self) -> u8 {
+        self as u8
+    }
+    fn as_usize(self) -> usize {
+        usize::from(self.as_u8())
+    }
+}
+
+pub trait HardwareInterruptHandler {
+    const HARDWARE_INTERRUPT: HardwareInterrupt;
+
+    fn handle_hardware_interrupt_unwrapped(_stack_frame: InterruptStackFrame);
+
+    extern "x86-interrupt" fn handle_hardware_interrupt(_stack_frame: InterruptStackFrame) {
+        Self::handle_hardware_interrupt_unwrapped(_stack_frame);
+        notify_end_of_interrupt(Self::HARDWARE_INTERRUPT);
+    }
+}
+
+fn notify_end_of_interrupt(interrupt: HardwareInterrupt) {
+    unsafe {
+        get_os().pics.notify_end_of_interrupt(interrupt.as_u8());
+    }
+}
+
+macro_rules! register_hardware_interrupt {
+    ($idt:expr, $interrupt:expr, $handler:ty) => {
+        $idt[$interrupt.as_u8()].set_handler_fn(<$handler>::handle_hardware_interrupt);
+    };
+}
+
+pub fn init_hardware_interrupts(idt: &mut InterruptDescriptorTable) {
+    register_hardware_interrupt!(idt, HardwareInterrupt::Timer, TimerHandler);
+}
+
+struct TimerHandler;
+
+impl HardwareInterruptHandler for TimerHandler {
+    const HARDWARE_INTERRUPT: HardwareInterrupt = HardwareInterrupt::Timer;
+
+    fn handle_hardware_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {
+        print!(".");
+    }
+}
