@@ -11,9 +11,7 @@ use core::panic::PanicInfo;
 
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
-use elysia_os::{panic_handler, testing};
 
-use x86_64::instructions::interrupts::int3;
 
 // Disables name mangling so the linker can recognize the entry point
 #[unsafe(no_mangle)]

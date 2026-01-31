@@ -17,9 +17,7 @@ pub mod vga_print;
 #[cfg(test)]
 use core::panic::PanicInfo;
 
-use crate::os::get_os;
 
-use x86_64::instructions::interrupts::int3;
 
 #[cfg(test)]
 #[unsafe(no_mangle)]

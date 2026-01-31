@@ -1,7 +1,4 @@
-use x86_64::{
-    instructions::interrupts::int3,
-    structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
-};
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 use crate::{print, println, test, tss::DOUBLE_FAULT_IST_LOCATION};
 use lazy_static::lazy_static;
