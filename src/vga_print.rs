@@ -1,6 +1,6 @@
 use core::fmt::{self, Write};
 
-use crate::os::get_os;
+use crate::{get_os, test};
 
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
@@ -134,3 +134,14 @@ macro_rules! println {
 pub fn _print(args: fmt::Arguments) {
     get_os().printer.write_fmt(args).unwrap();
 }
+
+test!("Basic VGA Print", || println!("Hello world!"));
+test!("Long VGA Print", || println!(
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+));
+test!("VGA Print new line", || println!("aaa\naaa\naaa"));
+test!("Really long VGA Print", || {
+    for i in 0..=100 {
+        println!("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    }
+});

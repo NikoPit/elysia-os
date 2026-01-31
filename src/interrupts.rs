@@ -1,6 +1,7 @@
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 use crate::println;
+use crate::s_println;
 use lazy_static::lazy_static;
 
 lazy_static! {
