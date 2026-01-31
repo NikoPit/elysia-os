@@ -1,9 +1,13 @@
-use core::fmt::Write;
 
+use lazy_static::lazy_static;
+use spin::*;
 use uart_16550::SerialPort;
-use x86_64::structures::idt::InterruptDescriptorTable;
 
 use crate::{interrupts::init_idt, vga_print::Printer};
+
+lazy_static! {
+    pub static ref ELYSIA_OS: Mutex<OS> = Mutex::new(OS::new());
+}
 
 pub struct OS {
     pub printer: Printer,
@@ -25,4 +29,8 @@ impl OS {
     pub fn init(&self) {
         init_idt();
     }
+}
+
+pub fn get_os() -> MutexGuard<'static, OS> {
+    ELYSIA_OS.lock()
 }
