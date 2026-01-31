@@ -1,10 +1,8 @@
 use crate::{s_print, s_println};
 
-#[cfg(test)]
 pub fn run_tests(tests: &[&dyn Fn()]) {
     use crate::{
-        debug_exit::{QemuExitCode, debug_exit},
-        println, s_println,
+        debug_exit::{QemuExitCode, debug_exit}, s_println,
     };
 
     s_println!("\nRunning {} tests", tests.len());
