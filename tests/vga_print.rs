@@ -4,12 +4,16 @@
 #![feature(custom_test_frameworks, abi_x86_interrupt)]
 // renames main function for testing because we disabled main with #[no_main]
 #![reexport_test_harness_main = "test_main"]
-#![test_runner(crate::run_tests)]
+#![test_runner(testing::run_tests)]
+use elysia_os::testing;
 // Disable dynamic linking with the std library because there is no std library in our own os
 
 use core::panic::PanicInfo;
 
+use elysia_os::panic_handler;
+use elysia_os::panic_handler::test_handle_panic;
 use elysia_os::println;
+use elysia_os::test;
 
 // Disables name mangling so the linker can recognize the entry point
 #[unsafe(no_mangle)]
@@ -19,19 +23,9 @@ pub extern "C" fn _start() -> ! {
     loop {}
 }
 
-pub fn run_tests(tests: &[&dyn Fn()]) {
-    use elysia_os::{
-        debug_exit::{QemuExitCode, debug_exit},
-        s_println,
-    };
-
-    s_println!("\nRunning {} tests", tests.len());
-    for test in tests {
-        test();
-    }
-
-    s_println!("\nTest success!");
-    debug_exit(QemuExitCode::Success);
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    test_handle_panic(info);
 }
 
 test!("Basic VGA Print", || println!("Hello world!"));

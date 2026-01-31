@@ -12,6 +12,9 @@ pub mod serial_print;
 pub mod testing;
 pub mod vga_print;
 
+#[cfg(test)]
+use core::panic::PanicInfo;
+
 use crate::os::get_os;
 
 use x86_64::instructions::interrupts::int3;
@@ -22,4 +25,12 @@ pub extern "C" fn _start() -> ! {
     test_main();
 
     loop {}
+}
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    use crate::panic_handler::test_handle_panic;
+
+    test_handle_panic(_info);
 }
