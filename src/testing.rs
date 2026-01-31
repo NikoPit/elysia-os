@@ -1,4 +1,4 @@
-use crate::{print, println, s_print, s_println};
+use crate::{s_print, s_println};
 
 #[cfg(test)]
 pub fn run_tests(tests: &[&dyn Fn()]) {
