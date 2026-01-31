@@ -22,6 +22,8 @@ use x86_64::instructions::interrupts::int3;
 #[cfg(test)]
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
+    get_os().init();
+
     test_main();
 
     loop {}

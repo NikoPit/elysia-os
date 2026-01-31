@@ -1,6 +1,9 @@
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use x86_64::{
+    instructions::interrupts::int3,
+    structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
+};
 
-use crate::println;
+use crate::{println, test};
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -20,3 +23,6 @@ pub fn init_idt() {
 pub extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("\nBreakpoint exception:\n\n{:#?}", stack_frame);
 }
+
+// test if breakpoint interrupt will crash the system
+test!("Breakpoint interrupt crash", || int3());
