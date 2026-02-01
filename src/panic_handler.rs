@@ -18,7 +18,7 @@ pub fn test_handle_panic(_info: &PanicInfo) -> ! {
     };
 
     s_println!("[FAILED]\n");
-    s_println!("Error:\n{}\n", _info);
+    s_println!("{}\n", _info);
 
     debug_exit(QemuExitCode::Failed);
 
