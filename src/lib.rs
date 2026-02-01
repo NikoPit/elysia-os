@@ -6,6 +6,7 @@
 
 pub mod debug_exit;
 pub mod driver;
+pub mod exception_interrupt;
 pub mod gdt;
 pub mod hardware_interrupt;
 pub mod interrupts;
