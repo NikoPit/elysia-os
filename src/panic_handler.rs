@@ -3,17 +3,18 @@
 
 use core::panic::PanicInfo;
 
-use crate::println;
+use crate::{misc::hlt_loop, println};
 
 pub fn handle_panic(_info: &PanicInfo) -> ! {
     println!("{}", _info);
 
-    loop {}
+    hlt_loop();
 }
 
 pub fn test_handle_panic(_info: &PanicInfo) -> ! {
     use crate::{
-        debug_exit::{QemuExitCode, debug_exit}, s_println,
+        debug_exit::{QemuExitCode, debug_exit},
+        s_println,
     };
 
     s_println!("[FAILED]\n");
@@ -21,5 +22,5 @@ pub fn test_handle_panic(_info: &PanicInfo) -> ! {
 
     debug_exit(QemuExitCode::Failed);
 
-    loop {}
+    hlt_loop();
 }

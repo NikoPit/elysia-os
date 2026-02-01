@@ -1,4 +1,7 @@
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use x86_64::{
+    instructions::interrupts::int3,
+    structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
+};
 
 use crate::{
     hardware_interrupt::init_hardware_interrupts, print, println, test,

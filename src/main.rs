@@ -9,6 +9,7 @@
 
 use core::panic::PanicInfo;
 
+use elysia_os::misc::hlt_loop;
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
 
@@ -22,7 +23,7 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
 
-    loop {}
+    hlt_loop();
 }
 
 pub fn run_tests(tests: &[&dyn Fn()]) {
