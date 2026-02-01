@@ -3,6 +3,7 @@ use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 use crate::{
     interrupts::{print_stackframe, print_stackframe_m},
     print,
+    tss::DOUBLE_FAULT_IST_LOCATION,
 };
 
 pub trait ExceptionInterruptHandler {
@@ -32,6 +33,7 @@ pub fn init_exception_interrupts(idt: &mut InterruptDescriptorTable) {
     unsafe {
         idt.double_fault
             .set_handler_fn(DoublefaultHandler::handle_exception_interrupt_err_code)
+            .set_stack_index(DOUBLE_FAULT_IST_LOCATION)
     };
 }
 
