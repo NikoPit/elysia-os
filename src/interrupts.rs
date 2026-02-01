@@ -4,7 +4,9 @@ use x86_64::{
 };
 
 use crate::{
-    hardware_interrupt::init_hardware_interrupts, print, println, test,
+    driver::{self, init_interrupt_drivers},
+    hardware_interrupt::init_hardware_interrupts,
+    print, println, test,
     tss::DOUBLE_FAULT_IST_LOCATION,
 };
 use lazy_static::lazy_static;
@@ -23,6 +25,7 @@ lazy_static! {
         };
 
         init_hardware_interrupts(&mut idt);
+        init_interrupt_drivers(&mut idt);
 
         idt
     };

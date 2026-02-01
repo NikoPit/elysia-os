@@ -5,9 +5,11 @@
 #![test_runner(crate::testing::run_tests)]
 
 pub mod debug_exit;
+pub mod driver;
 pub mod gdt;
 pub mod hardware_interrupt;
 pub mod interrupts;
+pub mod keyboard;
 pub mod misc;
 pub mod os;
 pub mod panic_handler;

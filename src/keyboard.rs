@@ -1,0 +1,72 @@
+use lazy_static::lazy_static;
+use pc_keyboard::{DecodedKey, KeyCode, Keyboard, ScancodeSet1, layouts};
+use spin::{Mutex, MutexGuard};
+use x86_64::instructions::port::Port;
+
+lazy_static! {
+    static ref _PS2_KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
+        Mutex::new(Keyboard::new(
+            ScancodeSet1::new(),
+            layouts::Us104Key,
+            pc_keyboard::HandleControl::Ignore
+        ));
+}
+
+use crate::{
+    driver::{Driver, InterruptDriver},
+    hardware_interrupt::{HardwareInterrupt, HardwareInterruptHandler},
+    os::get_os,
+    print, register_hardware_interrupt,
+};
+
+pub trait KeyboardDriver: Driver {
+    fn handle_key(key: DecodedKey) {
+        match key {
+            DecodedKey::Unicode(character) => print!("{character}"),
+            DecodedKey::RawKey(key) => Self::handle_raw_key(key),
+        }
+    }
+
+    fn handle_raw_key(key: KeyCode) {
+        // TODO: handle delete keys and enter and all that stuffs
+    }
+}
+
+pub struct PS2KeyboardDriver;
+
+impl Driver for PS2KeyboardDriver {}
+
+impl InterruptDriver for PS2KeyboardDriver {
+    fn idt_init(idt: &mut x86_64::structures::idt::InterruptDescriptorTable) {
+        register_hardware_interrupt!(idt, HardwareInterrupt::Keyboard, Self);
+    }
+}
+
+impl KeyboardDriver for PS2KeyboardDriver {}
+
+impl PS2KeyboardDriver {
+    fn get_keyboard() -> MutexGuard<'static, Keyboard<layouts::Us104Key, ScancodeSet1>> {
+        _PS2_KEYBOARD.lock()
+    }
+}
+
+impl HardwareInterruptHandler for PS2KeyboardDriver {
+    const HARDWARE_INTERRUPT: crate::hardware_interrupt::HardwareInterrupt =
+        HardwareInterrupt::Keyboard;
+
+    fn handle_hardware_interrupt_unwrapped(
+        _stack_frame: x86_64::structures::idt::InterruptStackFrame,
+    ) {
+        let mut keyboard_port = Port::new(0x60);
+        let scancode = unsafe { keyboard_port.read() };
+
+        let test_key_event = Self::get_keyboard().add_byte(scancode);
+
+        if let Ok(Some(key_event)) = test_key_event {
+            let thing = Self::get_keyboard().process_keyevent(key_event);
+            if let Some(key) = thing {
+                Self::handle_key(key);
+            }
+        }
+    }
+}
