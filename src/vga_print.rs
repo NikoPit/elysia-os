@@ -95,7 +95,7 @@ impl Printer {
             *VGA_BUFFER.offset(color_location) = cell_color.0;
         }
 
-        self.buffer_tracker[self.column][self.row] = character;
+        // TODO self.buffer_tracker[self.column][self.row] = character;
     }
 
     pub fn print_byte_char(&mut self, cell: VgaCell) {
