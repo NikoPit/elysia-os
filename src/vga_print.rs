@@ -1,3 +1,4 @@
+use core::cell;
 use core::fmt::{self, Write};
 
 use crate::os::{get_os, get_os_no_interrupt};
@@ -63,11 +64,17 @@ impl VgaCell {
 pub struct Printer {
     row: usize,
     column: usize,
+
+    buffer_tracker: [[u8; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 
 impl Printer {
     pub fn new() -> Self {
-        Self { row: 0, column: 0 }
+        Self {
+            row: 0,
+            column: 0,
+            buffer_tracker: [[0 as u8; BUFFER_WIDTH]; BUFFER_HEIGHT],
+        }
     }
 
     fn get_buffer_location(self) -> isize {
@@ -79,16 +86,25 @@ impl Printer {
         self.column = 0;
     }
 
+    fn write_char_wrapper(&mut self, character: u8, cell_color: CellColor) {
+        let char_location = self.get_buffer_location() * 2;
+        let color_location = self.get_buffer_location() * 2 + 1;
+
+        unsafe {
+            *VGA_BUFFER.offset(char_location) = character;
+            *VGA_BUFFER.offset(color_location) = cell_color.0;
+        }
+
+        self.buffer_tracker[self.column][self.row] = character;
+    }
+
     pub fn print_byte_char(&mut self, cell: VgaCell) {
         if cell.character == b'\n' {
             self.new_line();
             return;
         }
 
-        unsafe {
-            *VGA_BUFFER.offset(self.get_buffer_location() * 2) = cell.character;
-            *VGA_BUFFER.offset(self.get_buffer_location() * 2 + 1) = cell.color.0;
-        }
+        self.write_char_wrapper(cell.character, cell.color);
 
         if self.column >= BUFFER_WIDTH {
             self.new_line();
