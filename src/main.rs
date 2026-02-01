@@ -12,7 +12,6 @@ use core::panic::PanicInfo;
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
 
-
 // Disables name mangling so the linker can recognize the entry point
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {

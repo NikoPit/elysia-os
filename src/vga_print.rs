@@ -1,6 +1,6 @@
 use core::fmt::{self, Write};
 
-use crate::os::get_os;
+use crate::os::{get_os, get_os_no_interrupt};
 use crate::test;
 
 const BUFFER_HEIGHT: usize = 25;
@@ -133,7 +133,9 @@ macro_rules! println {
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    get_os().printer.write_fmt(args).unwrap();
+    get_os_no_interrupt(|mut os| {
+        os.printer.write_fmt(args).unwrap();
+    });
 }
 
 test!("Basic VGA Print", || println!("Hello world!"));

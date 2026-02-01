@@ -43,6 +43,13 @@ impl OS {
     }
 }
 
+pub fn get_os_no_interrupt<F>(func: F)
+where
+    F: FnOnce(MutexGuard<'static, OS>),
+{
+    interrupts::without_interrupts(|| func(get_os()));
+}
+
 pub fn get_os() -> MutexGuard<'static, OS> {
     ELYSIA_OS.lock()
 }

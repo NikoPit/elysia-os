@@ -1,6 +1,6 @@
 use core::fmt::{self, Write};
 
-use crate::os::get_os;
+use crate::os::{get_os, get_os_no_interrupt};
 
 #[macro_export]
 macro_rules! s_print {
@@ -15,8 +15,9 @@ macro_rules! s_println {
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    get_os()
-        .serial_port
-        .write_fmt(args)
-        .expect("Failed to print to serial port.");
+    get_os_no_interrupt(|mut os| {
+        os.serial_port
+            .write_fmt(args)
+            .expect("Failed to print to serial port")
+    });
 }
