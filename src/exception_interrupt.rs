@@ -1,8 +1,15 @@
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use x86_64::{
+    registers::control::Cr2,
+    structures::{
+        idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode},
+        paging::Page,
+    },
+};
 
 use crate::{
     interrupts::{print_stackframe, print_stackframe_m},
-    print,
+    misc::hlt_loop,
+    print, println,
     tss::DOUBLE_FAULT_IST_LOCATION,
 };
 
@@ -35,6 +42,7 @@ pub fn init_exception_interrupts(idt: &mut InterruptDescriptorTable) {
             .set_handler_fn(DoublefaultHandler::handle_exception_interrupt_err_code)
             .set_stack_index(DOUBLE_FAULT_IST_LOCATION)
     };
+    idt.page_fault.set_handler_fn(pagefault_handler);
 }
 
 struct BreakpointHandler;
@@ -56,4 +64,16 @@ impl ExceptionInterruptHandler for DoublefaultHandler {
             _stack_frame
         );
     }
+}
+
+// i gave up on trying to wrap everything behind a abstraction layer.
+extern "x86-interrupt" fn pagefault_handler(
+    _stack_frame: InterruptStackFrame,
+    err_code: PageFaultErrorCode,
+) {
+    println!("Page fault");
+    println!("Adress: {:?}", Cr2::read());
+    println!("Error code: {:?}", err_code);
+    print_stackframe_m(_stack_frame);
+    hlt_loop();
 }
