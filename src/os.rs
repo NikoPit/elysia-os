@@ -1,14 +1,19 @@
-use lazy_static::lazy_static;
-use pic8259::ChainedPics;
-use spin::*;
-use uart_16550::SerialPort;
-use x86_64::instructions::interrupts;
-
 use crate::{
     gdt::init_gdt,
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET},
     interrupts::init_idt,
+    paging::{BootinfoFrameAllocator, init_mapper},
     vga_print::Printer,
+};
+use bootloader::BootInfo;
+use lazy_static::lazy_static;
+use pic8259::ChainedPics;
+use spin::*;
+use uart_16550::SerialPort;
+use x86_64::{
+    VirtAddr,
+    instructions::interrupts,
+    structures::paging::{FrameAllocator, OffsetPageTable, Size4KiB, mapper},
 };
 
 lazy_static! {
@@ -19,6 +24,7 @@ pub struct OS {
     pub printer: Printer,
     pub serial_port: SerialPort,
     pub pics: ChainedPics,
+    pub phys_mem_offset: Option<VirtAddr>,
 }
 
 impl OS {
@@ -31,12 +37,15 @@ impl OS {
                 serial_port
             },
             pics: unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) },
+            phys_mem_offset: None,
         }
     }
 
-    pub fn init(&mut self) {
+    pub fn init(&mut self, bootinfo: &'static BootInfo) {
         init_gdt();
         init_idt();
+
+        self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
 
         unsafe { self.pics.initialize() };
         interrupts::enable();

@@ -11,15 +11,22 @@ use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
 use elysia_os::misc::hlt_loop;
+use elysia_os::paging::{BootinfoFrameAllocator, init_mapper};
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
+use x86_64::VirtAddr;
+use x86_64::structures::paging::{FrameAllocator, Page, Size4KiB, Translate, frame};
 
 entry_point!(k_main);
 
 fn k_main(bootinfo: &'static BootInfo) -> ! {
     println!("Welcome to Elysia-OS v0.1.0");
 
-    get_os().init();
+    get_os().init(bootinfo);
+
+    let mut frame_allocator: BootinfoFrameAllocator =
+        unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
+    let mut mapper = init_mapper(bootinfo);
 
     #[cfg(test)]
     test_main();
