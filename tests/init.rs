@@ -5,6 +5,8 @@
 // renames main function for testing because we disabled main with #[no_main]
 #![reexport_test_harness_main = "test_main"]
 #![test_runner(testing::run_tests)]
+use bootloader::BootInfo;
+use bootloader::entry_point;
 use elysia_os::os::get_os;
 use elysia_os::testing;
 use x86_64::instructions::interrupts::int3;
@@ -17,10 +19,10 @@ use elysia_os::panic_handler::test_handle_panic;
 use elysia_os::println;
 use elysia_os::test;
 
+entry_point!(_start);
 // Disables name mangling so the linker can recognize the entry point
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    get_os().init();
+fn _start(bootinfo: &'static BootInfo) -> ! {
+    get_os().init(bootinfo);
 
     test_main();
 

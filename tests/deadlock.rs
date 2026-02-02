@@ -5,6 +5,8 @@
 // renames main function for testing because we disabled main with #[no_main]
 #![reexport_test_harness_main = "test_main"]
 #![test_runner(testing::run_tests)]
+use bootloader::BootInfo;
+use bootloader::entry_point;
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::hardware_interrupt::HardwareInterrupt;
 use elysia_os::os::get_os;
@@ -40,12 +42,11 @@ lazy_static! {
 extern "x86-interrupt" fn timer_interrupt(_stack_frame: InterruptStackFrame) {
     print!("a")
 }
-
+entry_point!(_start);
 // Disables name mangling so the linker can recognize the entry point
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
+fn _start(bootinfo: &'static BootInfo) -> ! {
     s_print!("\nVGA Printer deadlock ");
-    get_os().init();
+    get_os().init(bootinfo);
     IDT.load();
 
     for i in 0..=10000 {

@@ -5,6 +5,8 @@
 // renames main function for testing because we disabled main with #[no_main]
 #![reexport_test_harness_main = "test_main"]
 #![test_runner(testing::run_tests)]
+use bootloader::BootInfo;
+use bootloader::entry_point;
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::os::get_os;
 use elysia_os::print;
@@ -23,11 +25,10 @@ use elysia_os::panic_handler::test_handle_panic;
 use elysia_os::println;
 use elysia_os::test;
 
-// Disables name mangling so the linker can recognize the entry point
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
+entry_point!(_start);
+fn _start(bootinfo: &'static BootInfo) -> ! {
     s_print!("\nStack overflow double-fault handling ");
-    get_os().init();
+    get_os().init(bootinfo);
 
     stack_overflow();
 

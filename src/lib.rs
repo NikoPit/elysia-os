@@ -33,7 +33,6 @@ entry_point!(test_k_main);
 #[cfg(test)]
 fn test_k_main(_boot_info: &'static BootInfo) -> ! {
     use crate::{misc::hlt_loop, os::get_os};
-    use crate::{misc::hlt_loop, os::get_os};
     get_os().init(_boot_info);
 
     test_main();
