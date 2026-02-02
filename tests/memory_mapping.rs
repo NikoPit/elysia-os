@@ -53,7 +53,9 @@ fn _start(bootinfo: &'static BootInfo) -> ! {
     unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e) };
 
     // TODO check the output to see if the "NEW!" string have been printed
-    s_println!("[OK]\n");
+    s_println!("[OK]\n\n\n\n\n");
+    s_println!("--------------------------------------------------------");
+    s_println!("not fully implemented");
 
     debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
 
