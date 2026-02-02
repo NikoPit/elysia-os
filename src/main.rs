@@ -16,8 +16,6 @@ use elysia_os::{os::get_os, println};
 
 entry_point!(k_main);
 
-// Disables name mangling so the linker can recognize the entry point
-#[unsafe(no_mangle)]
 fn k_main(bootinfo: &'static BootInfo) -> ! {
     println!("Welcome to Elysia-OS v0.1.0");
 
