@@ -10,13 +10,21 @@ use bootloader::entry_point;
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::misc::hlt_loop;
 use elysia_os::os::get_os;
+use elysia_os::paging::BootinfoFrameAllocator;
+use elysia_os::paging::init_mapper;
 use elysia_os::print;
 use elysia_os::s_print;
 use elysia_os::s_println;
 use elysia_os::testing;
+use x86_64::PhysAddr;
 use x86_64::VirtAddr;
 use x86_64::instructions::interrupts::int3;
+use x86_64::structures::paging::FrameAllocator;
+use x86_64::structures::paging::Mapper;
+use x86_64::structures::paging::OffsetPageTable;
 use x86_64::structures::paging::Page;
+use x86_64::structures::paging::PhysFrame;
+use x86_64::structures::paging::Size4KiB;
 // Disable dynamic linking with the std library because there is no std library in our own os
 
 use core::panic::PanicInfo;
@@ -25,13 +33,27 @@ use elysia_os::panic_handler;
 use elysia_os::panic_handler::test_handle_panic;
 use elysia_os::println;
 use elysia_os::test;
+
+const RANDOM_ADDR: u64 = 0x153212562324;
+
 entry_point!(_start);
 fn _start(bootinfo: &'static BootInfo) -> ! {
-    s_println!("\nMemory Mapping");
+    s_print!("\nMemory Mapping ");
 
     get_os().init(bootinfo);
 
-    let page = Page::containing_address(VirtAddr::new(0x153212562324));
+    let page = Page::containing_address(VirtAddr::new(RANDOM_ADDR));
+    let mut frame_allocator: BootinfoFrameAllocator =
+        unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
+    let mut mapper = init_mapper(bootinfo);
+    create_example_mapping(page, &mut mapper, &mut frame_allocator);
+
+    // 通过新的映射将字符串 `New!`  写到屏幕上。
+    let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
+    unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e) };
+
+    // TODO check the output to see if the "NEW!" string have been printed
+    s_println!("[OK]\n");
 
     debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
 
