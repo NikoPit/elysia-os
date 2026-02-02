@@ -23,8 +23,14 @@ pub mod vga_print;
 use core::panic::PanicInfo;
 
 #[cfg(test)]
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
+use bootloader::BootInfo;
+use bootloader::entry_point;
+
+#[cfg(test)]
+entry_point!(test_k_main);
+
+#[cfg(test)]
+fn test_k_main(_boot_info: &'static BootInfo) -> ! {
     use crate::{misc::hlt_loop, os::get_os};
 
     get_os().init();
