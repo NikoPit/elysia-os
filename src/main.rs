@@ -9,13 +9,16 @@
 
 use core::panic::PanicInfo;
 
+use bootloader::{BootInfo, entry_point};
 use elysia_os::misc::hlt_loop;
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
 
+entry_point!(k_main);
+
 // Disables name mangling so the linker can recognize the entry point
 #[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
+fn k_main(bootinfo: &'static BootInfo) -> ! {
     println!("Welcome to Elysia-OS v0.1.0");
 
     get_os().init();
