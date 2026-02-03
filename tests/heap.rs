@@ -14,6 +14,7 @@ use alloc::{
 use bootloader::{BootInfo, entry_point};
 use core::panic::PanicInfo;
 use elysia_os::{
+    heap::HEAP_SIZE,
     misc::hlt_loop,
     os::get_os,
     paging::{BootinfoFrameAllocator, init_mapper},
@@ -42,6 +43,12 @@ fn panic(info: &PanicInfo) -> ! {
 
 test!("Box value 1", || assert_eq!(*(Box::new(420)), 420));
 test!("Box value 2", || assert_eq!(*(Box::new(69)), 69));
+
+test!("A lot of Boxes", || {
+    for i in 0..HEAP_SIZE {
+        assert_eq!(*Box::new(i), i);
+    }
+});
 
 test!("String", || assert_eq!(
     {
