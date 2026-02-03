@@ -40,12 +40,12 @@ entry_point!(_start);
 fn _start(bootinfo: &'static BootInfo) -> ! {
     s_print!("\nMemory Mapping ");
 
-    get_os().init(bootinfo);
-
     let page = Page::containing_address(VirtAddr::new(RANDOM_ADDR));
     let mut frame_allocator: BootinfoFrameAllocator =
         unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
     let mut mapper = init_mapper(bootinfo);
+    get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
+
     create_example_mapping(page, &mut mapper, &mut frame_allocator);
 
     // 通过新的映射将字符串 `New!`  写到屏幕上。

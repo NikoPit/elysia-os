@@ -10,6 +10,8 @@ use bootloader::entry_point;
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::hardware_interrupt::HardwareInterrupt;
 use elysia_os::os::get_os;
+use elysia_os::paging::BootinfoFrameAllocator;
+use elysia_os::paging::init_mapper;
 use elysia_os::print;
 use elysia_os::s_print;
 use elysia_os::s_println;
@@ -46,7 +48,11 @@ entry_point!(_start);
 // Disables name mangling so the linker can recognize the entry point
 fn _start(bootinfo: &'static BootInfo) -> ! {
     s_print!("\nVGA Printer deadlock ");
-    get_os().init(bootinfo);
+    let mut frame_allocator: BootinfoFrameAllocator =
+        unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
+    let mut mapper = init_mapper(bootinfo);
+
+    get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
     IDT.load();
 
     for i in 0..=10000 {

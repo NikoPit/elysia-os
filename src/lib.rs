@@ -36,8 +36,16 @@ entry_point!(test_k_main);
 
 #[cfg(test)]
 fn test_k_main(_boot_info: &'static BootInfo) -> ! {
-    use crate::{misc::hlt_loop, os::get_os};
-    get_os().init(_boot_info);
+    use crate::{
+        misc::hlt_loop,
+        os::get_os,
+        paging::{BootinfoFrameAllocator, init_mapper},
+    };
+    let mut frame_allocator: BootinfoFrameAllocator =
+        unsafe { BootinfoFrameAllocator::new(&_boot_info.memory_map) };
+    let mut mapper = init_mapper(_boot_info);
+
+    get_os().init(_boot_info, &mut mapper, &mut frame_allocator);
 
     test_main();
 
