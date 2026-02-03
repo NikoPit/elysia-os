@@ -1,6 +1,7 @@
 use crate::{
     gdt::init_gdt,
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET},
+    heap::init_heap,
     interrupts::init_idt,
     paging::{BootinfoFrameAllocator, init_mapper},
     vga_print::Printer,
@@ -13,7 +14,7 @@ use uart_16550::SerialPort;
 use x86_64::{
     VirtAddr,
     instructions::interrupts,
-    structures::paging::{FrameAllocator, OffsetPageTable, Size4KiB, mapper},
+    structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Size4KiB, mapper},
 };
 
 lazy_static! {
@@ -41,9 +42,15 @@ impl OS {
         }
     }
 
-    pub fn init(&mut self, bootinfo: &'static BootInfo) {
+    pub fn init(
+        &mut self,
+        bootinfo: &'static BootInfo,
+        mapper: &mut impl Mapper<Size4KiB>,
+        frame_allocator: &mut impl FrameAllocator<Size4KiB>,
+    ) {
         init_gdt();
         init_idt();
+        init_heap(mapper, frame_allocator).expect("Heap init failed.");
 
         self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
 

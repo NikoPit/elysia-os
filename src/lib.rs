@@ -4,11 +4,14 @@
 #![reexport_test_harness_main = "test_main"]
 #![test_runner(crate::testing::run_tests)]
 
+extern crate alloc;
+
 pub mod debug_exit;
 pub mod driver;
 pub mod exception_interrupt;
 pub mod gdt;
 pub mod hardware_interrupt;
+pub mod heap;
 pub mod interrupts;
 pub mod keyboard;
 pub mod misc;
@@ -23,6 +26,7 @@ pub mod vga_print;
 #[cfg(test)]
 use core::panic::PanicInfo;
 
+use alloc::boxed::Box;
 #[cfg(test)]
 use bootloader::BootInfo;
 use bootloader::entry_point;
