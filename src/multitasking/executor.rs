@@ -5,6 +5,7 @@ use alloc::{
     sync::Arc,
 };
 use crossbeam_queue::ArrayQueue;
+use x86_64::instructions::interrupts::{self, enable_and_hlt};
 
 use crate::multitasking::{
     task::{Task, TaskID, TaskWaker},
@@ -68,6 +69,16 @@ impl Executor {
     pub fn run(&mut self) -> ! {
         loop {
             self.run_queued_tasks();
+            self.sleep_on_idle();
+        }
+    }
+
+    fn sleep_on_idle(&self) {
+        interrupts::disable();
+        if self.task_queue.is_empty() {
+            enable_and_hlt();
+        } else {
+            interrupts::enable();
         }
     }
 }
