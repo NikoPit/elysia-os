@@ -7,7 +7,7 @@ use x86_64::{
 };
 
 use crate::{
-    keyboard::PS2KeyboardDriver,
+    driver::keyboard::ps2::PS2KeyboardDriver,
     os::{get_os, get_os_no_interrupt},
     print,
 };

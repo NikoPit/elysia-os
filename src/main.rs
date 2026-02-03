@@ -9,10 +9,15 @@
 //
 extern crate alloc;
 
+#[cfg(test)]
+use core::iter::Successors;
 use core::panic::PanicInfo;
 
 use alloc::boxed::Box;
 use bootloader::{BootInfo, entry_point};
+#[cfg(test)]
+use elysia_os::debug_exit::debug_exit;
+use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
 use elysia_os::misc::hlt_loop;
 use elysia_os::multitasking::executor::Executor;
 use elysia_os::multitasking::task::Task;
@@ -25,24 +30,19 @@ use x86_64::structures::paging::{FrameAllocator, Page, Size4KiB, Translate, fram
 entry_point!(k_main);
 
 fn k_main(bootinfo: &'static BootInfo) -> ! {
+    #[cfg(test)]
+    debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
     println!("Welcome to Elysia-OS v0.1.0");
 
     let mut frame_allocator: BootinfoFrameAllocator =
         unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
     let mut mapper = init_mapper(bootinfo);
-    let mut executor = Executor::new();
 
     get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
-
+    let mut executor = Executor::new();
     executor.spawn(Task::new(taskz()));
+    executor.spawn(Task::new(process_keypresses()));
     executor.run();
-
-    #[cfg(test)]
-    test_main();
-
-    println!("ts worked");
-
-    hlt_loop();
 }
 
 async fn taskz() {

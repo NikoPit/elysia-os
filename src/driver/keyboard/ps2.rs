@@ -1,10 +1,12 @@
+use conquer_once::spin::OnceCell;
+use crossbeam_queue::ArrayQueue;
 use lazy_static::lazy_static;
 use pc_keyboard::{DecodedKey, KeyCode, Keyboard, ScancodeSet1, layouts};
 use spin::{Mutex, MutexGuard};
 use x86_64::instructions::port::Port;
 
 lazy_static! {
-    static ref _PS2_KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
+    pub static ref _PS2_KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
         Mutex::new(Keyboard::new(
             ScancodeSet1::new(),
             layouts::Us104Key,
@@ -13,10 +15,10 @@ lazy_static! {
 }
 
 use crate::{
-    driver::{Driver, InterruptDriver},
+    driver::{Driver, InterruptDriver, keyboard::scancode_processing::add_scancode},
     hardware_interrupt::{HardwareInterrupt, HardwareInterruptHandler},
     os::get_os,
-    print, register_hardware_interrupt,
+    print, println, register_hardware_interrupt,
 };
 
 pub trait KeyboardDriver: Driver {
@@ -60,13 +62,6 @@ impl HardwareInterruptHandler for PS2KeyboardDriver {
         let mut keyboard_port = Port::new(0x60);
         let scancode = unsafe { keyboard_port.read() };
 
-        let test_key_event = Self::get_keyboard().add_byte(scancode);
-
-        if let Ok(Some(key_event)) = test_key_event {
-            let thing = Self::get_keyboard().process_keyevent(key_event);
-            if let Some(key) = thing {
-                Self::handle_key(key);
-            }
-        }
+        add_scancode(scancode);
     }
 }
