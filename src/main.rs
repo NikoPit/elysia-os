@@ -14,6 +14,8 @@ use core::panic::PanicInfo;
 use alloc::boxed::Box;
 use bootloader::{BootInfo, entry_point};
 use elysia_os::misc::hlt_loop;
+use elysia_os::multitasking::executor::Executor;
+use elysia_os::multitasking::task::Task;
 use elysia_os::paging::{BootinfoFrameAllocator, init_mapper};
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
@@ -28,13 +30,23 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     let mut frame_allocator: BootinfoFrameAllocator =
         unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
     let mut mapper = init_mapper(bootinfo);
+    let mut executor = Executor::new();
 
     get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
+
+    executor.spawn(Task::new(taskz()));
+    executor.run();
 
     #[cfg(test)]
     test_main();
 
+    println!("ts worked");
+
     hlt_loop();
+}
+
+async fn taskz() {
+    println!("println from async task!");
 }
 
 pub fn run_tests(tests: &[&dyn Fn()]) {

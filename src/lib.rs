@@ -16,6 +16,7 @@ pub mod heap_allocators;
 pub mod interrupts;
 pub mod keyboard;
 pub mod misc;
+pub mod multitasking;
 pub mod os;
 pub mod paging;
 pub mod panic_handler;
