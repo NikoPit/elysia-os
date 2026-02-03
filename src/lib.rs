@@ -12,6 +12,7 @@ pub mod exception_interrupt;
 pub mod gdt;
 pub mod hardware_interrupt;
 pub mod heap;
+pub mod heap_allocators;
 pub mod interrupts;
 pub mod keyboard;
 pub mod misc;

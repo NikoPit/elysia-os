@@ -6,8 +6,11 @@ use x86_64::{
     },
 };
 
+use crate::heap_allocators::{Locked, fixed_block_size::FixedBlockSizeAllocator};
+
 #[global_allocator]
-static HEAP_ALLOCATOR: LockedHeap = LockedHeap::empty();
+static HEAP_ALLOCATOR: Locked<FixedBlockSizeAllocator> =
+    Locked::new(FixedBlockSizeAllocator::new());
 
 // Memory area for the heap
 pub const HEAP_START: usize = 0x_4444_4444_0000;
