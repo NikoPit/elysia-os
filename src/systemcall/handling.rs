@@ -12,7 +12,7 @@ use crate::{
     println,
     systemcall::{
         error::SyscallError,
-        implementations::{utils::SystemCallImpl, write::WriteImpl},
+        implementations::{print::PrintImpl, utils::SystemCallImpl},
         syscall_no::SystemCallNo,
         syscalls_table::SYSCALL_TABLE,
     },

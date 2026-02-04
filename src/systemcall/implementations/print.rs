@@ -9,7 +9,7 @@ use crate::{
     vga_print::{CellColor, VgaCell},
 };
 
-new_syscall!(WriteImpl, SystemCallNo::Write, fd: i32, buf: *const u8, count: usize, |fd, buf: *const u8, count: usize| -> Result<usize, SyscallError> {
+new_syscall!(PrintImpl, SystemCallNo::Print, fd: i32, buf: *const u8, count: usize, |fd, buf: *const u8, count: usize| -> Result<usize, SyscallError> {
     if fd < 0 {
         // Bad file descripter
         return Err(SyscallError::InvalidFileDescriptor);

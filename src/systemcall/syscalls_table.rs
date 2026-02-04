@@ -2,7 +2,7 @@ use crate::{
     register_syscall,
     systemcall::{
         error::SyscallError,
-        implementations::{utils::SystemCallImpl, write::WriteImpl},
+        implementations::{print::PrintImpl, utils::SystemCallImpl},
         syscall_no::SystemCallNo,
     },
 };
@@ -13,7 +13,7 @@ pub static SYSCALL_TABLE: [Option<SyscallHandler>; 512] = {
     let mut table = [None; 512];
 
     // 编译时初始化表
-    register_syscall!(table, SystemCallNo::Write, WriteImpl);
+    register_syscall!(table, SystemCallNo::Print, PrintImpl);
 
     table
 };

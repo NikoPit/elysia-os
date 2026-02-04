@@ -3,5 +3,5 @@ use num_enum::TryFromPrimitive;
 #[derive(Debug, Clone, Copy, PartialEq, TryFromPrimitive)]
 #[repr(usize)]
 pub enum SystemCallNo {
-    Write = 1,
+    Print = 1,
 }
