@@ -4,6 +4,7 @@ use crate::{
     heap::init_heap,
     interrupts::init_idt,
     paging::{BootinfoFrameAllocator, init_mapper},
+    systemcall::entry::init_syscall,
     vga_print::Printer,
 };
 use bootloader::BootInfo;
@@ -56,6 +57,8 @@ impl OS {
 
         unsafe { self.pics.initialize() };
         interrupts::enable();
+
+        init_syscall();
     }
 }
 

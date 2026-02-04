@@ -39,6 +39,9 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     let mut mapper = init_mapper(bootinfo);
 
     get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
+    unsafe {
+        core::arch::asm!("syscall");
+    }
     let mut executor = Executor::new();
     executor.spawn(Task::new(taskz()));
     executor.spawn(Task::new(process_keypresses()));

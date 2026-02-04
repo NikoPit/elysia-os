@@ -30,6 +30,9 @@ pic8259 = "0.11.0"
 version = "1.0"
 features = ["spin_no_std"]
 
+[dependencies.num_enum]
+version = "0.7.5"
+default-features = false
 [package.metadata.bootimage]
 test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04","-serial", "stdio"
 , "-display","none"]

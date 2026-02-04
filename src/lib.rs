@@ -20,6 +20,7 @@ pub mod os;
 pub mod paging;
 pub mod panic_handler;
 pub mod serial_print;
+pub mod systemcall;
 pub mod testing;
 pub mod tss;
 pub mod vga_print;
