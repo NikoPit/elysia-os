@@ -1,4 +1,5 @@
 pub enum SyscallError {
-    DoesntExist = -38,
+    InvalidSyscall = -38,
+    InvalidFileDescriptor = -255,
     Other = -256,
 }

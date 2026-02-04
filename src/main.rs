@@ -39,10 +39,11 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     let mut mapper = init_mapper(bootinfo);
 
     get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
-    unsafe {
-        core::arch::asm!("syscall");
-    }
     let mut executor = Executor::new();
+
+    // syscall test
+    trigger_syscall();
+
     executor.spawn(Task::new(taskz()));
     executor.spawn(Task::new(process_keypresses()));
     executor.run();
@@ -50,21 +51,6 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
 
 async fn taskz() {
     println!("println from async task!");
-}
-
-pub fn run_tests(tests: &[&dyn Fn()]) {
-    use elysia_os::{
-        debug_exit::{QemuExitCode, debug_exit},
-        s_println,
-    };
-
-    s_println!("\nRunning {} tests", tests.len());
-    for test in tests {
-        test();
-    }
-
-    s_println!("\nTest success!");
-    debug_exit(QemuExitCode::Success);
 }
 
 #[cfg(test)]
@@ -78,4 +64,23 @@ fn panic(_info: &PanicInfo) -> ! {
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     handle_panic(_info);
+}
+
+fn trigger_syscall() {
+    let syscall_number = 1; // write
+    let fd = 1;
+    let buf = b"Hello from syscall!\n".as_ptr();
+    let count = 20;
+
+    unsafe {
+        core::arch::asm!(
+            "syscall",
+            in("rax") syscall_number,
+            in("rdi") fd,
+            in("rsi") buf,
+            in("rdx") count,
+            out("rcx") _, // 系统调用会破坏rcx和r11
+            out("r11") _,
+        );
+    }
 }
