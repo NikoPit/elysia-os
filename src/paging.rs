@@ -3,6 +3,8 @@ use bootloader::{
     bootinfo::{MemoryMap, MemoryRegionType},
     entry_point,
 };
+use conquer_once::spin::OnceCell;
+use spin::Mutex;
 use x86_64::{
     PhysAddr, VirtAddr,
     registers::control::Cr3,
@@ -10,6 +12,9 @@ use x86_64::{
 };
 
 use crate::os::get_os;
+
+pub static MAPPER: OnceCell<Mutex<OffsetPageTable>> = OnceCell::uninit();
+pub static FRAME_ALLOCATOR: OnceCell<Mutex<BootinfoFrameAllocator>> = OnceCell::uninit();
 
 // initalize the mapper thats based on offset page table
 pub fn init_mapper(bootinfo: &'static BootInfo) -> OffsetPageTable<'static> {

@@ -1,4 +1,5 @@
 use crate::{
+    acpi::init::init_acpi,
     gdt::init_gdt,
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET},
     heap::init_heap,
@@ -46,12 +47,13 @@ impl OS {
     pub fn init(
         &mut self,
         bootinfo: &'static BootInfo,
-        mapper: &mut impl Mapper<Size4KiB>,
-        frame_allocator: &mut impl FrameAllocator<Size4KiB>,
+        mapper: &'static mut impl Mapper<Size4KiB>,
+        frame_allocator: &'static mut impl FrameAllocator<Size4KiB>,
     ) {
         init_gdt();
         init_idt();
         init_heap(mapper, frame_allocator).expect("Heap init failed.");
+        init_acpi(mapper, frame_allocator);
 
         self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
 

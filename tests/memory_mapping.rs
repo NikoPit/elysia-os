@@ -25,6 +25,7 @@ use x86_64::structures::paging::OffsetPageTable;
 use x86_64::structures::paging::Page;
 use x86_64::structures::paging::PhysFrame;
 use x86_64::structures::paging::Size4KiB;
+use x86_64::structures::paging::Translate;
 // Disable dynamic linking with the std library because there is no std library in our own os
 
 use core::panic::PanicInfo;

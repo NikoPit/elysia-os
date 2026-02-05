@@ -1,4 +1,6 @@
+use conquer_once::spin::OnceCell;
 use linked_list_allocator::LockedHeap;
+use spin::Mutex;
 use x86_64::{
     VirtAddr,
     structures::paging::{

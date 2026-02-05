@@ -14,18 +14,24 @@ use core::iter::Successors;
 use core::panic::PanicInfo;
 
 use alloc::boxed::Box;
+use alloc::string::ToString;
 use bootloader::{BootInfo, entry_point};
+use conquer_once::spin::OnceCell;
 #[cfg(test)]
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
 use elysia_os::misc::hlt_loop;
 use elysia_os::multitasking::executor::Executor;
 use elysia_os::multitasking::task::Task;
-use elysia_os::paging::{BootinfoFrameAllocator, init_mapper};
+use elysia_os::paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER, init_mapper};
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
+use lazy_static::lazy_static;
+use spin::Mutex;
 use x86_64::VirtAddr;
-use x86_64::structures::paging::{FrameAllocator, Page, Size4KiB, Translate, frame};
+use x86_64::structures::paging::{
+    FrameAllocator, Mapper, OffsetPageTable, Page, Size4KiB, Translate, frame,
+};
 
 entry_point!(k_main);
 
@@ -34,11 +40,16 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
     println!("Welcome to Elysia-OS v0.1.0");
 
-    let mut frame_allocator: BootinfoFrameAllocator =
-        unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
-    let mut mapper = init_mapper(bootinfo);
+    MAPPER
+        .try_get_or_init(|| unsafe { Mutex::new(init_mapper(bootinfo)) })
+        .expect("something went wronfg loll");
+    FRAME_ALLOCATOR
+        .try_get_or_init(|| unsafe {
+            Mutex::new(BootinfoFrameAllocator::new(&bootinfo.memory_map))
+        })
+        .expect("agwegfvev");
 
-    get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
+    get_os().init(bootinfo, &mut MAPPER, &mut FRAME_ALLOCATOR);
     let mut executor = Executor::new();
 
     // syscall test
