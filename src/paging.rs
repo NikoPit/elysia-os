@@ -13,9 +13,6 @@ use x86_64::{
 
 use crate::os::get_os;
 
-pub static MAPPER: OnceCell<Mutex<OffsetPageTable>> = OnceCell::uninit();
-pub static FRAME_ALLOCATOR: OnceCell<Mutex<BootinfoFrameAllocator>> = OnceCell::uninit();
-
 // initalize the mapper thats based on offset page table
 pub fn init_mapper(bootinfo: &'static BootInfo) -> OffsetPageTable<'static> {
     unsafe {

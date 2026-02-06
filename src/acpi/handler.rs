@@ -1,6 +1,7 @@
-use core::ptr::NonNull;
+use core::{iter::Map, ptr::NonNull};
 
 use acpi::{Handler, PhysicalMapping, address};
+use alloc::sync::Arc;
 use spin::Mutex;
 use x86_64::{
     PhysAddr, VirtAddr,
@@ -13,16 +14,16 @@ use crate::{
     write_addr, write_port,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Debug)]
 pub struct ACPIHandler {
-    mapper: &'static dyn Mapper<Size4KiB>,
-    frame_allocator: &'static dyn FrameAllocator<Size4KiB>,
+    mapper: Arc<Mutex<dyn Mapper<Size4KiB>>>,
+    frame_allocator: Arc<Mutex<dyn FrameAllocator<Size4KiB>>>,
 }
 
 impl ACPIHandler {
     pub fn new(
-        mapper: &'static mut dyn Mapper<Size4KiB>,
-        frame_allocator: &'static mut dyn FrameAllocator<Size4KiB>,
+        mapper: Arc<Mutex<impl Mapper<Size4KiB> + 'static>>,
+        frame_allocator: Arc<Mutex<impl FrameAllocator<Size4KiB> + 'static>>,
     ) -> Self {
         Self {
             mapper,

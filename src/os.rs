@@ -8,6 +8,7 @@ use crate::{
     systemcall::entry::init_syscall,
     vga_print::Printer,
 };
+use alloc::sync::Arc;
 use bootloader::BootInfo;
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
@@ -47,13 +48,13 @@ impl OS {
     pub fn init(
         &mut self,
         bootinfo: &'static BootInfo,
-        mapper: &'static mut impl Mapper<Size4KiB>,
-        frame_allocator: &'static mut impl FrameAllocator<Size4KiB>,
+        mapper: Arc<Mutex<impl Mapper<Size4KiB>>>,
+        frame_allocator: Arc<Mutex<impl FrameAllocator<Size4KiB>>>,
     ) {
         init_gdt();
         init_idt();
-        init_heap(mapper, frame_allocator).expect("Heap init failed.");
-        init_acpi(mapper, frame_allocator);
+        init_heap(mapper.clone(), frame_allocator.clone()).expect("Heap init failed.");
+        init_acpi(mapper.clone(), frame_allocator.clone());
 
         self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
 
