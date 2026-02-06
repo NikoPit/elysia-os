@@ -12,7 +12,11 @@ use x86_64::{
 };
 
 use crate::{
-    memory::paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
+    memory::{
+        mapping::map_phys_size,
+        paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
+        utils::get_map_location,
+    },
     os::get_os,
     println, read_addr, read_port,
     systemcall::implementations::utils::SystemCallImpl,
@@ -37,38 +41,14 @@ impl Handler for ACPIHandler {
         physical_address: usize,
         size: usize,
     ) -> acpi::PhysicalMapping<Self, T> {
-        static NEXT_VIRT_ADDR: AtomicU64 = AtomicU64::new(0xffff_f000_0000_0000);
-        let virt_addr_number =
-            NEXT_VIRT_ADDR.fetch_add(size as u64, core::sync::atomic::Ordering::SeqCst);
-        let virt_addr = VirtAddr::new(virt_addr_number);
-
         let frame: PhysFrame<Size4KiB> =
             PhysFrame::containing_address(PhysAddr::new(physical_address as u64));
-        let page: Page = Page::containing_address(virt_addr);
-        let flags = PageTableFlags::WRITABLE | PageTableFlags::PRESENT;
+        let page: Page =
+            Page::containing_address(VirtAddr::new(get_map_location(physical_address as u64)));
 
         let virt_addr_nonnull = NonNull::new(page.start_address().as_u64() as *mut T);
 
-        unsafe {
-            let result = MAPPER.get().unwrap().lock().map_to(
-                page,
-                frame,
-                flags,
-                &mut *FRAME_ALLOCATOR.get().unwrap().lock(),
-            );
-
-            match result {
-                Ok(flush) => {
-                    flush.flush();
-                }
-                Err(paging::mapper::MapToError::PageAlreadyMapped(_)) => {
-                    println!("skipping");
-                }
-                Err(err) => {
-                    panic!("{:?}", err)
-                }
-            }
-        }
+        map_phys_size(physical_address as u64, size as u64);
 
         PhysicalMapping {
             physical_start: frame.start_address().as_u64() as usize,

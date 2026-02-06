@@ -44,24 +44,16 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     println!("Welcome to Elysia-OS v0.1.0");
 
     let mut mapper = init_mapper(bootinfo);
-    println!("a");
     let mut frame_allocator = unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
-    println!("b");
 
     init_heap(&mut mapper, &mut frame_allocator).expect("Failed heap initilization");
-    println!("c");
 
     let mut mapper = Arc::new(Mutex::new(mapper));
-    println!("d");
     let mut frame_allocator = unsafe { Arc::new(Mutex::new(frame_allocator)) };
-    println!("e");
-
-    println!("{}", Box::new(42));
-    println!("gwfaF");
-
     get_os().init(bootinfo, mapper.clone(), frame_allocator.clone());
+
     let table = init_acpi(mapper.clone(), frame_allocator.clone());
-    println!("f");
+
     let mut executor = Executor::new();
 
     // syscall test
