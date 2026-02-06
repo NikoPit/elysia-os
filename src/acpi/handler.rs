@@ -6,24 +6,26 @@ use spin::Mutex;
 use x86_64::{
     PhysAddr, VirtAddr,
     instructions::port::Port,
-    structures::paging::{self, FrameAllocator, Mapper, Page, PageTableFlags, PhysFrame, Size4KiB},
+    structures::paging::{
+        self, FrameAllocator, Mapper, OffsetPageTable, Page, PageTableFlags, PhysFrame, Size4KiB,
+    },
 };
 
 use crate::{
-    os::get_os, read_addr, read_port, systemcall::implementations::utils::SystemCallImpl,
-    write_addr, write_port,
+    os::get_os, paging::BootinfoFrameAllocator, read_addr, read_port,
+    systemcall::implementations::utils::SystemCallImpl, write_addr, write_port,
 };
 
 #[derive(Clone)]
 pub struct ACPIHandler {
-    mapper: Arc<Mutex<dyn Mapper<Size4KiB>>>,
-    frame_allocator: Arc<Mutex<dyn FrameAllocator<Size4KiB>>>,
+    mapper: Arc<Mutex<OffsetPageTable<'static>>>,
+    frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
 }
 
 impl ACPIHandler {
     pub fn new(
-        mapper: Arc<Mutex<impl Mapper<Size4KiB> + 'static>>,
-        frame_allocator: Arc<Mutex<impl FrameAllocator<Size4KiB> + 'static>>,
+        mapper: Arc<Mutex<OffsetPageTable<'static>>>,
+        frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
     ) -> Self {
         Self {
             mapper: mapper.clone(),
@@ -49,10 +51,11 @@ impl Handler for ACPIHandler {
         let virt_addr_nonnull = NonNull::new(page.start_address().as_u64() as *mut T);
 
         unsafe {
-            // self.mapper
-            //   .map_to(page, frame, flags, &mut self.frame_allocator)
-            // .expect("Failed mapping on apic Handler")
-            //.flush();
+            self.mapper
+                .lock()
+                .map_to(page, frame, flags, &mut *self.frame_allocator.lock())
+                .expect("Failed mapping on apic Handler")
+                .flush();
         }
 
         PhysicalMapping {

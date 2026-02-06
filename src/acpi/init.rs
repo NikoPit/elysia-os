@@ -1,13 +1,16 @@
 use acpi::{AcpiTable, AcpiTables, rsdp::Rsdp};
 use alloc::sync::Arc;
 use spin::Mutex;
-use x86_64::structures::paging::{FrameAllocator, Mapper, Size4KiB};
+use x86_64::structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Size4KiB};
 
-use crate::{acpi::handler::ACPIHandler, println, systemcall::implementations};
+use crate::{
+    acpi::handler::ACPIHandler, paging::BootinfoFrameAllocator, println,
+    systemcall::implementations,
+};
 
 pub fn init_acpi(
-    mapper: Arc<Mutex<impl Mapper<Size4KiB> + 'static>>,
-    frame_allocator: Arc<Mutex<impl FrameAllocator<Size4KiB> + 'static>>,
+    mapper: Arc<Mutex<OffsetPageTable<'static>>>,
+    frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
 ) -> AcpiTables<ACPIHandler> {
     println!("init acpi start");
     let handler = ACPIHandler::new(mapper.clone(), frame_allocator.clone());

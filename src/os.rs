@@ -49,12 +49,12 @@ impl OS {
     pub fn init(
         &mut self,
         bootinfo: &'static BootInfo,
-        mapper: Arc<Mutex<impl Mapper<Size4KiB> + 'static>>,
-        frame_allocator: Arc<Mutex<impl FrameAllocator<Size4KiB> + 'static>>,
+        mapper: Arc<Mutex<OffsetPageTable<'static>>>,
+        frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
     ) {
         init_gdt();
         init_idt();
-        //without_interrupts(|| init_acpi(mapper.clone(), frame_allocator.clone()));
+        without_interrupts(|| init_acpi(mapper.clone(), frame_allocator.clone()));
 
         self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
 
