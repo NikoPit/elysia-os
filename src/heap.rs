@@ -9,7 +9,10 @@ use x86_64::{
     },
 };
 
-use crate::heap_allocators::{Locked, fixed_block_size::FixedBlockSizeAllocator};
+use crate::{
+    heap_allocators::{Locked, fixed_block_size::FixedBlockSizeAllocator},
+    println,
+};
 
 #[global_allocator]
 static HEAP_ALLOCATOR: Locked<FixedBlockSizeAllocator> =
@@ -22,8 +25,8 @@ pub const HEAP_SIZE: usize = 100 * 1024; // 100 KiB
 // Map the memory area for the heap from physical memory to virt memory
 // and do some other stuff
 pub fn init_heap(
-    mapper: Arc<Mutex<impl Mapper<Size4KiB>>>,
-    frame_allocator: Arc<Mutex<impl FrameAllocator<Size4KiB>>>,
+    mapper: &mut impl Mapper<Size4KiB>,
+    frame_allocator: &mut impl FrameAllocator<Size4KiB>,
 ) -> Result<(), MapToError<Size4KiB>> {
     // Page range of the heap
     let page_range = {
@@ -37,16 +40,10 @@ pub fn init_heap(
     // map the pages of heap memory to virtual memory
     for page in page_range {
         let frame = frame_allocator
-            .lock()
             .allocate_frame()
             .ok_or(MapToError::FrameAllocationFailed)?;
         let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
-        unsafe {
-            mapper
-                .lock()
-                .map_to(page, frame, flags, &mut *frame_allocator.lock())?
-                .flush()
-        };
+        unsafe { mapper.map_to(page, frame, flags, frame_allocator)?.flush() };
     }
 
     // initalize the heap allocator with the heap memory

@@ -21,6 +21,7 @@ use conquer_once::spin::OnceCell;
 #[cfg(test)]
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
+use elysia_os::heap::init_heap;
 use elysia_os::misc::hlt_loop;
 use elysia_os::multitasking::executor::Executor;
 use elysia_os::multitasking::task::Task;
@@ -41,12 +42,18 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
     println!("Welcome to Elysia-OS v0.1.0");
 
-    let mut mapper = Arc::new(Mutex::new(init_mapper(bootinfo)));
-    let mut frame_allocator = unsafe {
-        Arc::new(Mutex::new(BootinfoFrameAllocator::new(
-            &bootinfo.memory_map,
-        )))
-    };
+    let mut mapper = init_mapper(bootinfo);
+    println!("a");
+    let mut frame_allocator = unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
+    println!("b");
+
+    init_heap(&mut mapper, &mut frame_allocator).expect("Failed heap initilization");
+    println!("c");
+
+    let mut mapper = Arc::new(Mutex::new(mapper));
+    println!("d");
+    let mut frame_allocator = unsafe { Arc::new(Mutex::new(frame_allocator)) };
+    println!("e");
 
     get_os().init(bootinfo, mapper.clone(), frame_allocator.clone());
     let mut executor = Executor::new();

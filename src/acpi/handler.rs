@@ -14,7 +14,7 @@ use crate::{
     write_addr, write_port,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct ACPIHandler {
     mapper: Arc<Mutex<dyn Mapper<Size4KiB>>>,
     frame_allocator: Arc<Mutex<dyn FrameAllocator<Size4KiB>>>,
@@ -26,8 +26,8 @@ impl ACPIHandler {
         frame_allocator: Arc<Mutex<impl FrameAllocator<Size4KiB> + 'static>>,
     ) -> Self {
         Self {
-            mapper,
-            frame_allocator,
+            mapper: mapper.clone(),
+            frame_allocator: frame_allocator.clone(),
         }
     }
 }
@@ -58,7 +58,7 @@ impl Handler for ACPIHandler {
         PhysicalMapping {
             physical_start: frame.start_address().as_u64() as usize,
             mapped_length: size,
-            handler: *self,
+            handler: self.clone(),
             region_length: size,
             virtual_start: virt_addr_nonnull.unwrap(),
         }
