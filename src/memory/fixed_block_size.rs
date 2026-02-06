@@ -3,7 +3,7 @@ use core::{
     ptr::{self, NonNull},
 };
 
-use crate::heap_allocators::Locked;
+use crate::memory::utils::Locked;
 use core::mem;
 
 const BLOCK_SIZES: &[usize] = &[8, 16, 32, 64, 128, 256, 512, 1024, 2048];

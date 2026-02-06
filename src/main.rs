@@ -22,11 +22,11 @@ use elysia_os::acpi::init::init_acpi;
 #[cfg(test)]
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
-use elysia_os::heap::init_heap;
+use elysia_os::memory::heap::init_heap;
+use elysia_os::memory::paging::{BootinfoFrameAllocator, init_mapper};
 use elysia_os::misc::hlt_loop;
 use elysia_os::multitasking::executor::Executor;
 use elysia_os::multitasking::task::Task;
-use elysia_os::paging::{BootinfoFrameAllocator, init_mapper};
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
 use lazy_static::lazy_static;

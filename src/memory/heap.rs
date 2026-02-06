@@ -10,7 +10,7 @@ use x86_64::{
 };
 
 use crate::{
-    heap_allocators::{Locked, fixed_block_size::FixedBlockSizeAllocator},
+    memory::{fixed_block_size::FixedBlockSizeAllocator, utils::Locked},
     println,
 };
 

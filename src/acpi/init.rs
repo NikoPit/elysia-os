@@ -4,7 +4,7 @@ use spin::Mutex;
 use x86_64::structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Size4KiB};
 
 use crate::{
-    acpi::handler::ACPIHandler, paging::BootinfoFrameAllocator, println,
+    acpi::handler::ACPIHandler, memory::paging::BootinfoFrameAllocator, println,
     systemcall::implementations,
 };
 

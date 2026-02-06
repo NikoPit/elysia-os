@@ -1,5 +1,3 @@
-pub mod fixed_block_size;
-
 pub struct Locked<A> {
     inner: spin::Mutex<A>,
 }

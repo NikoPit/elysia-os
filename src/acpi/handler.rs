@@ -12,8 +12,8 @@ use x86_64::{
 };
 
 use crate::{
+    memory::paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
     os::get_os,
-    paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
     println, read_addr, read_port,
     systemcall::implementations::utils::SystemCallImpl,
     write_addr, write_port,

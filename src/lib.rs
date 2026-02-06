@@ -13,13 +13,11 @@ pub mod exception_interrupt;
 pub mod acpi;
 pub mod gdt;
 pub mod hardware_interrupt;
-pub mod heap;
-pub mod heap_allocators;
 pub mod interrupts;
+pub mod memory;
 pub mod misc;
 pub mod multitasking;
 pub mod os;
-pub mod paging;
 pub mod panic_handler;
 pub mod serial_print;
 pub mod systemcall;
@@ -41,9 +39,9 @@ entry_point!(test_k_main);
 #[cfg(test)]
 fn test_k_main(_boot_info: &'static BootInfo) -> ! {
     use crate::{
+        memory::paging::{BootinfoFrameAllocator, init_mapper},
         misc::hlt_loop,
         os::get_os,
-        paging::{BootinfoFrameAllocator, init_mapper},
     };
     let mut frame_allocator: BootinfoFrameAllocator =
         unsafe { BootinfoFrameAllocator::new(&_boot_info.memory_map) };
