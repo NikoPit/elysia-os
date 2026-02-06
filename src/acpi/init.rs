@@ -14,8 +14,9 @@ pub fn init_acpi(
 ) -> AcpiTables<ACPIHandler> {
     println!("init acpi start");
     let handler = ACPIHandler::new(mapper.clone(), frame_allocator.clone());
-    let rsdp =
-        unsafe { Rsdp::search_for_on_bios(handler.clone()) }.expect("Failed searching for Rsdp");
+    println!("step2");
+    let rsdp = unsafe { Rsdp::search_for_on_bios(handler) }.expect("Failed searching for Rsdp");
+    println!("step3");
     unsafe {
         AcpiTables::from_rsdp(handler, rsdp.physical_start)
             .expect("Failed to get ACPI Table from rsdp")

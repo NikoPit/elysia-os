@@ -4,7 +4,7 @@ use crate::{
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET},
     heap::init_heap,
     interrupts::init_idt,
-    paging::{BootinfoFrameAllocator, init_mapper},
+    paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER, init_mapper},
     println,
     systemcall::entry::init_syscall,
     vga_print::Printer,
@@ -52,9 +52,12 @@ impl OS {
         mapper: Arc<Mutex<OffsetPageTable<'static>>>,
         frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
     ) {
+        MAPPER.get_or_init(|| mapper.clone());
+        FRAME_ALLOCATOR.get_or_init(|| frame_allocator.clone());
+
         init_gdt();
         init_idt();
-        without_interrupts(|| init_acpi(mapper.clone(), frame_allocator.clone()));
+        //without_interrupts(|| init_acpi(mapper.clone(), frame_allocator.clone()));
 
         self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
 

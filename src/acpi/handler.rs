@@ -1,4 +1,4 @@
-use core::{iter::Map, ptr::NonNull};
+use core::{iter::Map, ptr::NonNull, sync::atomic::AtomicU64};
 
 use acpi::{Handler, PhysicalMapping, address};
 use alloc::sync::Arc;
@@ -12,25 +12,22 @@ use x86_64::{
 };
 
 use crate::{
-    os::get_os, paging::BootinfoFrameAllocator, read_addr, read_port,
-    systemcall::implementations::utils::SystemCallImpl, write_addr, write_port,
+    os::get_os,
+    paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
+    println, read_addr, read_port,
+    systemcall::implementations::utils::SystemCallImpl,
+    write_addr, write_port,
 };
 
-#[derive(Clone)]
-pub struct ACPIHandler {
-    mapper: Arc<Mutex<OffsetPageTable<'static>>>,
-    frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
-}
+#[derive(Clone, Copy)]
+pub struct ACPIHandler {}
 
 impl ACPIHandler {
     pub fn new(
         mapper: Arc<Mutex<OffsetPageTable<'static>>>,
         frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
     ) -> Self {
-        Self {
-            mapper: mapper.clone(),
-            frame_allocator: frame_allocator.clone(),
-        }
+        Self {}
     }
 }
 
@@ -40,7 +37,9 @@ impl Handler for ACPIHandler {
         physical_address: usize,
         size: usize,
     ) -> acpi::PhysicalMapping<Self, T> {
-        let virt_addr_number = 0x6235461612;
+        static NEXT_VIRT_ADDR: AtomicU64 = AtomicU64::new(0xffff_f000_0000_0000);
+        let virt_addr_number =
+            NEXT_VIRT_ADDR.fetch_add(size as u64, core::sync::atomic::Ordering::SeqCst);
         let virt_addr = VirtAddr::new(virt_addr_number);
 
         let frame: PhysFrame<Size4KiB> =
@@ -51,11 +50,24 @@ impl Handler for ACPIHandler {
         let virt_addr_nonnull = NonNull::new(page.start_address().as_u64() as *mut T);
 
         unsafe {
-            self.mapper
-                .lock()
-                .map_to(page, frame, flags, &mut *self.frame_allocator.lock())
-                .expect("Failed mapping on apic Handler")
-                .flush();
+            let result = MAPPER.get().unwrap().lock().map_to(
+                page,
+                frame,
+                flags,
+                &mut *FRAME_ALLOCATOR.get().unwrap().lock(),
+            );
+
+            match result {
+                Ok(flush) => {
+                    flush.flush();
+                }
+                Err(paging::mapper::MapToError::PageAlreadyMapped(_)) => {
+                    println!("skipping");
+                }
+                Err(err) => {
+                    panic!("{:?}", err)
+                }
+            }
         }
 
         PhysicalMapping {

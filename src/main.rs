@@ -18,6 +18,7 @@ use alloc::string::ToString;
 use alloc::sync::Arc;
 use bootloader::{BootInfo, entry_point};
 use conquer_once::spin::OnceCell;
+use elysia_os::acpi::init::init_acpi;
 #[cfg(test)]
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
@@ -56,8 +57,10 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     println!("e");
 
     println!("{}", Box::new(42));
+    println!("gwfaF");
 
-    get_os().init(bootinfo, mapper, frame_allocator);
+    get_os().init(bootinfo, mapper.clone(), frame_allocator.clone());
+    let table = init_acpi(mapper.clone(), frame_allocator.clone());
     println!("f");
     let mut executor = Executor::new();
 
