@@ -55,7 +55,10 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     let mut frame_allocator = unsafe { Arc::new(Mutex::new(frame_allocator)) };
     println!("e");
 
-    get_os().init(bootinfo, mapper.clone(), frame_allocator.clone());
+    println!("{}", Box::new(42));
+
+    get_os().init(bootinfo, mapper, frame_allocator);
+    println!("f");
     let mut executor = Executor::new();
 
     // syscall test

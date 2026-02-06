@@ -17,7 +17,7 @@ use spin::*;
 use uart_16550::SerialPort;
 use x86_64::{
     VirtAddr,
-    instructions::interrupts,
+    instructions::interrupts::{self, without_interrupts},
     structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Size4KiB, mapper},
 };
 
@@ -52,10 +52,9 @@ impl OS {
         mapper: Arc<Mutex<impl Mapper<Size4KiB> + 'static>>,
         frame_allocator: Arc<Mutex<impl FrameAllocator<Size4KiB> + 'static>>,
     ) {
-        println!("agb");
         init_gdt();
         init_idt();
-        //init_acpi(mapper.clone(), frame_allocator.clone());
+        //without_interrupts(|| init_acpi(mapper.clone(), frame_allocator.clone()));
 
         self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
 
