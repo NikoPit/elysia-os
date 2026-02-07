@@ -1,12 +1,3 @@
-use x86_64::{
-    VirtAddr,
-    instructions::interrupts::without_interrupts,
-    registers::{
-        control::{Efer, EferFlags},
-        model_specific::{LStar, SFMask},
-        rflags::RFlags,
-    },
-};
 
 // entry point for all system calls
 #[unsafe(no_mangle)]

@@ -28,18 +28,8 @@ pub mod vga_print;
 #[cfg(test)]
 use core::panic::PanicInfo;
 
-use alloc::sync::Arc;
-use bootloader::{BootInfo, entry_point};
-use spin::Mutex;
-use x86_64::{VirtAddr, instructions::interrupts as x86_64_interrupts};
+use bootloader::BootInfo;
 
-use crate::{
-    memory::{
-        heap::init_heap,
-        paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER, init_mapper},
-    },
-    os::get_os,
-};
 
 #[cfg(test)]
 entry_point!(test_k_main);

@@ -13,19 +13,15 @@ extern crate alloc;
 use core::iter::Successors;
 use core::panic::PanicInfo;
 
-use alloc::sync::Arc;
 use bootloader::{BootInfo, entry_point};
 #[cfg(test)]
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
 use elysia_os::init;
-use elysia_os::memory::heap::init_heap;
-use elysia_os::memory::paging::{BootinfoFrameAllocator, init_mapper};
 use elysia_os::multitasking::executor::Executor;
 use elysia_os::multitasking::task::Task;
 use elysia_os::panic_handler::handle_panic;
-use elysia_os::{os::get_os, println};
-use spin::Mutex;
+use elysia_os::println;
 
 entry_point!(k_main);
 

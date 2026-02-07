@@ -1,5 +1,5 @@
 use x86_64::{
-    instructions::interrupts::{self, int3},
+    instructions::interrupts::{self},
     structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
 };
 

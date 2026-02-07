@@ -1,10 +1,7 @@
 use crate::{
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET},
-    memory::paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
     vga_print::Printer,
 };
-use alloc::sync::Arc;
-use bootloader::BootInfo;
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin::*;
@@ -12,7 +9,6 @@ use uart_16550::SerialPort;
 use x86_64::{
     VirtAddr,
     instructions::interrupts::{self},
-    structures::paging::OffsetPageTable,
 };
 
 lazy_static! {
