@@ -25,19 +25,17 @@ new_syscall!(PrintImpl, SystemCallNo::Print, fd: i32, buf: *const u8, count: usi
 fn write_to_stdio(buf: *const u8, count: usize, error: bool) -> usize {
     let test = unsafe { core::slice::from_raw_parts(buf, count) };
     let test = from_utf8(test).unwrap();
-    unsafe {
-        get_os().printer.print_string(
-            test,
-            CellColor::new(
-                if error {
-                    crate::vga_print::VgaColor::Red
-                } else {
-                    crate::vga_print::VgaColor::White
-                },
-                crate::vga_print::VgaColor::Black,
-            ),
-        )
-    };
+    get_os().printer.print_string(
+        test,
+        CellColor::new(
+            if error {
+                crate::vga_print::VgaColor::Red
+            } else {
+                crate::vga_print::VgaColor::White
+            },
+            crate::vga_print::VgaColor::Black,
+        ),
+    );
 
     0
 }

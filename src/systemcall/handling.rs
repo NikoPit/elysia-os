@@ -1,10 +1,6 @@
-
 use crate::{
     println,
-    systemcall::{
-        error::SyscallError,
-        syscalls_table::SYSCALL_TABLE,
-    },
+    systemcall::{error::SyscallError, syscalls_table::SYSCALL_TABLE},
 };
 
 // Repr C to make the assembly code can successfully construct it
@@ -20,7 +16,7 @@ struct SyscallSnapshot {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn syscall_handler(snapshot_ptr: *mut SyscallSnapshot) {
+extern "C" fn syscall_handler(snapshot_ptr: *mut SyscallSnapshot) {
     let snapshot = unsafe { &mut *snapshot_ptr };
 
     println!("[DEBUG] Syscall: {}", (snapshot.syscall_no));

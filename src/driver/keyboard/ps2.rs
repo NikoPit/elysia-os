@@ -43,10 +43,8 @@ impl InterruptDriver for PS2KeyboardDriver {
 
 impl KeyboardDriver for PS2KeyboardDriver {}
 
-impl PS2KeyboardDriver {
-    fn get_keyboard() -> MutexGuard<'static, Keyboard<layouts::Us104Key, ScancodeSet1>> {
-        _PS2_KEYBOARD.lock()
-    }
+pub fn get_keyboard() -> MutexGuard<'static, Keyboard<layouts::Us104Key, ScancodeSet1>> {
+    _PS2_KEYBOARD.lock()
 }
 
 impl HardwareInterruptHandler for PS2KeyboardDriver {

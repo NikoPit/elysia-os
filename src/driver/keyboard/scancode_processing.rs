@@ -5,7 +5,7 @@ use crossbeam_queue::ArrayQueue;
 use futures_util::{Stream, StreamExt, task::AtomicWaker};
 
 use crate::{
-    driver::keyboard::ps2::{_PS2_KEYBOARD, KeyboardDriver, PS2KeyboardDriver},
+    driver::keyboard::ps2::{KeyboardDriver, PS2KeyboardDriver, get_keyboard},
     println,
 };
 
@@ -74,10 +74,10 @@ pub async fn process_keypresses() {
 
     // loop through scancodes infinitely
     while let Some(scancode) = scancodes.next().await {
-        let test_key_event = _PS2_KEYBOARD.lock().add_byte(scancode);
+        let test_key_event = get_keyboard().add_byte(scancode);
 
         if let Ok(Some(key_event)) = test_key_event {
-            let thing = _PS2_KEYBOARD.lock().process_keyevent(key_event);
+            let thing = get_keyboard().process_keyevent(key_event);
             if let Some(key) = thing {
                 PS2KeyboardDriver::handle_key(key);
             }

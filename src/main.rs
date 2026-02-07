@@ -42,7 +42,7 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
 
     // [TODO] maybe i should move some stuff out of the os struct? tho if it works, dont touch it
     let mapper = Arc::new(Mutex::new(mapper));
-    let frame_allocator = unsafe { Arc::new(Mutex::new(frame_allocator)) };
+    let frame_allocator = Arc::new(Mutex::new(frame_allocator));
     get_os().init(bootinfo, mapper.clone(), frame_allocator.clone());
 
     // it seems like if i dont call it in main,
