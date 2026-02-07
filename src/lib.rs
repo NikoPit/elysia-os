@@ -29,7 +29,8 @@ pub mod vga_print;
 use core::panic::PanicInfo;
 
 use bootloader::BootInfo;
-
+#[cfg(test)]
+use bootloader::entry_point;
 
 #[cfg(test)]
 entry_point!(test_k_main);

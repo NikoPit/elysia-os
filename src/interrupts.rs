@@ -1,5 +1,5 @@
 use x86_64::{
-    instructions::interrupts::{self},
+    instructions::interrupts::{self, int3},
     structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
 };
 
@@ -37,4 +37,4 @@ pub fn print_stackframe(message: &str, stack_frame: InterruptStackFrame) {
 }
 
 // test if breakpoint interrupt will crash the system
-test!("Breakpoint interrupt crash", || int3());
+test!("Breakpoint interrupt crash", || interrupts::int3());
