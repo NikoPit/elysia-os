@@ -1,11 +1,8 @@
 use crate::{
-    acpi::init::init_acpi,
     gdt::init_gdt,
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET},
     interrupts::init_idt,
-    memory::heap::init_heap,
-    memory::paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER, init_mapper},
-    println,
+    memory::paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
     systemcall::entry::init_syscall,
     vga_print::Printer,
 };
@@ -17,8 +14,8 @@ use spin::*;
 use uart_16550::SerialPort;
 use x86_64::{
     VirtAddr,
-    instructions::interrupts::{self, without_interrupts},
-    structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Size4KiB, mapper},
+    instructions::interrupts::{self},
+    structures::paging::OffsetPageTable,
 };
 
 lazy_static! {

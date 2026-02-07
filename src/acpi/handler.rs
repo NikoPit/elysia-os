@@ -1,24 +1,10 @@
-use core::{iter::Map, ptr::NonNull, sync::atomic::AtomicU64};
+use core::ptr::NonNull;
 
-use acpi::{Handler, PhysicalMapping, address};
-use alloc::sync::Arc;
-use spin::Mutex;
-use x86_64::{
-    PhysAddr, VirtAddr,
-    instructions::port::Port,
-    structures::paging::{
-        self, FrameAllocator, Mapper, OffsetPageTable, Page, PageTableFlags, PhysFrame, Size4KiB,
-    },
-};
+use acpi::{Handler, PhysicalMapping};
+use x86_64::instructions::port::Port;
 
 use crate::{
-    memory::{
-        paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
-        utils::get_offsetted_location,
-    },
-    os::get_os,
-    println, read_addr, read_port,
-    systemcall::implementations::utils::SystemCallImpl,
+    memory::utils::get_offsetted_location, read_addr, read_port,
     write_addr, write_port,
 };
 
@@ -43,7 +29,7 @@ impl Handler for ACPIHandler {
         }
     }
 
-    fn unmap_physical_region<T>(region: &PhysicalMapping<Self, T>) {}
+    fn unmap_physical_region<T>(_region: &PhysicalMapping<Self, T>) {}
 
     fn read_u8(&self, address: usize) -> u8 {
         unsafe { read_addr!(address, u8) }
@@ -101,27 +87,27 @@ impl Handler for ACPIHandler {
         unsafe { write_port!(port, value) }
     }
 
-    fn write_pci_u8(&self, address: acpi::PciAddress, offset: u16, value: u8) {
+    fn write_pci_u8(&self, _address: acpi::PciAddress, _offset: u16, _value: u8) {
         unimplemented!()
     }
 
-    fn write_pci_u16(&self, address: acpi::PciAddress, offset: u16, value: u16) {
+    fn write_pci_u16(&self, _address: acpi::PciAddress, _offset: u16, _value: u16) {
         unimplemented!()
     }
 
-    fn write_pci_u32(&self, address: acpi::PciAddress, offset: u16, value: u32) {
+    fn write_pci_u32(&self, _address: acpi::PciAddress, _offset: u16, _value: u32) {
         unimplemented!()
     }
 
-    fn read_pci_u8(&self, address: acpi::PciAddress, offset: u16) -> u8 {
+    fn read_pci_u8(&self, _address: acpi::PciAddress, _offset: u16) -> u8 {
         unimplemented!()
     }
 
-    fn read_pci_u16(&self, address: acpi::PciAddress, offset: u16) -> u16 {
+    fn read_pci_u16(&self, _address: acpi::PciAddress, _offset: u16) -> u16 {
         unimplemented!()
     }
 
-    fn read_pci_u32(&self, address: acpi::PciAddress, offset: u16) -> u32 {
+    fn read_pci_u32(&self, _address: acpi::PciAddress, _offset: u16) -> u32 {
         unimplemented!()
     }
 
@@ -129,11 +115,11 @@ impl Handler for ACPIHandler {
         0
     }
 
-    fn stall(&self, microseconds: u64) {
+    fn stall(&self, _microseconds: u64) {
         unimplemented!()
     }
 
-    fn sleep(&self, milliseconds: u64) {
+    fn sleep(&self, _milliseconds: u64) {
         unimplemented!()
     }
 
@@ -141,11 +127,11 @@ impl Handler for ACPIHandler {
         unimplemented!()
     }
 
-    fn release(&self, mutex: acpi::Handle) {
+    fn release(&self, _mutex: acpi::Handle) {
         unimplemented!()
     }
 
-    fn acquire(&self, mutex: acpi::Handle, timeout: u16) -> Result<(), acpi::aml::AmlError> {
+    fn acquire(&self, _mutex: acpi::Handle, _timeout: u16) -> Result<(), acpi::aml::AmlError> {
         unimplemented!()
     }
 }

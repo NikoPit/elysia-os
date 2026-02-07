@@ -1,5 +1,5 @@
 use acpi::AcpiTables;
-use conquer_once::spin::{Once, OnceCell};
+use conquer_once::spin::OnceCell;
 
 use crate::acpi::handler::ACPIHandler;
 

@@ -1,17 +1,9 @@
 pub mod keyboard;
 
-use core::char;
 
-use pc_keyboard::{DecodedKey, KeyCode, Keyboard, ScancodeSet1, layouts};
-use x86_64::{instructions::port::Port, structures::idt::InterruptDescriptorTable};
+use x86_64::structures::idt::InterruptDescriptorTable;
 
-use crate::{
-    driver::keyboard::ps2::PS2KeyboardDriver,
-    hardware_interrupt::{HardwareInterrupt, HardwareInterruptHandler},
-    os::get_os,
-    panic_handler::handle_panic,
-    print, println,
-};
+use crate::driver::keyboard::ps2::PS2KeyboardDriver;
 
 pub trait Driver {}
 

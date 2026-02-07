@@ -1,16 +1,13 @@
 use core::task::{Context, Poll, Waker};
 
 use alloc::{
-    collections::{btree_map::BTreeMap, vec_deque::VecDeque},
+    collections::btree_map::BTreeMap,
     sync::Arc,
 };
 use crossbeam_queue::ArrayQueue;
 use x86_64::instructions::interrupts::{self, enable_and_hlt};
 
-use crate::multitasking::{
-    task::{Task, TaskID, TaskWaker},
-    waker::dummy_waker,
-};
+use crate::multitasking::task::{Task, TaskID, TaskWaker};
 
 // When a task was awoken, the taskid will be pushed to the
 // task queue to be executed.

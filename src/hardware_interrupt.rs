@@ -1,16 +1,7 @@
-use core::ops::Index;
 
-use pc_keyboard::{DecodedKey, KeyEvent};
-use x86_64::{
-    instructions::port::Port,
-    structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
-};
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
-use crate::{
-    driver::keyboard::ps2::PS2KeyboardDriver,
-    os::{get_os, get_os_no_interrupt},
-    print,
-};
+use crate::os::get_os;
 
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;

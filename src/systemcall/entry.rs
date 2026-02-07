@@ -16,7 +16,7 @@ pub fn init_syscall() {
         SFMask::write(RFlags::INTERRUPT_FLAG);
 
         // sets the entry point for systemcalls
-        let syscall_entry_addr = VirtAddr::new(syscall_entry as usize as u64);
+        let syscall_entry_addr = VirtAddr::new(syscall_entry as *const () as usize as u64);
         LStar::write(syscall_entry_addr);
     })
 }

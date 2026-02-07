@@ -1,5 +1,5 @@
 use x86_64::{
-    PhysAddr, VirtAddr,
+    VirtAddr,
     structures::paging::{
         FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB, mapper::MapToError,
     },
@@ -21,7 +21,7 @@ impl<A> Locked<A> {
         }
     }
 
-    pub fn lock(&self) -> spin::MutexGuard<A> {
+    pub fn lock(&self) -> spin::MutexGuard<'_, A> {
         self.inner.lock()
     }
 }

@@ -1,19 +1,8 @@
-use x86_64::{
-    VirtAddr,
-    instructions::interrupts::without_interrupts,
-    registers::{
-        control::{Efer, EferFlags},
-        model_specific::{LStar, SFMask},
-        rflags::RFlags,
-    },
-};
 
 use crate::{
     println,
     systemcall::{
         error::SyscallError,
-        implementations::{print::PrintImpl, utils::SystemCallImpl},
-        syscall_no::SystemCallNo,
         syscalls_table::SYSCALL_TABLE,
     },
 };

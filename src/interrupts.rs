@@ -1,14 +1,10 @@
-use x86_64::{
-    instructions::interrupts::int3,
-    structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
-};
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 use crate::{
-    driver::{self, init_interrupt_drivers},
+    driver::init_interrupt_drivers,
     exception_interrupt::init_exception_interrupts,
     hardware_interrupt::init_hardware_interrupts,
     print, println, test,
-    tss::DOUBLE_FAULT_IST_LOCATION,
 };
 use lazy_static::lazy_static;
 

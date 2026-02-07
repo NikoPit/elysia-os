@@ -1,15 +1,11 @@
 use x86_64::{
     registers::control::Cr2,
-    structures::{
-        idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode},
-        paging::Page,
-    },
+    structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode},
 };
 
 use crate::{
     interrupts::{print_stackframe, print_stackframe_m},
-    misc::hlt_loop,
-    print, println,
+    misc::hlt_loop, println,
     tss::DOUBLE_FAULT_IST_LOCATION,
 };
 
@@ -17,7 +13,7 @@ pub trait ExceptionInterruptHandler {
     fn handle_exception_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {}
     fn handle_exception_interrupt_unwrapped_err_code(
         _stack_frame: InterruptStackFrame,
-        err_code: u64,
+        _err_code: u64,
     ) -> ! {
         unimplemented!();
     }

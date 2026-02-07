@@ -1,5 +1,4 @@
 use crate::systemcall::{error::SyscallError, syscall_no::SystemCallNo};
-use paste::paste;
 
 pub trait SystemCallImpl {
     const ENTRY: SystemCallNo;

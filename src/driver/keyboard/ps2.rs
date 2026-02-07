@@ -1,5 +1,3 @@
-use conquer_once::spin::OnceCell;
-use crossbeam_queue::ArrayQueue;
 use lazy_static::lazy_static;
 use pc_keyboard::{DecodedKey, KeyCode, Keyboard, ScancodeSet1, layouts};
 use spin::{Mutex, MutexGuard};
@@ -17,8 +15,7 @@ lazy_static! {
 use crate::{
     driver::{Driver, InterruptDriver, keyboard::scancode_processing::add_scancode},
     hardware_interrupt::{HardwareInterrupt, HardwareInterruptHandler},
-    os::get_os,
-    print, println, register_hardware_interrupt,
+    print, register_hardware_interrupt,
 };
 
 pub trait KeyboardDriver: Driver {
@@ -29,7 +26,7 @@ pub trait KeyboardDriver: Driver {
         }
     }
 
-    fn handle_raw_key(key: KeyCode) {
+    fn handle_raw_key(_key: KeyCode) {
         // TODO: handle delete keys and enter and all that stuffs
     }
 }

@@ -6,7 +6,7 @@ use crate::{
     systemcall::{
         error::SyscallError, implementations::utils::SystemCallImpl, syscall_no::SystemCallNo,
     },
-    vga_print::{CellColor, VgaCell},
+    vga_print::CellColor,
 };
 
 new_syscall!(PrintImpl, SystemCallNo::Print, fd: i32, buf: *const u8, count: usize, |fd, buf: *const u8, count: usize| -> Result<usize, SyscallError> {

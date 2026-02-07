@@ -28,10 +28,8 @@ pub mod vga_print;
 #[cfg(test)]
 use core::panic::PanicInfo;
 
-use alloc::boxed::Box;
 #[cfg(test)]
 use bootloader::BootInfo;
-use bootloader::entry_point;
 
 #[cfg(test)]
 entry_point!(test_k_main);

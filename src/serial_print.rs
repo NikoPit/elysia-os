@@ -1,6 +1,6 @@
 use core::fmt::{self, Write};
 
-use crate::os::{get_os, get_os_no_interrupt};
+use crate::os::get_os_no_interrupt;
 
 #[macro_export]
 macro_rules! s_print {

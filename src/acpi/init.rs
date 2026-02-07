@@ -1,16 +1,7 @@
-use core::panic;
 
-use acpi::{AcpiError, AcpiTable, AcpiTables, rsdp::Rsdp};
-use alloc::sync::Arc;
-use spin::Mutex;
-use x86_64::structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Size4KiB};
+use acpi::{AcpiTables, rsdp::Rsdp};
 
-use crate::{
-    acpi::{ACPI_TABLE, handler::ACPIHandler},
-    memory::paging::BootinfoFrameAllocator,
-    println,
-    systemcall::{error, implementations},
-};
+use crate::acpi::{ACPI_TABLE, handler::ACPIHandler};
 
 pub fn init_acpi() {
     let handler = ACPIHandler {};

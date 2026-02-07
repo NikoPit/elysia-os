@@ -13,28 +13,19 @@ extern crate alloc;
 use core::iter::Successors;
 use core::panic::PanicInfo;
 
-use alloc::boxed::Box;
-use alloc::string::ToString;
 use alloc::sync::Arc;
 use bootloader::{BootInfo, entry_point};
-use conquer_once::spin::OnceCell;
 use elysia_os::acpi::init::init_acpi;
 #[cfg(test)]
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
 use elysia_os::memory::heap::init_heap;
 use elysia_os::memory::paging::{BootinfoFrameAllocator, init_mapper};
-use elysia_os::misc::hlt_loop;
 use elysia_os::multitasking::executor::Executor;
 use elysia_os::multitasking::task::Task;
 use elysia_os::panic_handler::handle_panic;
 use elysia_os::{os::get_os, println};
-use lazy_static::lazy_static;
 use spin::Mutex;
-use x86_64::VirtAddr;
-use x86_64::structures::paging::{
-    FrameAllocator, Mapper, OffsetPageTable, Page, Size4KiB, Translate, frame,
-};
 
 entry_point!(k_main);
 
@@ -50,8 +41,8 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     init_heap(&mut mapper, &mut frame_allocator).expect("Failed heap initilization");
 
     // [TODO] maybe i should move some stuff out of the os struct? tho if it works, dont touch it
-    let mut mapper = Arc::new(Mutex::new(mapper));
-    let mut frame_allocator = unsafe { Arc::new(Mutex::new(frame_allocator)) };
+    let mapper = Arc::new(Mutex::new(mapper));
+    let frame_allocator = unsafe { Arc::new(Mutex::new(frame_allocator)) };
     get_os().init(bootinfo, mapper.clone(), frame_allocator.clone());
 
     // it seems like if i dont call it in main,

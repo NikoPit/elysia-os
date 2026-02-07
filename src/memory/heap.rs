@@ -1,7 +1,3 @@
-use alloc::sync::Arc;
-use conquer_once::spin::OnceCell;
-use linked_list_allocator::LockedHeap;
-use spin::Mutex;
 use x86_64::{
     VirtAddr,
     structures::paging::{
@@ -9,10 +5,7 @@ use x86_64::{
     },
 };
 
-use crate::{
-    memory::{fixed_block_size::FixedBlockSizeAllocator, utils::Locked},
-    println,
-};
+use crate::memory::{fixed_block_size::FixedBlockSizeAllocator, utils::Locked};
 
 #[global_allocator]
 static HEAP_ALLOCATOR: Locked<FixedBlockSizeAllocator> =

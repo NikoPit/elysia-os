@@ -1,7 +1,6 @@
-use core::cell;
 use core::fmt::{self, Write};
 
-use crate::os::{get_os, get_os_no_interrupt};
+use crate::os::get_os_no_interrupt;
 use crate::test;
 
 const BUFFER_HEIGHT: usize = 25;
