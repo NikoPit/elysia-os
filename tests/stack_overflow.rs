@@ -8,9 +8,8 @@
 use bootloader::BootInfo;
 use bootloader::entry_point;
 use elysia_os::debug_exit::debug_exit;
+use elysia_os::init;
 use elysia_os::os::get_os;
-use elysia_os::paging::BootinfoFrameAllocator;
-use elysia_os::paging::init_mapper;
 use elysia_os::print;
 use elysia_os::s_print;
 use elysia_os::s_println;
@@ -30,11 +29,8 @@ use elysia_os::test;
 entry_point!(_start);
 fn _start(bootinfo: &'static BootInfo) -> ! {
     s_print!("\nStack overflow double-fault handling ");
-    let mut frame_allocator: BootinfoFrameAllocator =
-        unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
-    let mut mapper = init_mapper(bootinfo);
 
-    get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
+    init(bootinfo);
 
     stack_overflow();
 

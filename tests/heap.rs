@@ -16,23 +16,14 @@ use bootloader::{BootInfo, entry_point};
 use core::panic::PanicInfo;
 use crossbeam_queue::ArrayQueue;
 use elysia_os::{
-    heap::HEAP_SIZE,
-    misc::hlt_loop,
-    multitasking::task::TaskID,
-    os::get_os,
-    paging::{BootinfoFrameAllocator, init_mapper},
-    panic_handler::test_handle_panic,
-    test,
+    init, memory::heap::HEAP_SIZE, misc::hlt_loop, multitasking::task::TaskID, os::get_os,
+    panic_handler::test_handle_panic, test,
 };
 
 entry_point!(main);
 
 fn main(boot_info: &'static BootInfo) -> ! {
-    let mut frame_allocator: BootinfoFrameAllocator =
-        unsafe { BootinfoFrameAllocator::new(&boot_info.memory_map) };
-    let mut mapper = init_mapper(boot_info);
-
-    get_os().init(boot_info, &mut mapper, &mut frame_allocator);
+    init(boot_info);
 
     test_main();
 

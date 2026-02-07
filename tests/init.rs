@@ -7,9 +7,8 @@
 #![test_runner(testing::run_tests)]
 use bootloader::BootInfo;
 use bootloader::entry_point;
+use elysia_os::init;
 use elysia_os::os::get_os;
-use elysia_os::paging::BootinfoFrameAllocator;
-use elysia_os::paging::init_mapper;
 use elysia_os::testing;
 use x86_64::instructions::interrupts::int3;
 // Disable dynamic linking with the std library because there is no std library in our own os
@@ -24,11 +23,7 @@ use elysia_os::test;
 entry_point!(_start);
 // Disables name mangling so the linker can recognize the entry point
 fn _start(bootinfo: &'static BootInfo) -> ! {
-    let mut frame_allocator: BootinfoFrameAllocator =
-        unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
-    let mut mapper = init_mapper(bootinfo);
-
-    get_os().init(bootinfo, &mut mapper, &mut frame_allocator);
+    init(bootinfo);
 
     test_main();
 
