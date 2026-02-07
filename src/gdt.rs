@@ -25,7 +25,7 @@ struct GDTSelectors {
     tss_selector: SegmentSelector,
 }
 
-pub fn init_gdt() {
+pub fn init() {
     GDT.0.load();
 
     unsafe {

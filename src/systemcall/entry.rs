@@ -7,19 +7,6 @@ use x86_64::{
         rflags::RFlags,
     },
 };
-pub fn init_syscall() {
-    without_interrupts(|| {
-        // enable systemcalls
-        unsafe { Efer::update(|efer| efer.insert(EferFlags::SYSTEM_CALL_EXTENSIONS)) };
-
-        // disable interrupts on systemcalls
-        SFMask::write(RFlags::INTERRUPT_FLAG);
-
-        // sets the entry point for systemcalls
-        let syscall_entry_addr = VirtAddr::new(syscall_entry as *const () as usize as u64);
-        LStar::write(syscall_entry_addr);
-    })
-}
 
 // entry point for all system calls
 #[unsafe(no_mangle)]

@@ -1,9 +1,6 @@
 use crate::{
-    gdt::init_gdt,
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET},
-    interrupts::init_idt,
     memory::paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
-    systemcall::entry::init_syscall,
     vga_print::Printer,
 };
 use alloc::sync::Arc;
@@ -41,26 +38,6 @@ impl OS {
             pics: unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) },
             phys_mem_offset: None,
         }
-    }
-
-    pub fn init(
-        &mut self,
-        bootinfo: &'static BootInfo,
-        mapper: Arc<Mutex<OffsetPageTable<'static>>>,
-        frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
-    ) {
-        MAPPER.get_or_init(|| mapper.clone());
-        FRAME_ALLOCATOR.get_or_init(|| frame_allocator.clone());
-
-        init_gdt();
-        init_idt();
-
-        self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
-
-        unsafe { self.pics.initialize() };
-        interrupts::enable();
-
-        init_syscall();
     }
 }
 

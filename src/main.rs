@@ -15,10 +15,10 @@ use core::panic::PanicInfo;
 
 use alloc::sync::Arc;
 use bootloader::{BootInfo, entry_point};
-use elysia_os::acpi::init::init_acpi;
 #[cfg(test)]
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
+use elysia_os::init;
 use elysia_os::memory::heap::init_heap;
 use elysia_os::memory::paging::{BootinfoFrameAllocator, init_mapper};
 use elysia_os::multitasking::executor::Executor;
@@ -34,20 +34,7 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
     println!("Welcome to Elysia-OS v0.1.0");
 
-    // temporary mapper and frame alloc to initalize heap
-    // so i can wrap them inside Arc and Mutex
-    let mut mapper = init_mapper(bootinfo);
-    let mut frame_allocator = unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
-    init_heap(&mut mapper, &mut frame_allocator).expect("Failed heap initilization");
-
-    // [TODO] maybe i should move some stuff out of the os struct? tho if it works, dont touch it
-    let mapper = Arc::new(Mutex::new(mapper));
-    let frame_allocator = Arc::new(Mutex::new(frame_allocator));
-    get_os().init(bootinfo, mapper.clone(), frame_allocator.clone());
-
-    // it seems like if i dont call it in main,
-    // it will have a crashout for whatever reason
-    init_acpi();
+    init(bootinfo);
 
     let mut executor = Executor::new();
 

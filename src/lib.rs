@@ -28,8 +28,18 @@ pub mod vga_print;
 #[cfg(test)]
 use core::panic::PanicInfo;
 
-#[cfg(test)]
-use bootloader::BootInfo;
+use alloc::sync::Arc;
+use bootloader::{BootInfo, entry_point};
+use spin::Mutex;
+use x86_64::{VirtAddr, instructions::interrupts as x86_64_interrupts};
+
+use crate::{
+    memory::{
+        heap::init_heap,
+        paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER, init_mapper},
+    },
+    os::get_os,
+};
 
 #[cfg(test)]
 entry_point!(test_k_main);
@@ -41,15 +51,20 @@ fn test_k_main(_boot_info: &'static BootInfo) -> ! {
         misc::hlt_loop,
         os::get_os,
     };
-    let mut frame_allocator: BootinfoFrameAllocator =
-        unsafe { BootinfoFrameAllocator::new(&_boot_info.memory_map) };
-    let mut mapper = init_mapper(_boot_info);
 
-    get_os().init(_boot_info, &mut mapper, &mut frame_allocator);
+    init(_boot_info);
 
     test_main();
 
     hlt_loop();
+}
+
+pub fn init(bootinfo: &'static BootInfo) {
+    memory::init(bootinfo);
+    gdt::init();
+    interrupts::init();
+    systemcall::init();
+    acpi::init();
 }
 
 #[cfg(test)]

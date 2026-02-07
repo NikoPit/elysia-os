@@ -5,7 +5,8 @@
 // renames main function for testing because we disabled main with #[no_main]
 #![reexport_test_harness_main = "test_main"]
 #![test_runner(testing::run_tests)]
-use elysia_os::interrupts::init_idt;
+use elysia_os::interrupts;
+use elysia_os::interrupts::init;
 use elysia_os::testing;
 use x86_64::instructions::interrupts::int3;
 // Disable dynamic linking with the std library because there is no std library in our own os
@@ -20,7 +21,7 @@ use elysia_os::test;
 // Disables name mangling so the linker can recognize the entry point
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    init_idt();
+    interrupts::init();
     test_main();
 
     loop {}
