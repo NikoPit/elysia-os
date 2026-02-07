@@ -57,7 +57,6 @@ impl OS {
 
         init_gdt();
         init_idt();
-        //without_interrupts(|| init_acpi(mapper.clone(), frame_allocator.clone()));
 
         self.phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
 

@@ -66,6 +66,6 @@ pub fn map_area(start: u64, end: u64) -> Result<(), MapToError<Size4KiB>> {
     Ok(())
 }
 
-pub fn get_map_location(virt: u64) -> u64 {
-    virt + get_os().phys_mem_offset.unwrap().as_u64()
+pub fn get_offsetted_location(phys: u64) -> u64 {
+    phys + get_os().phys_mem_offset.unwrap().as_u64()
 }

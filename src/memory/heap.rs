@@ -24,6 +24,8 @@ pub const HEAP_SIZE: usize = 100 * 1024; // 100 KiB
 
 // Map the memory area for the heap from physical memory to virt memory
 // and do some other stuff
+// Note: cant call the map_area() function because
+// MAPPER and FRAME_ALLOCATOR is not initalized
 pub fn init_heap(
     mapper: &mut impl Mapper<Size4KiB>,
     frame_allocator: &mut impl FrameAllocator<Size4KiB>,

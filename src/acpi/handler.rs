@@ -13,9 +13,8 @@ use x86_64::{
 
 use crate::{
     memory::{
-        mapping::map_phys_size,
         paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER},
-        utils::get_map_location,
+        utils::get_offsetted_location,
     },
     os::get_os,
     println, read_addr, read_port,
@@ -23,17 +22,8 @@ use crate::{
     write_addr, write_port,
 };
 
-#[derive(Clone, Copy)]
-pub struct ACPIHandler {}
-
-impl ACPIHandler {
-    pub fn new(
-        mapper: Arc<Mutex<OffsetPageTable<'static>>>,
-        frame_allocator: Arc<Mutex<BootinfoFrameAllocator>>,
-    ) -> Self {
-        Self {}
-    }
-}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ACPIHandler;
 
 impl Handler for ACPIHandler {
     unsafe fn map_physical_region<T>(
@@ -41,21 +31,15 @@ impl Handler for ACPIHandler {
         physical_address: usize,
         size: usize,
     ) -> acpi::PhysicalMapping<Self, T> {
-        let frame: PhysFrame<Size4KiB> =
-            PhysFrame::containing_address(PhysAddr::new(physical_address as u64));
-        let page: Page =
-            Page::containing_address(VirtAddr::new(get_map_location(physical_address as u64)));
-
-        let virt_addr_nonnull = NonNull::new(page.start_address().as_u64() as *mut T);
-
-        map_phys_size(physical_address as u64, size as u64);
-
+        // I doesnt need to manually map stuff because bootlaoder already
+        // mapped the memory :skull:
         PhysicalMapping {
-            physical_start: frame.start_address().as_u64() as usize,
+            physical_start: physical_address,
             mapped_length: size,
             handler: self.clone(),
             region_length: size,
-            virtual_start: virt_addr_nonnull.unwrap(),
+            virtual_start: NonNull::new(get_offsetted_location(physical_address as u64) as *mut T)
+                .unwrap(),
         }
     }
 
