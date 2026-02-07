@@ -12,29 +12,22 @@ use elysia_os::init;
 use elysia_os::memory::paging::FRAME_ALLOCATOR;
 use elysia_os::memory::paging::MAPPER;
 use elysia_os::misc::hlt_loop;
-use elysia_os::os::get_os;
-use elysia_os::print;
 use elysia_os::s_print;
 use elysia_os::s_println;
 use elysia_os::testing;
 use x86_64::PhysAddr;
 use x86_64::VirtAddr;
-use x86_64::instructions::interrupts::int3;
 use x86_64::structures::paging::FrameAllocator;
 use x86_64::structures::paging::Mapper;
 use x86_64::structures::paging::OffsetPageTable;
 use x86_64::structures::paging::Page;
 use x86_64::structures::paging::PhysFrame;
 use x86_64::structures::paging::Size4KiB;
-use x86_64::structures::paging::Translate;
 // Disable dynamic linking with the std library because there is no std library in our own os
 
 use core::panic::PanicInfo;
 
-use elysia_os::panic_handler;
 use elysia_os::panic_handler::test_handle_panic;
-use elysia_os::println;
-use elysia_os::test;
 
 const RANDOM_ADDR: u64 = 0x153212562324;
 
@@ -64,12 +57,6 @@ fn _start(bootinfo: &'static BootInfo) -> ! {
     debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
 
     hlt_loop();
-}
-
-fn pagefault() {
-    unsafe {
-        *(0xdeadbeef as *mut u8) = 114;
-    }
 }
 
 #[panic_handler]

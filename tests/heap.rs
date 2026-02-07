@@ -16,7 +16,7 @@ use bootloader::{BootInfo, entry_point};
 use core::panic::PanicInfo;
 use crossbeam_queue::ArrayQueue;
 use elysia_os::{
-    init, memory::heap::HEAP_SIZE, misc::hlt_loop, multitasking::task::TaskID, os::get_os,
+    init, memory::heap::HEAP_SIZE, misc::hlt_loop, multitasking::task::TaskID,
     panic_handler::test_handle_panic, test,
 };
 

@@ -10,7 +10,6 @@ use core::panic::PanicInfo;
 use bootloader::{BootInfo, entry_point};
 use elysia_os::{
     debug_exit::debug_exit, init, misc::hlt_loop, panic_handler::test_handle_panic, s_println,
-    serial_print,
 };
 
 entry_point!(k_main);

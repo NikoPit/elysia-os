@@ -37,11 +37,7 @@ entry_point!(test_k_main);
 
 #[cfg(test)]
 fn test_k_main(_boot_info: &'static BootInfo) -> ! {
-    use crate::{
-        memory::paging::{BootinfoFrameAllocator, init_mapper},
-        misc::hlt_loop,
-        os::get_os,
-    };
+    use crate::misc::hlt_loop;
 
     init(_boot_info);
 

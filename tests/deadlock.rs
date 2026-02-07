@@ -10,24 +10,17 @@ use bootloader::entry_point;
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::hardware_interrupt::HardwareInterrupt;
 use elysia_os::init;
-use elysia_os::os::get_os;
 use elysia_os::print;
 use elysia_os::s_print;
 use elysia_os::s_println;
 use elysia_os::testing;
-use volatile::VolatilePtr;
-use volatile::VolatileRef;
-use x86_64::instructions::interrupts::int3;
 use x86_64::structures::idt::InterruptDescriptorTable;
 use x86_64::structures::idt::InterruptStackFrame;
 // Disable dynamic linking with the std library because there is no std library in our own os
 
 use core::panic::PanicInfo;
 
-use elysia_os::panic_handler;
 use elysia_os::panic_handler::test_handle_panic;
-use elysia_os::println;
-use elysia_os::test;
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -51,7 +44,7 @@ fn _start(bootinfo: &'static BootInfo) -> ! {
 
     IDT.load();
 
-    for i in 0..=10000 {
+    for _i in 0..=10000 {
         print!("-");
     }
 

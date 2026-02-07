@@ -9,8 +9,6 @@
 //
 extern crate alloc;
 
-#[cfg(test)]
-use core::iter::Successors;
 use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
@@ -20,7 +18,6 @@ use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
 use elysia_os::init;
 use elysia_os::multitasking::executor::Executor;
 use elysia_os::multitasking::task::Task;
-use elysia_os::panic_handler::handle_panic;
 use elysia_os::println;
 
 entry_point!(k_main);
@@ -56,6 +53,8 @@ fn panic(_info: &PanicInfo) -> ! {
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
+    use elysia_os::panic_handler::handle_panic;
+
     handle_panic(_info);
 }
 
