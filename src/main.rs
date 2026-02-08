@@ -11,10 +11,13 @@ extern crate alloc;
 
 use core::panic::PanicInfo;
 
+use alloc::string::ToString;
 use bootloader::{BootInfo, entry_point};
 #[cfg(test)]
 use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
+use elysia_os::filesystem::path::Path;
+use elysia_os::filesystem::vfs::{FileData, VirtualFS};
 use elysia_os::init;
 use elysia_os::multitasking::executor::Executor;
 use elysia_os::multitasking::task::Task;
@@ -30,6 +33,21 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     init(bootinfo);
 
     let mut executor = Executor::new();
+
+    let a_txt = Path::new("/test/a.txt");
+    VirtualFS.lock().create_file(a_txt.clone()).unwrap();
+    VirtualFS
+        .lock()
+        .write_file(
+            a_txt.clone(),
+            FileData {
+                content: "abc".to_string(),
+            },
+        )
+        .unwrap();
+    let content = VirtualFS.lock().read_file(a_txt.clone()).unwrap().content;
+
+    println!("{:?}", content);
 
     // syscall test
     trigger_syscall();

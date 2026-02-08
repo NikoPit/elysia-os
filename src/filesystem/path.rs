@@ -1,10 +1,16 @@
 use alloc::{
     string::{String, ToString},
+    sync::Arc,
     vec::Vec,
 };
+use spin::Mutex;
 
-use crate::filesystem::vfs::{FSResult, INode, Vfs};
+use crate::{
+    filesystem::vfs::{Directory, FSResult, FileLike, VFS, VirtualFS},
+    println,
+};
 
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PathPart {
     // [TODO] CurrentDir,
     // [TODO] ParentDir,
@@ -12,7 +18,8 @@ pub enum PathPart {
     Normal(String),
 }
 
-pub struct Path(Vec<PathPart>);
+#[derive(Clone, Debug)]
+pub struct Path(pub Vec<PathPart>);
 
 impl Path {
     pub fn new(path: &str) -> Self {
@@ -33,7 +40,7 @@ impl Path {
                     if buf.is_empty() {
                         continue;
                     }
-                    vec.push(PathPart::Normal(buf));
+                    vec.push(PathPart::Normal(buf.clone()));
                     buf.clear()
                 }
                 _ => buf.push(ch),
@@ -45,11 +52,51 @@ impl Path {
         vec
     }
 
-    pub fn get_inode(&self) -> FSResult<INode> {
-        unimplemented!()
-    }
+    pub fn navigate(&self, vfs: &VFS) -> FSResult<(Arc<Mutex<dyn Directory>>, String)> {
+        let mut current_dir = vfs.root.clone();
 
-    pub fn get_parts(&mut self) -> Vec<PathPart> {
-        self.0
+        for ele in 0..=self.0.len() - 1 {
+            let ele = self.0.get(ele).unwrap();
+            match ele {
+                PathPart::Normal(name) => {
+                    let next_dir = {
+                        let guard = current_dir.lock();
+                        if let Ok((FileLike::Directory(dir))) = guard.get(name.clone()) {
+                            Some(dir.clone())
+                        } else {
+                            None
+                        }
+                    };
+
+                    if let Some(dir) = next_dir {
+                        current_dir = dir.clone();
+                    } else {
+                        current_dir.clone().lock().mkdir(name.clone());
+
+                        let dir = {
+                            let guard = current_dir.lock();
+                            if let Ok(FileLike::Directory(dir)) = guard.get(name.clone()) {
+                                Some(dir.clone())
+                            } else {
+                                None
+                            }
+                        };
+                        if let Some(dir) = dir {
+                            current_dir = dir.clone();
+                        }
+                    }
+                }
+                PathPart::Root => continue,
+            }
+        }
+
+        let name = {
+            if let Some(PathPart::Normal(name)) = self.0.get(self.0.len() - 1) {
+                Some(name)
+            } else {
+                None
+            }
+        };
+        Ok((current_dir, name.unwrap().clone()))
     }
 }

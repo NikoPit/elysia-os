@@ -6,11 +6,11 @@
 
 extern crate alloc;
 
+pub mod acpi;
 pub mod debug_exit;
 pub mod driver;
 pub mod exception_interrupt;
-//pub mod filesystem;
-pub mod acpi;
+pub mod filesystem;
 pub mod gdt;
 pub mod hardware_interrupt;
 pub mod interrupts;
