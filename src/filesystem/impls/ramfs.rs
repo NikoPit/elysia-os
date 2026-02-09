@@ -1,22 +1,12 @@
-use core::ffi::c_long;
 
 use alloc::{
     collections::btree_map::BTreeMap,
     string::{String, ToString},
     sync::Arc,
-    vec::Vec,
 };
-use conquer_once::spin::{Once, OnceCell};
 use spin::Mutex;
 
-use crate::{
-    filesystem::{
-        self,
-        impls::ramfs,
-        vfs::{self, Directory, FSResult, File, FileData, FileLike, FileSystem},
-    },
-    os::get_os,
-};
+use crate::filesystem::vfs::{Directory, FSResult, File, FileData, FileLike, FileSystem};
 
 pub struct RamFS {
     root: RamDirectory,

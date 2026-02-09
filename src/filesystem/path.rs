@@ -1,14 +1,11 @@
 use alloc::{
-    string::{String, ToString},
+    string::String,
     sync::Arc,
     vec::Vec,
 };
 use spin::Mutex;
 
-use crate::{
-    filesystem::vfs::{Directory, FSResult, FileLike, VFS, VirtualFS},
-    println, s_println,
-};
+use crate::filesystem::vfs::{Directory, FSResult, FileLike, VFS};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PathPart {
@@ -61,7 +58,7 @@ impl Path {
                 PathPart::Normal(name) => {
                     let next_dir = {
                         let guard = current_dir.lock();
-                        if let Ok((FileLike::Directory(dir))) = guard.get(name.clone()) {
+                        if let Ok(FileLike::Directory(dir) ) = guard.get(name.clone()) {
                             Some(dir.clone())
                         } else {
                             None

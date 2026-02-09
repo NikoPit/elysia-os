@@ -1,26 +1,19 @@
-use core::{fmt::Debug, iter::Map};
+use core::fmt::Debug;
 
-use acpi::aml::namespace;
 use alloc::{
     boxed::Box,
     collections::btree_map::BTreeMap,
-    str,
     string::{String, ToString},
     sync::Arc,
     vec::Vec,
 };
 use spin::Mutex;
-use x86_64::registers::segmentation::FS;
 
-use crate::{
-    filesystem::{
+use crate::filesystem::{
         errors::FSError,
-        impls::ramfs::{self, RamDirectory, RamFS},
-        path::{Path, PathPart},
-    },
-    println, s_print, s_println,
-    systemcall::entry,
-};
+        impls::ramfs::{RamDirectory, RamFS},
+        path::Path,
+    };
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -131,7 +124,7 @@ impl VFS {
 
         let file_like = dir.get(dir_name)?;
         if let FileLike::File(file) = file_like {
-            (file.lock().read())
+            file.lock().read() 
         } else {
             Err(FSError::NotFound)
         }
@@ -148,7 +141,7 @@ impl VFS {
         }
     }
 
-    pub fn delete_file(&mut self, path: Path) -> FSResult<()> {
+    pub fn delete_file(&mut self, _path: Path) -> FSResult<()> {
         unimplemented!("Just dont create files that your gonna delete lmao its not my problem")
     }
 
