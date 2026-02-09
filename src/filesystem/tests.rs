@@ -1,5 +1,12 @@
+use alloc::string::ToString;
 
-use crate::test;
+use crate::{
+    filesystem::{
+        path::Path,
+        vfs::{FileData, VirtualFS},
+    },
+    test,
+};
 
 test!("VFS Basic", || {
     let a_txt = Path::new("/test/vfs_create.txt");
