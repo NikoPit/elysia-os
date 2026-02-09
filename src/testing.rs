@@ -2,7 +2,8 @@ use crate::{s_print, s_println};
 
 pub fn run_tests(tests: &[&dyn Fn()]) {
     use crate::{
-        debug_exit::{QemuExitCode, debug_exit}, s_println,
+        debug_exit::{QemuExitCode, debug_exit},
+        s_println,
     };
 
     s_println!("\nRunning {} tests", tests.len());
@@ -37,6 +38,7 @@ impl Test {
 macro_rules! test {
     ($name:literal, $test_fn: expr) => {
         #[test_case]
+        #[allow(unused_imports)]
         fn __test() {
             $crate::testing::Test::new($name, $test_fn).run_test();
         }

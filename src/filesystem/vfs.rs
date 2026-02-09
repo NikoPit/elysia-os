@@ -87,10 +87,12 @@ impl VFS {
         }
     }
 
-    pub fn init(&mut self) {
+    pub fn init(&mut self) -> FSResult<()> {
         for ele in &self.filesystems {
-            ele.lock().init();
+            ele.lock().init()?;
         }
+
+        Ok(())
     }
 
     fn register_fs(&mut self, fs: impl FileSystem + 'static) {
@@ -100,9 +102,7 @@ impl VFS {
     pub fn create_file(&mut self, path: Path) -> FSResult<()> {
         let dir = path.navigate(self)?;
 
-        dir.clone().0.lock().new_file(dir.1);
-
-        Ok(())
+        dir.clone().0.lock().new_file(dir.1)
     }
 
     pub fn create_dir(&mut self, path: Path) -> FSResult<()> {
@@ -128,8 +128,7 @@ impl VFS {
         let dir = path.navigate(self)?;
 
         if let Ok(FileLike::File(file)) = dir.0.lock().get(dir.1.clone()) {
-            file.lock().write(data);
-            Ok(())
+            file.lock().write(data)
         } else {
             Err(FSError::NotFound)
         }
