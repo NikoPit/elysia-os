@@ -53,12 +53,10 @@ impl Path {
     }
 
     pub fn navigate(&self, vfs: &VFS) -> FSResult<(Arc<Mutex<dyn Directory>>, String)> {
-        s_println!("{:?}", self.0);
         let mut current_dir = vfs.root.clone();
 
         for ele in 0..=self.0.len() - 2 {
             let ele = self.0.get(ele).unwrap();
-            s_println!("{:?}", ele);
             match ele {
                 PathPart::Normal(name) => {
                     let next_dir = {

@@ -112,7 +112,6 @@ impl VFS {
 
     pub fn create_file(&mut self, path: Path) -> FSResult<()> {
         let dir = path.navigate(self)?;
-        s_println!("{:?}", dir);
 
         dir.clone().0.lock().new_file(dir.1);
 
@@ -161,7 +160,6 @@ impl VFS {
         if let Ok(FileLike::Directory(dir)) = dir {
             Ok(dir.lock().list_contents()?)
         } else {
-            println!("{:?}", dir.unwrap());
             Err(FSError::NotFound)
         }
     }
