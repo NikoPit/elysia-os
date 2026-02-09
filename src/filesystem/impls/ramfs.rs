@@ -22,11 +22,13 @@ pub struct RamFS {
     root: RamDirectory,
 }
 
+#[derive(Debug)]
 pub struct RamDirectory {
     name: String,
     contents: BTreeMap<String, FileLike>,
 }
 
+#[derive(Debug)]
 pub struct RamFile {
     pub name: String,
     pub content: FileData,

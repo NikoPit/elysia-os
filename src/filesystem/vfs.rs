@@ -1,4 +1,4 @@
-use core::iter::Map;
+use core::{fmt::Debug, iter::Map};
 
 use acpi::aml::namespace;
 use alloc::{
@@ -18,7 +18,7 @@ use crate::{
         impls::ramfs::{self, RamDirectory, RamFS},
         path::{Path, PathPart},
     },
-    println,
+    println, s_print, s_println,
     systemcall::entry,
 };
 use lazy_static::lazy_static;
@@ -41,13 +41,13 @@ pub struct FileData {
     pub content: String,
 }
 
-pub trait File: Send + Sync {
+pub trait File: Send + Sync + Debug {
     fn name(&self) -> FSResult<String>;
     fn read(&self) -> FSResult<FileData>;
     fn write(&mut self, data: FileData) -> FSResult<()>;
 }
 
-pub trait Directory: Send + Sync {
+pub trait Directory: Send + Sync + Debug {
     fn name(&self) -> FSResult<String>;
     fn contents(&self) -> FSResult<&BTreeMap<String, FileLike>>;
     fn new_file(&mut self, name: String) -> FSResult<()>;
@@ -79,6 +79,7 @@ pub trait FileSystem: Send + Sync {
     fn init(&mut self) -> FSResult<()>;
 }
 
+#[derive(Debug)]
 pub enum FileLike {
     File(Arc<Mutex<dyn File>>),
     Directory(Arc<Mutex<dyn Directory>>),
@@ -111,6 +112,7 @@ impl VFS {
 
     pub fn create_file(&mut self, path: Path) -> FSResult<()> {
         let dir = path.navigate(self)?;
+        s_println!("{:?}", dir);
 
         dir.clone().0.lock().new_file(dir.1);
 
@@ -159,6 +161,7 @@ impl VFS {
         if let Ok(FileLike::Directory(dir)) = dir {
             Ok(dir.lock().list_contents()?)
         } else {
+            println!("{:?}", dir.unwrap());
             Err(FSError::NotFound)
         }
     }
