@@ -1,4 +1,3 @@
-
 use alloc::{
     collections::btree_map::BTreeMap,
     string::{String, ToString},
@@ -7,10 +6,6 @@ use alloc::{
 use spin::Mutex;
 
 use crate::filesystem::vfs::{Directory, FSResult, File, FileData, FileLike, FileSystem};
-
-pub struct RamFS {
-    root: RamDirectory,
-}
 
 #[derive(Debug)]
 pub struct RamDirectory {
@@ -49,12 +44,6 @@ impl File for RamFile {
     }
 }
 
-impl FileSystem for RamFS {
-    fn init(&mut self) -> FSResult<()> {
-        Ok(())
-    }
-}
-
 impl Directory for RamDirectory {
     fn name(&self) -> FSResult<String> {
         Ok(self.name.clone())
@@ -84,14 +73,6 @@ impl RamDirectory {
         Self {
             name,
             contents: BTreeMap::new(),
-        }
-    }
-}
-
-impl RamFS {
-    pub fn new() -> Self {
-        Self {
-            root: RamDirectory::new("root".to_string()),
         }
     }
 }

@@ -9,11 +9,7 @@ use alloc::{
 };
 use spin::Mutex;
 
-use crate::filesystem::{
-        errors::FSError,
-        impls::ramfs::{RamDirectory, RamFS},
-        path::Path,
-    };
+use crate::filesystem::{errors::FSError, impls::ramfs::RamDirectory, path::Path};
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -92,8 +88,6 @@ impl VFS {
     }
 
     pub fn init(&mut self) {
-        self.register_fs(RamFS::new());
-
         for ele in &self.filesystems {
             ele.lock().init();
         }
@@ -124,7 +118,7 @@ impl VFS {
 
         let file_like = dir.get(dir_name)?;
         if let FileLike::File(file) = file_like {
-            file.lock().read() 
+            file.lock().read()
         } else {
             Err(FSError::NotFound)
         }
