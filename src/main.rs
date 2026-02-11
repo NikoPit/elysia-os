@@ -19,8 +19,8 @@ use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
 use elysia_os::filesystem::path::Path;
 use elysia_os::filesystem::vfs::{FileData, VirtualFS};
 use elysia_os::init;
-use elysia_os::multitasking::executor::Executor;
-use elysia_os::multitasking::task::Task;
+use elysia_os::multitasking::kernel_task::executor::Executor;
+use elysia_os::multitasking::kernel_task::task::Task;
 use elysia_os::println;
 
 entry_point!(k_main);

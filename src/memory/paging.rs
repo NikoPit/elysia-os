@@ -11,7 +11,6 @@ use x86_64::{
     structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB},
 };
 
-
 pub static MAPPER: OnceCell<Arc<Mutex<OffsetPageTable<'static>>>> = OnceCell::uninit();
 pub static FRAME_ALLOCATOR: OnceCell<Arc<Mutex<BootinfoFrameAllocator>>> = OnceCell::uninit();
 

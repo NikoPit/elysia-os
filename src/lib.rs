@@ -23,6 +23,7 @@ pub mod serial_print;
 pub mod systemcall;
 pub mod testing;
 pub mod tss;
+pub mod userspace;
 pub mod vga_print;
 
 #[cfg(test)]
