@@ -72,48 +72,13 @@ impl Manager {
             self.current = Some(next_task.pid.clone());
 
             unsafe {
-                Self::switch(current_task_ptr, next_task.context.as_ptr());
+                Self::context_switch(current_task_ptr, next_task.context.as_ptr());
             }
         }
     }
-
-    pub unsafe extern "C" fn switch(
-        current: *mut multitasking::context::Context,
-        next: *mut multitasking::context::Context,
-    ) {
-        arch::asm!(
-            // Constructs the "Context"
-            // Note: the instruction pointer have already been automatically
-            // saved when we call switch();
-            // because of this, we dont have to explicitly save it
-            "push rbp", "push rbx", "push r12", "push r13", "push r14", "push r15"
-        );
-        arch::asm!(
-            // Updates the context of the current process
-            // to the context we've pushed to the stack
-            // note to future me: the [] basically means refrence
-            // &current (1st argument) = rsp (stack pointer);
-            // this also saves the rsp into the rsp value of the context struct (i think lol)
-            "mov [rdi], rsp",
-            // rsp = &next; (rsi = second arg) (updates the stack with the context of the next process)
-            "mov rsp, [rsi]"
-        );
-        arch::asm!(
-            // pop the context of the next process
-            // back into the cpu registers
-            "pop r15", "pop r14", "pop r13", "pop r12", "pop rbx", "pop rbp"
-        );
-        // Go back to the instruction pointer that the process is at
-        // (its on the stack top right now so RET will go there)
-        // We dont have to explicitly push it or something
-        // becuase its already been saved when we called
-        // switch. so now its already sitting at the stack top
-        arch::asm!("ret");
-    }
 }
 
-pub extern "C" fn testz() -> ! {
-    loop {
-        println!("hello from process 1!!!");
-    }
+pub extern "C" fn testz() {
+    println!("hello from process 1!!!");
+    println!("YOOO");
 }

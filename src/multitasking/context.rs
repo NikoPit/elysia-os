@@ -1,7 +1,7 @@
 use futures_util::future::Select;
 
 use crate::{
-    multitasking::{memory::allocate_stack, process},
+    multitasking::{exit::exit_handler, memory::allocate_stack, process},
     println,
     userspace::elf_loader::Function,
 };
@@ -20,30 +20,47 @@ pub struct Context {
 
 impl Context {
     pub fn new(entry_point: u64) -> Self {
+        // stack top
         let mut ptr: *mut u64 = allocate_stack(16).as_mut_ptr();
 
         unsafe {
+            // Push the exit handler, so when the entry point returns
+            // switch() will call the exit handler
+            ptr = ptr.sub(1);
+
+            *ptr = exit_handler as u64;
+
             // Give space for the entry point ptr
             ptr = ptr.sub(1);
             // Put the entry point pointer into the stack
             // to be used on switch()
             *ptr = entry_point;
 
-            // allocate spaces for the r15 - rbp
+            // make space for the r15 - rbp
             for _ in 0..6 {
                 ptr = ptr.sub(1);
                 ptr.write(0);
             }
         }
 
+        // Now the rsp is pointing at the stack top
+        // under the entry point and all the other bs (r15-rbp)
+        // so it wont accidently read / write into them
+
+        // The stack:
+        // GUARD PAGE
+        // EXIT HANDLER
+        // ENTRY POINT
+        // r15-rbp
+        // EMPTY SPACE <-
         Self {
+            rsp: ptr as u64,
             r15: 0,
             r14: 0,
             r13: 0,
             r12: 0,
             rbx: 0,
             rbp: 0,
-            rsp: ptr as u64,
         }
     }
     pub fn empty() -> Self {
