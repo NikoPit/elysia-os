@@ -37,12 +37,10 @@ impl Manager {
             pid: ProcessID::new(),
             context: Context::empty(),
         };
-        println!("l40");
 
         self.current = Some(current_process.pid);
         self.processes.insert(current_process.pid, current_process);
 
-        println!("l45");
         self.spawn(testz as Function);
         self.run_next();
     }
@@ -57,7 +55,6 @@ impl Manager {
 
     fn run_next(&mut self) {
         if let Some(next) = self.queue.pop() {
-            println!("a");
             let mut current_task_id = self.current.take().unwrap();
 
             let mut current_task_ptr = self
@@ -66,18 +63,13 @@ impl Manager {
                 .unwrap()
                 .context
                 .as_ptr();
-            println!("b");
 
             let next_task = match self.processes.get_mut(&next) {
                 Some(task) => task,
                 None => return,
             };
-            println!("c");
 
             self.current = Some(next_task.pid.clone());
-            println!("d");
-
-            println!("{:?}", current_task_ptr);
 
             unsafe {
                 Self::switch(current_task_ptr, next_task.context.as_ptr());
@@ -89,7 +81,6 @@ impl Manager {
         current: *mut multitasking::context::Context,
         next: *mut multitasking::context::Context,
     ) {
-        //println!("switchz");
         arch::asm!(
             // Constructs the "Context"
             // Note: the instruction pointer have already been automatically
@@ -112,7 +103,6 @@ impl Manager {
             // back into the cpu registers
             "pop r15", "pop r14", "pop r13", "pop r12", "pop rbx", "pop rbp"
         );
-        println!("basf");
         // Go back to the instruction pointer that the process is at
         // (its on the stack top right now so RET will go there)
         // We dont have to explicitly push it or something
@@ -124,6 +114,6 @@ impl Manager {
 
 pub extern "C" fn testz() -> ! {
     loop {
-        println!("hello");
+        println!("hello from process 1!!!");
     }
 }

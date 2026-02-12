@@ -29,6 +29,7 @@ impl Context {
             // to be used on switch()
             *ptr = entry_point;
 
+            // allocate spaces for the r15 - rbp
             for _ in 0..6 {
                 ptr = ptr.sub(1);
                 ptr.write(0);
