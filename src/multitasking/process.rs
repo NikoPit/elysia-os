@@ -5,7 +5,11 @@ use x86_64::{
     structures::paging::{OffsetPageTable, PageTable},
 };
 
-use crate::{multitasking::context::Context, println, userspace::elf_loader::Function};
+use crate::{
+    multitasking::{blocked::BlockType, context::Context},
+    println,
+    userspace::elf_loader::Function,
+};
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Process {
@@ -43,10 +47,10 @@ impl ProcessID {
     }
 }
 
-// make ts actually useful
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum State {
     Ready, // ready to run (in a queue)
     Running,
-    Blocked, // stuck, waiting for something (like keyboard input)
+    Blocked(BlockType), // stuck, waiting for something (like keyboard input)
     Zombie,
 }

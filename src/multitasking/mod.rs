@@ -1,3 +1,4 @@
+pub mod blocked;
 pub mod context;
 pub mod exit;
 pub mod kernel_task;

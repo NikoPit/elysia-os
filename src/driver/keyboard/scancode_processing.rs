@@ -6,6 +6,7 @@ use futures_util::{Stream, StreamExt, task::AtomicWaker};
 
 use crate::{
     driver::keyboard::ps2::{KeyboardDriver, PS2KeyboardDriver, get_keyboard},
+    multitasking::{MANAGER, manager},
     println,
 };
 
@@ -21,6 +22,10 @@ pub(crate) fn add_scancode(scancode: u8) {
         } else {
             // wake up the registered waker
             WAKER.wake();
+            match MANAGER.try_lock() {
+                Some(mut manager) => manager.wake_keyboard(),
+                None => {}
+            }
         }
     } else {
         println!("Scancode queue have not been initilized");

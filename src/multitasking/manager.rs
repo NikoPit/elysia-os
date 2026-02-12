@@ -1,4 +1,4 @@
-use core::arch;
+use core::{arch, ops::Deref};
 
 use alloc::{collections::btree_map::BTreeMap, sync::Arc, vec::Vec};
 use crossbeam_queue::ArrayQueue;
@@ -11,6 +11,7 @@ use crate::{
     misc::hlt_loop,
     multitasking::{
         self, MANAGER,
+        blocked::{BlockType, BlockedQueues, WakeType},
         context::Context,
         process::{self, Process, ProcessID},
     },
@@ -24,6 +25,7 @@ pub struct Manager {
     pub current: Option<ProcessID>,
     pub queue: Arc<ArrayQueue<ProcessID>>,
     pub zombies: Vec<ProcessID>,
+    pub blocked_queues: BlockedQueues,
 
     pub idle_process: Option<ProcessID>,
 }
@@ -35,6 +37,7 @@ impl Manager {
             idle_process: None,
             zombies: Vec::new(),
             current: None,
+            blocked_queues: BlockedQueues::new(),
             queue: Arc::new(ArrayQueue::new(128)),
         }
     }
@@ -128,6 +131,24 @@ impl Manager {
         return Some((current_task_ptr, next_task.context.as_ptr()));
 
         None
+    }
+
+    pub fn block_current(&mut self, block_type: BlockType) {
+        let mut current = self.processes.get_mut(&self.current.unwrap()).unwrap();
+
+        current.state = process::State::Blocked(block_type);
+        // TODO make this work. to future me: uncomment it and u will see why
+        //self.queue.into_iter().filter(|p| *p != current.pid.clone());
+
+        match block_type {
+            BlockType::WakeRequired(wake_type) => match wake_type {
+                WakeType::Keyboard => self.blocked_queues.keyboard.push_back(current.pid.clone()),
+                WakeType::IO => self.blocked_queues.io.push_back(current.pid.clone()),
+            },
+            _ => {}
+        }
+
+        run_next();
     }
 }
 
