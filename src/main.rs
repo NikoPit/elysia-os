@@ -22,6 +22,7 @@ use elysia_os::init;
 use elysia_os::multitasking::MANAGER;
 use elysia_os::multitasking::kernel_task::executor::Executor;
 use elysia_os::multitasking::kernel_task::task::Task;
+use elysia_os::multitasking::manager::run_next;
 use elysia_os::println;
 
 entry_point!(k_main);
@@ -35,27 +36,9 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
 
     let mut executor = Executor::new();
 
-    let a_txt = Path::new("/test/a.txt");
-    VirtualFS.lock().create_file(a_txt.clone()).unwrap();
-    VirtualFS
-        .lock()
-        .write_file(
-            a_txt.clone(),
-            FileData {
-                content: "abc".to_string(),
-            },
-        )
-        .unwrap();
-    let content = VirtualFS.lock().read_file(a_txt.clone()).unwrap().content;
+    run_next();
 
-    println!("{:?}", content);
-
-    // syscall test
-    //trigger_syscall();
-    //
-    MANAGER.lock().init();
-
-    executor.spawn(Task::new(init_processes()));
+    //executor.spawn(Task::new(init_processes()));
     //executor.spawn(Task::new(taskz()));
     executor.spawn(Task::new(process_keypresses()));
     executor.run();

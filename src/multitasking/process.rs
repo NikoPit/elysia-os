@@ -14,6 +14,13 @@ pub struct Process {
 }
 
 impl Process {
+    pub fn default() -> Self {
+        Self {
+            pid: ProcessID::new(),
+            context: Context::empty(),
+        }
+    }
+
     pub fn new(entry_point: Function) -> Self {
         Self {
             pid: ProcessID::new(),

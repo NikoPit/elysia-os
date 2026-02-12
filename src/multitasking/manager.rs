@@ -1,6 +1,6 @@
 use core::arch;
 
-use alloc::{collections::btree_map::BTreeMap, sync::Arc};
+use alloc::{collections::btree_map::BTreeMap, sync::Arc, vec::Vec};
 use crossbeam_queue::ArrayQueue;
 use x86_64::{
     registers::control,
@@ -8,8 +8,9 @@ use x86_64::{
 };
 
 use crate::{
+    misc::hlt_loop,
     multitasking::{
-        self,
+        self, MANAGER,
         context::Context,
         process::{self, Process, ProcessID},
     },
@@ -17,43 +18,85 @@ use crate::{
     userspace::elf_loader::Function,
 };
 
+#[derive(Debug)]
 pub struct Manager {
     pub processes: BTreeMap<ProcessID, Process>,
     pub current: Option<ProcessID>,
     pub queue: Arc<ArrayQueue<ProcessID>>,
+    pub zombies: Vec<ProcessID>,
+
+    pub idle_process: Option<ProcessID>,
 }
 
 impl Manager {
     pub fn new() -> Self {
         Self {
             processes: BTreeMap::new(),
+            idle_process: None,
+            zombies: Vec::new(),
             current: None,
             queue: Arc::new(ArrayQueue::new(128)),
         }
     }
 
     pub fn init(&mut self) {
-        let current_process = Process {
-            pid: ProcessID::new(),
-            context: Context::empty(),
-        };
+        let kernel_process = Process::default();
+        let pid = kernel_process.pid.clone();
 
-        self.current = Some(current_process.pid);
-        self.processes.insert(current_process.pid, current_process);
+        let idle_process = Process::new(idle as Function);
+
+        self.current = Some(pid);
+        self.processes.insert(pid, kernel_process);
+
+        self.idle_process = Some(idle_process.pid.clone());
+        self.processes
+            .insert(idle_process.pid.clone(), idle_process);
 
         self.spawn(testz as Function);
-        self.run_next();
+        self.spawn(test2 as Function);
     }
 
     // [TODO] temporary start.
     pub fn spawn(&mut self, entry_point: Function) {
-        let process = Process::new((entry_point));
+        let process = Process::new(entry_point);
         let pid = process.pid.clone();
         self.processes.insert(process.pid, process);
         self.queue.push(pid);
     }
 
-    fn run_next(&mut self) {
+    fn clean_zombies(&mut self) {
+        for (ele) in self.zombies.drain(..) {
+            self.processes.remove(&ele);
+            self.current.take_if(|p| *p == ele);
+        }
+    }
+
+    /// runs the next process. called from a zombie process
+    pub fn next_zombie(&mut self) -> Option<(*mut Context)> {
+        self.clean_zombies();
+
+        let mut next_task = if let Some(next) = self.queue.pop() {
+            let next_task = match self.processes.get_mut(&next) {
+                Some(task) => task,
+                // Possibly zombie task
+                None => return None,
+            };
+
+            next_task
+        } else {
+            match self.processes.get_mut(&self.idle_process.unwrap()) {
+                Some(task) => task,
+                None => panic!("This isnt supposed to happen"),
+            }
+        };
+        self.current = Some(next_task.pid.clone());
+
+        return Some((next_task.context.as_ptr()));
+
+        None
+    }
+
+    pub fn next(&mut self) -> Option<(*mut Context, *mut Context)> {
         if let Some(next) = self.queue.pop() {
             let mut current_task_id = self.current.take().unwrap();
 
@@ -66,19 +109,58 @@ impl Manager {
 
             let next_task = match self.processes.get_mut(&next) {
                 Some(task) => task,
-                None => return,
+                // Possibly zombie task
+                None => return None,
             };
 
             self.current = Some(next_task.pid.clone());
 
-            unsafe {
-                Self::context_switch(current_task_ptr, next_task.context.as_ptr());
-            }
+            return Some((current_task_ptr, next_task.context.as_ptr()));
         }
+
+        None
     }
+}
+
+pub fn run_next() {
+    let targets = {
+        let mut manager = MANAGER.lock();
+        manager.next()
+    }
+    .unwrap();
+
+    unsafe {
+        Manager::context_switch(targets.0, targets.1);
+    }
+}
+
+pub fn run_next_zombie() {
+    let target = match {
+        let mut manager = MANAGER.lock();
+        manager
+    }
+    .next_zombie()
+    {
+        Some(val) => val,
+        None => {
+            return;
+        }
+    };
+    unsafe {
+        Manager::context_switch_zombie(target);
+    }
+}
+
+pub extern "C" fn test2() {
+    println!("process2, yessa");
+    println!("PROCESSS22222 YESSSS");
 }
 
 pub extern "C" fn testz() {
     println!("hello from process 1!!!");
     println!("YOOO");
+}
+
+pub extern "C" fn idle() -> ! {
+    hlt_loop()
 }

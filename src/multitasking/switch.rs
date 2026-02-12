@@ -36,4 +36,22 @@ impl Manager {
         // switch. so now its already sitting at the stack top
         arch::asm!("ret");
     }
+
+    pub unsafe extern "C" fn context_switch_zombie(next: *mut multitasking::context::Context) {
+        arch::asm!(
+            // rsp = &next; (rsi = second arg) (updates the stack with the context of the next process)
+            "mov rsp, [rdi]"
+        );
+        arch::asm!(
+            // pop the context of the next process
+            // back into the cpu registers
+            "pop r15", "pop r14", "pop r13", "pop r12", "pop rbx", "pop rbp"
+        );
+        // Go back to the instruction pointer that the process is at
+        // (its on the stack top right now so RET will go there)
+        // We dont have to explicitly push it or something
+        // becuase its already been saved when we called
+        // switch. so now its already sitting at the stack top
+        arch::asm!("ret");
+    }
 }

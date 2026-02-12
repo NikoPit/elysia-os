@@ -33,6 +33,8 @@ use bootloader::BootInfo;
 #[cfg(test)]
 use bootloader::entry_point;
 
+use crate::multitasking::MANAGER;
+
 #[cfg(test)]
 entry_point!(test_k_main);
 
@@ -53,6 +55,8 @@ pub fn init(bootinfo: &'static BootInfo) {
     interrupts::init();
     systemcall::init();
     acpi::init();
+
+    MANAGER.lock().init();
 }
 
 #[cfg(test)]
