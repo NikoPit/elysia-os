@@ -11,6 +11,7 @@ use crate::{multitasking::context::Context, println, userspace::elf_loader::Func
 pub struct Process {
     pub pid: ProcessID,
     pub context: Context,
+    pub state: State,
 }
 
 impl Process {
@@ -18,6 +19,7 @@ impl Process {
         Self {
             pid: ProcessID::new(),
             context: Context::empty(),
+            state: State::Ready,
         }
     }
 
@@ -25,6 +27,7 @@ impl Process {
         Self {
             pid: ProcessID::new(),
             context: Context::new(entry_point as u64),
+            state: State::Ready,
         }
     }
 }
@@ -38,4 +41,12 @@ impl ProcessID {
 
         Self(NEXT_ID.fetch_add(1, core::sync::atomic::Ordering::Relaxed))
     }
+}
+
+// make ts actually useful
+pub enum State {
+    Ready, // ready to run (in a queue)
+    Running,
+    Blocked, // stuck, waiting for something (like keyboard input)
+    Zombie,
 }
