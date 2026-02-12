@@ -19,6 +19,7 @@ use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
 use elysia_os::filesystem::path::Path;
 use elysia_os::filesystem::vfs::{FileData, VirtualFS};
 use elysia_os::init;
+use elysia_os::multitasking::MANAGER;
 use elysia_os::multitasking::kernel_task::executor::Executor;
 use elysia_os::multitasking::kernel_task::task::Task;
 use elysia_os::println;
@@ -50,11 +51,18 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     println!("{:?}", content);
 
     // syscall test
-    trigger_syscall();
+    //trigger_syscall();
+    //
+    MANAGER.lock().init();
 
-    executor.spawn(Task::new(taskz()));
+    executor.spawn(Task::new(init_processes()));
+    //executor.spawn(Task::new(taskz()));
     executor.spawn(Task::new(process_keypresses()));
     executor.run();
+}
+
+async fn init_processes() {
+    MANAGER.lock().init();
 }
 
 async fn taskz() {

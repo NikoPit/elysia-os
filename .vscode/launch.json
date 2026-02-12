@@ -1,0 +1,173 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug unit tests in library 'elysia_os'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test"
+                ]
+            }
+        },
+        {
+            "name": "Debug executable 'elysia-os'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "run",
+                    "--bin=elysia-os"
+                ]
+            },
+            "args": []
+        },
+        {
+            "name": "Debug unit tests in executable 'elysia-os'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--bin=elysia-os"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'acpi'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=acpi"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'basic_raw'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=basic_raw"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'deadlock'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=deadlock"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'filesystem'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=filesystem"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'heap'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=heap"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'idt_init'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=idt_init"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'init'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=init"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'memory_mapping'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=memory_mapping"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'multitask'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=multitask"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'pagefault'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=pagefault"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'stack_overflow'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=stack_overflow"
+                ]
+            }
+        },
+        {
+            "name": "Debug integration test 'syscall'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--test=syscall"
+                ]
+            }
+        }
+    ]
+}

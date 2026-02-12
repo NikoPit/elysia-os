@@ -1,15 +1,21 @@
-use crate::{multitasking::memory::allocate_stack, userspace::elf_loader::Function};
+use futures_util::future::Select;
+
+use crate::{
+    multitasking::{memory::allocate_stack, process},
+    println,
+    userspace::elf_loader::Function,
+};
 
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Context {
+    rsp: u64, // stack pointer. aka the stack for the process
     r15: u64,
     r14: u64,
     r13: u64,
     r12: u64,
     rbx: u64,
     rbp: u64,
-    rsp: u64, // stack pointer. aka the stack for the process
 }
 
 impl Context {
@@ -22,6 +28,11 @@ impl Context {
             // Put the entry point pointer into the stack
             // to be used on switch()
             *ptr = entry_point;
+
+            for _ in 0..6 {
+                ptr = ptr.sub(1);
+                ptr.write(0);
+            }
         }
 
         Self {
@@ -46,7 +57,7 @@ impl Context {
         }
     }
 
-    pub fn as_ptr(self) -> *mut Self {
-        &mut self.clone() as *mut Self
+    pub fn as_ptr(&mut self) -> *mut Self {
+        self as *mut Self
     }
 }

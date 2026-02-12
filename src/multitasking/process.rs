@@ -5,9 +5,9 @@ use x86_64::{
     structures::paging::{OffsetPageTable, PageTable},
 };
 
-use crate::{multitasking::context::Context, userspace::elf_loader::Function};
+use crate::{multitasking::context::Context, println, userspace::elf_loader::Function};
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Process {
     pub pid: ProcessID,
     pub context: Context,
@@ -23,10 +23,10 @@ impl Process {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
-pub struct ProcessID(u64);
+pub struct ProcessID(pub u64);
 
 impl ProcessID {
-    fn new() -> Self {
+    pub fn new() -> Self {
         static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 
         Self(NEXT_ID.fetch_add(1, core::sync::atomic::Ordering::Relaxed))
