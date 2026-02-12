@@ -84,11 +84,13 @@ impl Manager {
 
             next_task
         } else {
+            // call the idle process if there is nothing to do
             match self.processes.get_mut(&self.idle_process.unwrap()) {
                 Some(task) => task,
                 None => panic!("This isnt supposed to happen"),
             }
         };
+
         self.current = Some(next_task.pid.clone());
 
         return Some((next_task.context.as_ptr()));
@@ -97,26 +99,33 @@ impl Manager {
     }
 
     pub fn next(&mut self) -> Option<(*mut Context, *mut Context)> {
-        if let Some(next) = self.queue.pop() {
-            let mut current_task_id = self.current.take().unwrap();
+        let mut current_task_id = self.current.take().unwrap();
 
-            let mut current_task_ptr = self
-                .processes
-                .get_mut(&current_task_id)
-                .unwrap()
-                .context
-                .as_ptr();
+        let mut current_task_ptr = self
+            .processes
+            .get_mut(&current_task_id)
+            .unwrap()
+            .context
+            .as_ptr();
 
+        let mut next_task = if let Some(next) = self.queue.pop() {
             let next_task = match self.processes.get_mut(&next) {
                 Some(task) => task,
                 // Possibly zombie task
                 None => return None,
             };
 
-            self.current = Some(next_task.pid.clone());
+            next_task
+        } else {
+            match self.processes.get_mut(&self.idle_process.unwrap()) {
+                Some(task) => task,
+                None => panic!("This isnt supposed to happen"),
+            }
+        };
 
-            return Some((current_task_ptr, next_task.context.as_ptr()));
-        }
+        self.current = Some(next_task.pid.clone());
+
+        return Some((current_task_ptr, next_task.context.as_ptr()));
 
         None
     }
@@ -134,6 +143,7 @@ pub fn run_next() {
     }
 }
 
+/// runs the next process. called from a zombie process
 pub fn run_next_zombie() {
     let target = match {
         let mut manager = MANAGER.lock();
@@ -162,5 +172,6 @@ pub extern "C" fn testz() {
 }
 
 pub extern "C" fn idle() -> ! {
+    println!("idle");
     hlt_loop()
 }
