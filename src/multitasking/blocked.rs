@@ -56,7 +56,7 @@ impl Manager {
         if let Some(process) = self.processes.get_mut(&process) {
             if matches!(process.state, State::Blocked(_)) {
                 process.state = State::Ready;
-                self.queue.push(process.pid);
+                self.queue.push_back(process.pid);
             } else {
             }
         }

@@ -12,9 +12,13 @@ impl Manager {
             // Note: the instruction pointer have already been automatically
             // saved when we call switch();
             // because of this, we dont have to explicitly save it
-            "push rbp", "push rbx", "push r12", "push r13", "push r14", "push r15"
-        );
-        arch::asm!(
+            "push rbp",
+            "push rbx",
+            "push r12",
+            "push r13",
+            "push r14",
+            "push r15",
+            "pushfq",
             // Updates the context of the current process
             // to the context we've pushed to the stack
             // note to future me: the [] basically means refrence
@@ -22,19 +26,23 @@ impl Manager {
             // this also saves the rsp into the rsp value of the context struct (i think lol)
             "mov [rdi], rsp",
             // rsp = &next; (rsi = second arg) (updates the stack with the context of the next process)
-            "mov rsp, [rsi]"
-        );
-        arch::asm!(
+            "mov rsp, [rsi]",
             // pop the context of the next process
             // back into the cpu registers
-            "pop r15", "pop r14", "pop r13", "pop r12", "pop rbx", "pop rbp"
+            "popfq",
+            "pop r15",
+            "pop r14",
+            "pop r13",
+            "pop r12",
+            "pop rbx",
+            "pop rbp",
+            // Go back to the instruction pointer that the process is at
+            // (its on the stack top right now so RET will go there)
+            // We dont have to explicitly push it or something
+            // becuase its already been saved when we called
+            // switch. so now its already sitting at the stack top
+            "ret"
         );
-        // Go back to the instruction pointer that the process is at
-        // (its on the stack top right now so RET will go there)
-        // We dont have to explicitly push it or something
-        // becuase its already been saved when we called
-        // switch. so now its already sitting at the stack top
-        arch::asm!("ret");
     }
 
     pub unsafe extern "C" fn context_switch_zombie(next: *mut multitasking::context::Context) {
@@ -45,13 +53,13 @@ impl Manager {
         arch::asm!(
             // pop the context of the next process
             // back into the cpu registers
-            "pop r15", "pop r14", "pop r13", "pop r12", "pop rbx", "pop rbp"
+            "popfq", "pop r15", "pop r14", "pop r13", "pop r12", "pop rbx", "pop rbp"
         );
         // Go back to the instruction pointer that the process is at
         // (its on the stack top right now so RET will go there)
         // We dont have to explicitly push it or something
         // becuase its already been saved when we called
         // switch. so now its already sitting at the stack top
-        arch::asm!("ret");
+        arch::asm!("ret", options(noreturn));
     }
 }

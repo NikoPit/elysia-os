@@ -36,8 +36,6 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
 
     let mut executor = Executor::new();
 
-    run_next();
-
     //executor.spawn(Task::new(init_processes()));
     //executor.spawn(Task::new(taskz()));
     executor.spawn(Task::new(process_keypresses()));

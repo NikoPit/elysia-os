@@ -1,21 +1,30 @@
 use core::{arch, ops::Deref};
 
-use alloc::{collections::btree_map::BTreeMap, sync::Arc, vec::Vec};
+use alloc::{
+    collections::{btree_map::BTreeMap, vec_deque::VecDeque},
+    sync::Arc,
+    vec::Vec,
+};
 use crossbeam_queue::ArrayQueue;
 use x86_64::{
-    registers::control,
+    instructions::interrupts::{self, without_interrupts},
+    registers::{
+        control,
+        rflags::{self, RFlags},
+    },
     structures::paging::{OffsetPageTable, PageTable, Size4KiB},
 };
 
 use crate::{
+    hardware_interrupt::notify_end_of_interrupt,
     misc::hlt_loop,
     multitasking::{
         self, MANAGER,
         blocked::{BlockType, BlockedQueues, WakeType},
         context::Context,
-        process::{self, Process, ProcessID},
+        process::{self, Process, ProcessID, State},
     },
-    println,
+    println, s_print, s_println,
     userspace::elf_loader::Function,
 };
 
@@ -23,7 +32,7 @@ use crate::{
 pub struct Manager {
     pub processes: BTreeMap<ProcessID, Process>,
     pub current: Option<ProcessID>,
-    pub queue: Arc<ArrayQueue<ProcessID>>,
+    pub queue: VecDeque<ProcessID>,
     pub zombies: Vec<ProcessID>,
     pub blocked_queues: BlockedQueues,
 
@@ -38,25 +47,30 @@ impl Manager {
             zombies: Vec::new(),
             current: None,
             blocked_queues: BlockedQueues::new(),
-            queue: Arc::new(ArrayQueue::new(128)),
+            queue: (VecDeque::new()),
         }
     }
 
     pub fn init(&mut self) {
-        let kernel_process = Process::default();
-        let pid = kernel_process.pid.clone();
+        without_interrupts(|| {
+            let kernel_process = Process::default();
+            let pid = kernel_process.pid.clone();
 
-        let idle_process = Process::new(idle as Function);
+            let idle_process = Process::new(idle as Function);
 
-        self.current = Some(pid);
-        self.processes.insert(pid, kernel_process);
+            self.current = Some(pid);
+            self.processes.insert(pid, kernel_process);
 
-        self.idle_process = Some(idle_process.pid.clone());
-        self.processes
-            .insert(idle_process.pid.clone(), idle_process);
+            self.idle_process = Some(idle_process.pid.clone());
+            self.processes
+                .insert(idle_process.pid.clone(), idle_process);
 
-        self.spawn(testz as Function);
-        self.spawn(test2 as Function);
+            self.spawn(test3 as Function);
+            self.spawn(testz as Function);
+            self.spawn(test2 as Function);
+
+            println!("{:?}", self.queue);
+        });
     }
 
     // [TODO] temporary start.
@@ -64,7 +78,7 @@ impl Manager {
         let process = Process::new(entry_point);
         let pid = process.pid.clone();
         self.processes.insert(process.pid, process);
-        self.queue.push(pid);
+        self.queue.push_back(pid);
     }
 
     fn clean_zombies(&mut self) {
@@ -78,7 +92,7 @@ impl Manager {
     pub fn next_zombie(&mut self) -> Option<(*mut Context)> {
         self.clean_zombies();
 
-        let mut next_task = if let Some(next) = self.queue.pop() {
+        let mut next_task = if let Some(next) = self.queue.pop_front() {
             let next_task = match self.processes.get_mut(&next) {
                 Some(task) => task,
                 // Possibly zombie task
@@ -103,15 +117,24 @@ impl Manager {
 
     pub fn next(&mut self) -> Option<(*mut Context, *mut Context)> {
         let mut current_task_id = self.current.take().unwrap();
+        s_println!("{:?}", self.queue);
 
-        let mut current_task_ptr = self
-            .processes
-            .get_mut(&current_task_id)
-            .unwrap()
-            .context
-            .as_ptr();
+        let mut current_task_ptr = {
+            let current_task = self.processes.get_mut(&current_task_id).unwrap();
 
-        let mut next_task = if let Some(next) = self.queue.pop() {
+            if current_task.state == State::Running {
+                current_task.state = State::Ready;
+                self.queue.push_back(current_task_id);
+            }
+
+            self.processes
+                .get_mut(&current_task_id)
+                .unwrap()
+                .context
+                .as_ptr()
+        };
+
+        let next_task = if let Some(next) = self.queue.pop_front() {
             let next_task = match self.processes.get_mut(&next) {
                 Some(task) => task,
                 // Possibly zombie task
@@ -125,6 +148,8 @@ impl Manager {
                 None => panic!("This isnt supposed to happen"),
             }
         };
+
+        next_task.state = State::Running;
 
         self.current = Some(next_task.pid.clone());
 
@@ -152,10 +177,28 @@ impl Manager {
     }
 }
 
+pub fn schedule() {
+    let targets = {
+        without_interrupts(|| {
+            let mut manager = MANAGER.lock();
+            manager.next()
+        })
+    }
+    .unwrap();
+
+    notify_end_of_interrupt(crate::hardware_interrupt::HardwareInterrupt::Timer);
+
+    unsafe {
+        Manager::context_switch(targets.0, targets.1);
+    }
+}
+
 pub fn run_next() {
     let targets = {
-        let mut manager = MANAGER.lock();
-        manager.next()
+        without_interrupts(|| {
+            let mut manager = MANAGER.lock();
+            manager.next()
+        })
     }
     .unwrap();
 
@@ -167,8 +210,10 @@ pub fn run_next() {
 /// runs the next process. called from a zombie process
 pub fn run_next_zombie() {
     let target = match {
-        let mut manager = MANAGER.lock();
-        manager
+        without_interrupts(|| {
+            let mut manager = MANAGER.lock();
+            manager
+        })
     }
     .next_zombie()
     {
@@ -182,14 +227,22 @@ pub fn run_next_zombie() {
     }
 }
 
+pub extern "C" fn test3() {
+    loop {
+        s_print!("3");
+    }
+}
+
 pub extern "C" fn test2() {
-    println!("process2, yessa");
-    println!("PROCESSS22222 YESSSS");
+    loop {
+        s_print!("2");
+    }
 }
 
 pub extern "C" fn testz() {
-    println!("hello from process 1!!!");
-    println!("YOOO");
+    loop {
+        s_print!("1");
+    }
 }
 
 pub extern "C" fn idle() -> ! {

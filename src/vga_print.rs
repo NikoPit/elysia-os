@@ -110,7 +110,8 @@ impl Printer {
         }
 
         if self.row >= BUFFER_HEIGHT {
-            // TODO
+            self.row = 0;
+            self.column = 0;
         }
 
         self.column += 1;

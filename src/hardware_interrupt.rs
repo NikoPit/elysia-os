@@ -1,7 +1,11 @@
-
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
-use crate::os::get_os;
+use crate::{
+    debug_exit::debug_exit,
+    multitasking::{MANAGER, manager::run_next},
+    os::get_os,
+    print, println, s_print,
+};
 
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
@@ -33,7 +37,7 @@ pub trait HardwareInterruptHandler {
     }
 }
 
-fn notify_end_of_interrupt(interrupt: HardwareInterrupt) {
+pub fn notify_end_of_interrupt(interrupt: HardwareInterrupt) {
     unsafe {
         get_os().pics.notify_end_of_interrupt(interrupt.as_u8());
     }
@@ -55,5 +59,9 @@ struct TimerHandler;
 impl HardwareInterruptHandler for TimerHandler {
     const HARDWARE_INTERRUPT: HardwareInterrupt = HardwareInterrupt::Timer;
 
-    fn handle_hardware_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {}
+    fn handle_hardware_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {
+        notify_end_of_interrupt(Self::HARDWARE_INTERRUPT);
+        s_print!(".");
+        run_next();
+    }
 }

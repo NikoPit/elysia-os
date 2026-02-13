@@ -16,6 +16,7 @@ pub struct Context {
     r12: u64,
     rbx: u64,
     rbp: u64,
+    rflags: u64,
 }
 
 impl Context {
@@ -36,11 +37,19 @@ impl Context {
             // to be used on switch()
             *ptr = entry_point;
 
+            // NOTE: the order which you write stuff into the stack
+            // must be the EXACT SAME ORDER as its location
+            // in the context struct AND the order which
+            // you push/pop in the context switch
+
             // make space for the r15 - rbp
             for _ in 0..6 {
                 ptr = ptr.sub(1);
                 ptr.write(0);
             }
+
+            ptr = ptr.sub(1);
+            ptr.write(0x202);
         }
 
         // Now the rsp is pointing at the stack top
@@ -55,6 +64,7 @@ impl Context {
         // EMPTY SPACE <-
         Self {
             rsp: ptr as u64,
+            rflags: 0x202,
             r15: 0,
             r14: 0,
             r13: 0,
@@ -65,6 +75,7 @@ impl Context {
     }
     pub fn empty() -> Self {
         Self {
+            rflags: 0,
             r15: 0,
             r14: 0,
             r13: 0,
