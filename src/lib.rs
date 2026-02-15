@@ -32,6 +32,7 @@ use core::panic::PanicInfo;
 use bootloader::BootInfo;
 #[cfg(test)]
 use bootloader::entry_point;
+use x86_64::instructions::interrupts::without_interrupts;
 
 use crate::multitasking::MANAGER;
 
@@ -56,7 +57,7 @@ pub fn init(bootinfo: &'static BootInfo) {
     systemcall::init();
     acpi::init();
 
-    MANAGER.lock().init();
+    without_interrupts(|| MANAGER.lock().init());
 }
 
 #[cfg(test)]

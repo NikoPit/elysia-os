@@ -68,8 +68,6 @@ impl Manager {
             self.spawn(test3 as Function);
             self.spawn(testz as Function);
             self.spawn(test2 as Function);
-
-            println!("{:?}", self.queue);
         });
     }
 
@@ -117,7 +115,6 @@ impl Manager {
 
     pub fn next(&mut self) -> Option<(*mut Context, *mut Context)> {
         let mut current_task_id = self.current.take().unwrap();
-        s_println!("{:?}", self.queue);
 
         let mut current_task_ptr = {
             let current_task = self.processes.get_mut(&current_task_id).unwrap();
@@ -227,22 +224,16 @@ pub fn run_next_zombie() {
     }
 }
 
-pub extern "C" fn test3() {
-    loop {
-        s_print!("3");
-    }
+pub extern "C" fn test3() -> ! {
+    loop {}
 }
 
-pub extern "C" fn test2() {
-    loop {
-        s_print!("2");
-    }
+pub extern "C" fn test2() -> ! {
+    loop {}
 }
 
-pub extern "C" fn testz() {
-    loop {
-        s_print!("1");
-    }
+pub extern "C" fn testz() -> ! {
+    loop {}
 }
 
 pub extern "C" fn idle() -> ! {

@@ -6,17 +6,20 @@ use crate::{
     userspace::elf_loader::Function,
 };
 
+// NOTE: the direction of the struct in memory and the stack is REVERSED
+// therefore you need to push rbp - r15 and then rflags
+// and also, ptr.sub(1) 6 times (rbp-r15) and then write the rflags
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Context {
     rsp: u64, // stack pointer. aka the stack for the process
+    rflags: u64,
     r15: u64,
     r14: u64,
     r13: u64,
     r12: u64,
     rbx: u64,
     rbp: u64,
-    rflags: u64,
 }
 
 impl Context {
@@ -42,7 +45,7 @@ impl Context {
             // in the context struct AND the order which
             // you push/pop in the context switch
 
-            // make space for the r15 - rbp
+            // make space for the rbp - r15
             for _ in 0..6 {
                 ptr = ptr.sub(1);
                 ptr.write(0);

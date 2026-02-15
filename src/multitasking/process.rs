@@ -11,22 +11,24 @@ use crate::{
     userspace::elf_loader::Function,
 };
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Debug)]
 pub struct Process {
     pub pid: ProcessID,
     pub context: Context,
     pub state: State,
 }
 
-impl Process {
-    pub fn default() -> Self {
+impl Default for Process {
+    fn default() -> Self {
         Self {
             pid: ProcessID::new(),
             context: Context::empty(),
             state: State::Ready,
         }
     }
+}
 
+impl Process {
     pub fn new(entry_point: Function) -> Self {
         Self {
             pid: ProcessID::new(),

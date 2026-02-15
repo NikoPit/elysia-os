@@ -44,13 +44,9 @@ pub fn allocate_stack(pages: u64) -> VirtAddr {
 
 /// returns the start page
 pub fn allocate_page(count: u64) -> Page<Size4KiB> {
-    let page = Page::containing_address(VirtAddr::new(
-        AVALIBLE_MEMORY.fetch_add(4096, Ordering::Relaxed),
-    ));
-
-    for _ in 0..count + 1 {
-        AVALIBLE_MEMORY.fetch_add(4096, Ordering::Relaxed);
-    }
-
-    page
+    // NOTE: the start page is the page at the TOP not the BOTTOM
+    // page. because stack goes from UP to DOWN!!!!!!
+    Page::containing_address(VirtAddr::new(
+        AVALIBLE_MEMORY.fetch_add((count + 1) * 4096, Ordering::Relaxed),
+    ))
 }

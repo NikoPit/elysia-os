@@ -1,8 +1,14 @@
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use x86_64::{
+    instructions::interrupts::without_interrupts,
+    structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
+};
 
 use crate::{
     debug_exit::debug_exit,
-    multitasking::{MANAGER, manager::run_next},
+    multitasking::{
+        MANAGER,
+        manager::{Manager, run_next},
+    },
     os::get_os,
     print, println, s_print,
 };
@@ -62,6 +68,18 @@ impl HardwareInterruptHandler for TimerHandler {
     fn handle_hardware_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {
         notify_end_of_interrupt(Self::HARDWARE_INTERRUPT);
         s_print!(".");
-        run_next();
+        // NOTE: DO NOT call context_switch deep within a call stack
+        // because it will messup the stack
+        let targets = {
+            without_interrupts(|| {
+                let mut manager = MANAGER.lock();
+                manager.next()
+            })
+        }
+        .unwrap();
+
+        unsafe {
+            Manager::context_switch(targets.0, targets.1);
+        }
     }
 }
