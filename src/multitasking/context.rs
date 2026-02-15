@@ -1,7 +1,9 @@
 use futures_util::future::Select;
 
 use crate::{
+    memory::{page_table_wrapper::PageTableWrapped, paging::MAPPER},
     multitasking::{exit::exit_handler, memory::allocate_stack, process},
+    os::get_os,
     println,
     userspace::elf_loader::Function,
 };
@@ -23,22 +25,26 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(entry_point: u64) -> Self {
+    // TODO: fix ts (seprate pagetable for each process)
+    // im gonna moveon and fix the pagefault shit first
+    pub fn new(entry_point: u64, table: &mut PageTableWrapped) -> Self {
+        let (one, two) = allocate_stack(16, &mut *MAPPER.get().unwrap().lock()); //&mut table.inner);
         // stack top
-        let mut ptr: *mut u64 = allocate_stack(16).as_mut_ptr();
+        let mut phys_ptr: *mut u64 = one.as_mut_ptr();
+        let virt_ptr: *mut u64 = one.as_mut_ptr();
 
         unsafe {
             // Push the exit handler, so when the entry point returns
             // switch() will call the exit handler
-            ptr = ptr.sub(1);
+            phys_ptr = phys_ptr.sub(1);
 
-            *ptr = exit_handler as u64;
+            *phys_ptr = exit_handler as u64;
 
             // Give space for the entry point ptr
-            ptr = ptr.sub(1);
+            phys_ptr = phys_ptr.sub(1);
             // Put the entry point pointer into the stack
             // to be used on switch()
-            *ptr = entry_point;
+            *phys_ptr = entry_point;
 
             // NOTE: the order which you write stuff into the stack
             // must be the EXACT SAME ORDER as its location
@@ -47,12 +53,12 @@ impl Context {
 
             // make space for the rbp - r15
             for _ in 0..6 {
-                ptr = ptr.sub(1);
-                ptr.write(0);
+                phys_ptr = phys_ptr.sub(1);
+                phys_ptr.write(0);
             }
 
-            ptr = ptr.sub(1);
-            ptr.write(0x202);
+            phys_ptr = phys_ptr.sub(1);
+            phys_ptr.write(0x202);
         }
 
         // Now the rsp is pointing at the stack top
@@ -66,7 +72,7 @@ impl Context {
         // r15-rbp
         // EMPTY SPACE <-
         Self {
-            rsp: ptr as u64,
+            rsp: phys_ptr as u64,
             rflags: 0x202,
             r15: 0,
             r14: 0,

@@ -22,7 +22,7 @@ use elysia_os::init;
 use elysia_os::multitasking::MANAGER;
 use elysia_os::multitasking::kernel_task::executor::Executor;
 use elysia_os::multitasking::kernel_task::task::Task;
-use elysia_os::multitasking::manager::run_next;
+use elysia_os::multitasking::scheduling::run_next;
 use elysia_os::println;
 
 entry_point!(k_main);

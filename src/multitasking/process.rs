@@ -6,21 +6,24 @@ use x86_64::{
 };
 
 use crate::{
-    multitasking::{blocked::BlockType, context::Context},
+    memory::page_table_wrapper::PageTableWrapped,
+    multitasking::{context::Context, yielding::BlockType},
     println,
     userspace::elf_loader::Function,
 };
 
-#[derive(Debug)]
 pub struct Process {
     pub pid: ProcessID,
     pub context: Context,
     pub state: State,
+    pub page_table: PageTableWrapped,
 }
 
 impl Default for Process {
     fn default() -> Self {
+        let table = PageTableWrapped::default();
         Self {
+            page_table: table,
             pid: ProcessID::new(),
             context: Context::empty(),
             state: State::Ready,
@@ -30,9 +33,11 @@ impl Default for Process {
 
 impl Process {
     pub fn new(entry_point: Function) -> Self {
+        let mut table = PageTableWrapped::default();
         Self {
+            page_table: PageTableWrapped::default(),
             pid: ProcessID::new(),
-            context: Context::new(entry_point as u64),
+            context: Context::new(entry_point as u64, &mut table),
             state: State::Ready,
         }
     }

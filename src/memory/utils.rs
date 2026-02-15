@@ -1,12 +1,13 @@
 use x86_64::{
     VirtAddr,
     structures::paging::{
-        FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB, mapper::MapToError,
+        FrameAllocator, Mapper, Page, PageTable, PageTableFlags, PhysFrame, Size4KiB,
+        mapper::MapToError,
     },
 };
 
 use crate::{
-    memory::paging::{FRAME_ALLOCATOR, MAPPER},
+    memory::paging::{FRAME_ALLOCATOR, MAPPER, get_l4_table},
     os::get_os,
 };
 
@@ -23,6 +24,16 @@ impl<A> Locked<A> {
 
     pub fn lock(&self) -> spin::MutexGuard<'_, A> {
         self.inner.lock()
+    }
+}
+
+/// Copies the memory mapping of the kernel l4 table
+/// into the table of something else (probably table for processes)
+pub fn copy_kernel_mapping(table: &mut PageTable) {
+    let kernel_l4 = get_l4_table(get_os().phys_mem_offset.unwrap());
+
+    for i in 256..512 {
+        table[i] = kernel_l4[i].clone();
     }
 }
 

@@ -5,10 +5,7 @@ use x86_64::{
 
 use crate::{
     debug_exit::debug_exit,
-    multitasking::{
-        MANAGER,
-        manager::{Manager, run_next},
-    },
+    multitasking::{MANAGER, manager::Manager, scheduling::run_next},
     os::get_os,
     print, println, s_print,
 };

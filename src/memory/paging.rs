@@ -24,7 +24,7 @@ pub fn init_mapper(bootinfo: &'static BootInfo) -> OffsetPageTable<'static> {
     }
 }
 
-unsafe fn get_l4_table(phys_mem_offset: VirtAddr) -> &'static mut PageTable {
+pub fn get_l4_table(phys_mem_offset: VirtAddr) -> &'static mut PageTable {
     let addr = Cr3::read().0.start_address();
     let virt = phys_mem_offset + addr.as_u64();
     let page_table_ptr = virt.as_mut_ptr();

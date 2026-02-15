@@ -2,44 +2,56 @@ use core::sync::atomic::{AtomicU16, AtomicU64, Ordering};
 
 use x86_64::{
     VirtAddr,
-    structures::paging::{FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB},
+    structures::paging::{
+        FrameAllocator, Mapper, OffsetPageTable, Page, PageTable, PageTableFlags, PhysFrame,
+        Size4KiB,
+    },
 };
 
 use crate::{
     memory::paging::{FRAME_ALLOCATOR, MAPPER},
+    os::get_os,
     println,
 };
 
 static AVALIBLE_MEMORY: AtomicU64 = AtomicU64::new(0x4444_0000);
 
-pub fn allocate_stack(pages: u64) -> VirtAddr {
+/// Returns the virtual address of the stack top
+/// and the offsetted physical address of the stack top
+pub fn allocate_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> (VirtAddr, VirtAddr) {
     // skips the guard page
     let guard_page = allocate_page(pages);
-
     let mut frame_allocator = FRAME_ALLOCATOR.try_get().unwrap().lock();
+    let mut last_frame: Option<PhysFrame> = None;
 
     let start = guard_page + 1;
     for i in 0..pages {
         let page = start + i;
+        let frame = frame_allocator.allocate_frame().unwrap();
 
         unsafe {
-            MAPPER
-                .try_get()
-                .unwrap()
-                .lock()
+            table
                 .map_to(
                     page,
-                    frame_allocator.allocate_frame().unwrap(),
+                    frame,
                     PageTableFlags::PRESENT | PageTableFlags::WRITABLE,
                     &mut *frame_allocator,
                 )
                 .unwrap()
                 .flush();
         };
+
+        last_frame = Some(frame);
     }
 
     // stack top
-    (start + pages).start_address()
+    (
+        (start + pages).start_address(),
+        VirtAddr::new(
+            last_frame.unwrap().start_address().as_u64()
+                + get_os().phys_mem_offset.unwrap().as_u64(),
+        ),
+    )
 }
 
 /// returns the start page

@@ -1,6 +1,6 @@
 use crate::{
     misc::hlt_loop,
-    multitasking::{MANAGER, manager::run_next_zombie},
+    multitasking::{MANAGER, scheduling::run_next_zombie},
     println,
 };
 
