@@ -37,10 +37,7 @@ pub fn copy_kernel_mapping(table: &mut PageTable) {
     let kernel_l4 = l4_binding.level_4_table();
     //s_println!("{:#?}", kernel_l4[0]);
 
-    // TODO: shouldent copy it, the kernel should only be in the higher half
-    table[0] = kernel_l4[0].clone();
-
-    for i in 256..512 {
+    for i in 0..512 {
         table[i] = kernel_l4[i].clone();
     }
 }
