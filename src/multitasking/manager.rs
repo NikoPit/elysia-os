@@ -25,7 +25,7 @@ use crate::{
         scheduling::run_next,
         yielding::{BlockType, BlockedQueues, WakeType},
     },
-    println, s_print, s_println,
+    print, println, s_print, s_println,
     userspace::elf_loader::Function,
 };
 
@@ -124,15 +124,21 @@ pub fn schedule() {
 }
 
 pub extern "C" fn test3() -> ! {
-    loop {}
+    loop {
+        print!("1");
+    }
 }
 
 pub extern "C" fn test2() -> ! {
-    loop {}
+    loop {
+        print!("2");
+    }
 }
 
 pub extern "C" fn testz() -> ! {
-    loop {}
+    loop {
+        print!("3");
+    }
 }
 
 pub extern "C" fn idle() -> ! {

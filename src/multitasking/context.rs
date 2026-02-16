@@ -28,9 +28,9 @@ impl Context {
     // TODO: fix ts (seprate pagetable for each process)
     // im gonna moveon and fix the pagefault shit first
     pub fn new(entry_point: u64, table: &mut PageTableWrapped) -> Self {
-        let (one, two) = allocate_stack(16, &mut *MAPPER.get().unwrap().lock()); //&mut table.inner);
+        let (one, two) = allocate_stack(16, &mut table.inner);
         // stack top
-        let mut phys_ptr: *mut u64 = one.as_mut_ptr();
+        let mut phys_ptr: *mut u64 = two.as_mut_ptr();
         let virt_ptr: *mut u64 = one.as_mut_ptr();
 
         unsafe {

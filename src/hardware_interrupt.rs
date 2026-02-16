@@ -64,19 +64,7 @@ impl HardwareInterruptHandler for TimerHandler {
 
     fn handle_hardware_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {
         notify_end_of_interrupt(Self::HARDWARE_INTERRUPT);
-        s_print!(".");
-        // NOTE: DO NOT call context_switch deep within a call stack
-        // because it will messup the stack
-        let targets = {
-            without_interrupts(|| {
-                let mut manager = MANAGER.lock();
-                manager.next()
-            })
-        }
-        .unwrap();
 
-        unsafe {
-            Manager::context_switch(targets.0, targets.1);
-        }
+        run_next();
     }
 }
