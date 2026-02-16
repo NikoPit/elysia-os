@@ -72,7 +72,7 @@ impl Context {
         // r15-rbp
         // EMPTY SPACE <-
         Self {
-            rsp: phys_ptr as u64,
+            rsp: virt_ptr as u64,
             rflags: 0x202,
             r15: 0,
             r14: 0,

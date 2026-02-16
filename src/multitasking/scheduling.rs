@@ -40,7 +40,7 @@ impl Manager {
 
         self.current = Some(next_task.pid.clone());
 
-        //next_task.page_table.load();
+        next_task.page_table.load();
 
         return Some((current_task_ptr, next_task.context.as_ptr()));
 
