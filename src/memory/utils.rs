@@ -1,14 +1,17 @@
+use core::ptr::copy_nonoverlapping;
+
 use x86_64::{
     VirtAddr,
     structures::paging::{
         FrameAllocator, Mapper, Page, PageTable, PageTableFlags, PhysFrame, Size4KiB,
-        mapper::MapToError,
+        mapper::MapToError, page_table::PageTableEntry,
     },
 };
 
 use crate::{
     memory::paging::{FRAME_ALLOCATOR, MAPPER, get_l4_table},
     os::get_os,
+    println, s_println,
 };
 
 pub struct Locked<A> {
@@ -30,9 +33,11 @@ impl<A> Locked<A> {
 /// Copies the memory mapping of the kernel l4 table
 /// into the table of something else (probably table for processes)
 pub fn copy_kernel_mapping(table: &mut PageTable) {
-    let kernel_l4 = get_l4_table(get_os().phys_mem_offset.unwrap());
+    let l4_binding = MAPPER.get().unwrap().lock();
+    let kernel_l4 = l4_binding.level_4_table();
+    //s_println!("{:#?}", kernel_l4[0]);
 
-    for i in 256..512 {
+    for i in 0..512 {
         table[i] = kernel_l4[i].clone();
     }
 }

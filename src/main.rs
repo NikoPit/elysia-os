@@ -18,12 +18,12 @@ use elysia_os::debug_exit::debug_exit;
 use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
 use elysia_os::filesystem::path::Path;
 use elysia_os::filesystem::vfs::{FileData, VirtualFS};
-use elysia_os::init;
 use elysia_os::multitasking::MANAGER;
 use elysia_os::multitasking::kernel_task::executor::Executor;
 use elysia_os::multitasking::kernel_task::task::Task;
 use elysia_os::multitasking::scheduling::run_next;
 use elysia_os::println;
+use elysia_os::{init, s_println};
 
 entry_point!(k_main);
 
@@ -31,6 +31,7 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     #[cfg(test)]
     debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
     println!("Welcome to Elysia-OS v0.1.0");
+    s_println!("{:?}", bootinfo.physical_memory_offset);
 
     init(bootinfo);
 

@@ -1,10 +1,11 @@
 use futures_util::future::Select;
+use x86_64::VirtAddr;
 
 use crate::{
     memory::{page_table_wrapper::PageTableWrapped, paging::MAPPER},
     multitasking::{exit::exit_handler, memory::allocate_stack, process},
     os::get_os,
-    println,
+    println, s_print,
     userspace::elf_loader::Function,
 };
 
@@ -31,7 +32,7 @@ impl Context {
         let (one, two) = allocate_stack(16, &mut table.inner);
         // stack top
         let mut phys_ptr: *mut u64 = two.as_mut_ptr();
-        let virt_ptr: *mut u64 = one.as_mut_ptr();
+        let mut virt_ptr: *mut u64 = one.as_mut_ptr();
 
         unsafe {
             // Push the exit handler, so when the entry point returns
@@ -61,6 +62,8 @@ impl Context {
             phys_ptr.write(0x202);
         }
 
+        s_print!("{:?}", VirtAddr::from_ptr(phys_ptr));
+
         // Now the rsp is pointing at the stack top
         // under the entry point and all the other bs (r15-rbp)
         // so it wont accidently read / write into them
@@ -72,7 +75,8 @@ impl Context {
         // r15-rbp
         // EMPTY SPACE <-
         Self {
-            rsp: virt_ptr as u64,
+            // TODO: use virt_ptr
+            rsp: phys_ptr as u64,
             rflags: 0x202,
             r15: 0,
             r14: 0,

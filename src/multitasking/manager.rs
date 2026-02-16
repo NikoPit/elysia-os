@@ -131,11 +131,7 @@ pub extern "C" fn test3() -> ! {
 
 pub extern "C" fn test2() -> ! {
     loop {
-        unsafe {
-            let x: *mut u64 = 0x1145_1140 as *mut u64;
-            *x = 200;
-            print!("{}", *x);
-        }
+        unsafe {}
 
         print!("2");
     }
@@ -144,9 +140,7 @@ pub extern "C" fn test2() -> ! {
 pub extern "C" fn testz() -> ! {
     loop {
         unsafe {
-            let x: *mut u64 = 0x1145_1140 as *mut u64;
-            *x = 3;
-            print!("{}", *x);
+            print!("{}", 3);
         }
     }
 }
