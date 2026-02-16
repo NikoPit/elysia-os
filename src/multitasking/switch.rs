@@ -7,12 +7,13 @@ impl Manager {
     // because it will messup the stack completely
     /// # Safety
     /// Must provide valid current / next conteext ptr
+    #[unsafe(naked)]
     pub unsafe extern "C" fn context_switch(
         current: *mut multitasking::context::Context,
         next: *mut multitasking::context::Context,
     ) {
         unsafe {
-            arch::asm!(
+            arch::naked_asm!(
                 // Constructs the "Context"
                 // Note: the instruction pointer have already been automatically
                 // saved when we call switch();
@@ -46,10 +47,7 @@ impl Manager {
                 // We dont have to explicitly push it or something
                 // becuase its already been saved when we called
                 // switch. so now its already sitting at the stack top
-                "ret",
-                in("rdi") current,
-                in("rsi") next,
-                options(noreturn)
+                "ret"
             )
         };
     }

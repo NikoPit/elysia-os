@@ -1,7 +1,7 @@
 #![no_std]
 // Disables main function to customize entry point
 #![no_main]
-#![feature(abi_x86_interrupt, custom_test_frameworks)]
+#![feature(abi_x86_interrupt, custom_test_frameworks, naked_functions)]
 #![reexport_test_harness_main = "test_main"]
 #![test_runner(elysia_os::testing::run_tests)]
 // renames main function for testing because we disabled main with #[no_main]
