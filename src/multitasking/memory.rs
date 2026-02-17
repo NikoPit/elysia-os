@@ -15,7 +15,7 @@ use crate::{
 };
 
 static AVALIBLE_MEMORY: AtomicU64 = AtomicU64::new(0x4444_0000);
-const USER_STACK: u64 = 0x7000_0000_0000;
+pub const USER_STACK: u64 = 0x7000_0000_0000;
 
 /// Returns the virtual address of the stack top
 /// and the offsetted physical address of the stack top

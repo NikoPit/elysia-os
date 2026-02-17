@@ -10,6 +10,7 @@ use x86_64::{
 
 use crate::{
     memory::paging::{FRAME_ALLOCATOR, MAPPER, get_l4_table},
+    multitasking::memory::USER_STACK,
     os::get_os,
     println, s_println,
 };
@@ -40,7 +41,7 @@ pub fn copy_kernel_mapping(table: &mut PageTable) {
     for i in 0..512 {
         table[i] = kernel_l4[i].clone();
     }
-    let stack_p4_index = VirtAddr::new(0x7000_0000_0000).p4_index();
+    let stack_p4_index = VirtAddr::new(USER_STACK).p4_index();
     s_println!("{:?}", stack_p4_index);
     table[usize::from(stack_p4_index)] = PageTableEntry::new(); // 清空这一项
 }
