@@ -40,6 +40,13 @@ pub fn copy_kernel_mapping(table: &mut PageTable) {
     for i in 0..512 {
         table[i] = kernel_l4[i].clone();
     }
+    let stack_p4_index = VirtAddr::new(0x7000_0000_0000).p4_index();
+    s_println!("{:?}", stack_p4_index);
+    table[usize::from(stack_p4_index)] = PageTableEntry::new(); // 清空这一项
+}
+
+pub fn apply_offset(num: u64) -> u64 {
+    num + get_os().phys_mem_offset.unwrap().as_u64()
 }
 
 pub fn map_size(start: u64, size: u64) -> Result<(), MapToError<Size4KiB>> {

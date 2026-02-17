@@ -41,9 +41,3 @@ impl Default for PageTableWrapped {
         }
     }
 }
-
-impl PageTableWrapped {
-    pub fn load(&self) {
-        unsafe { Cr3::write(self.frame, Cr3Flags::empty()) };
-    }
-}

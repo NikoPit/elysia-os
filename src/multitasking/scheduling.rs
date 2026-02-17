@@ -1,6 +1,9 @@
 use x86_64::instructions::interrupts::without_interrupts;
 
-use crate::multitasking::{MANAGER, context::Context, manager::Manager, process::State};
+use crate::{
+    multitasking::{MANAGER, context::Context, manager::Manager, process::State},
+    s_print,
+};
 
 impl Manager {
     pub fn next(&mut self) -> Option<(*mut Context, *mut Context)> {
@@ -40,8 +43,6 @@ impl Manager {
 
         self.current = Some(next_task.pid.clone());
 
-        next_task.page_table.load();
-
         return Some((current_task_ptr, next_task.context.as_ptr()));
 
         None
@@ -68,8 +69,6 @@ impl Manager {
 
         self.current = Some(next_task.pid.clone());
 
-        next_task.page_table.load();
-
         return Some((next_task.context.as_ptr()));
 
         None
@@ -83,6 +82,7 @@ pub fn run_next() {
         })
     }
     .unwrap();
+    s_print!("w");
 
     unsafe {
         Manager::context_switch(targets.0, targets.1);

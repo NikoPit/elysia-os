@@ -2,7 +2,7 @@ use core::sync::atomic::AtomicU64;
 
 use x86_64::{
     VirtAddr,
-    structures::paging::{OffsetPageTable, PageTable},
+    structures::paging::{OffsetPageTable, Page, PageTable},
 };
 
 use crate::{
@@ -34,10 +34,11 @@ impl Default for Process {
 impl Process {
     pub fn new(entry_point: Function) -> Self {
         let mut table = PageTableWrapped::default();
+        let context = Context::new(entry_point as u64, &mut table);
         Self {
-            page_table: PageTableWrapped::default(),
+            page_table: table,
             pid: ProcessID::new(),
-            context: Context::new(entry_point as u64, &mut table),
+            context: context,
             state: State::Ready,
         }
     }
