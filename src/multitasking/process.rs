@@ -28,7 +28,7 @@ impl Default for Process {
 impl Process {
     pub fn new(entry_point: Function) -> Self {
         let mut table = PageTableWrapped::default();
-        let contxt = Context::kernel(entry_point as u64, &mut table);
+        let contxt = Context::user(entry_point as u64, &mut table);
         Self {
             page_table: table,
             pid: ProcessID::default(),

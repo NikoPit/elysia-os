@@ -25,7 +25,6 @@ pub unsafe extern "C" fn context_switch(current: *mut Context, next: *mut Contex
         "mov [rdi + 24], r14",
         "mov [rdi + 16], r15",
         // Pushes the rflags
-        "pushfq",
         // note to future me: the [] basically means refrence
         // Updates the rsp of the context of the current process
         // current.rsp = rsp;
@@ -38,7 +37,6 @@ pub unsafe extern "C" fn context_switch(current: *mut Context, next: *mut Contex
         "mov cr3, rax",
         // rsp = &next.rsp; (rsi = second arg)
         "mov rsp, [rsi + 8]",
-        "popfq",
         "mov r15, [rsi + 16]",
         "mov r14, [rsi + 24]",
         "mov r13, [rsi + 32]",
@@ -50,7 +48,7 @@ pub unsafe extern "C" fn context_switch(current: *mut Context, next: *mut Contex
         // We dont have to explicitly push it or something
         // becuase its already been saved when we called
         // switch. so now its already sitting at the stack top
-        "ret"
+        "iretq"
     )
 }
 

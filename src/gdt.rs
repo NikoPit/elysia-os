@@ -8,7 +8,7 @@ use x86_64::{
 use crate::tss;
 
 lazy_static! {
-    static ref GDT: (GlobalDescriptorTable, GDTSelectors)= {
+    pub static ref GDT: (GlobalDescriptorTable, GDTSelectors)= {
         let mut gdt = GlobalDescriptorTable::new();
 
         // a selector is just a fancy way of saying index. it stores the index and
@@ -16,16 +16,18 @@ lazy_static! {
         let kernel_code_selector = gdt.append(Descriptor::kernel_code_segment());
         let tss_selector = gdt.append(Descriptor::tss_segment(&tss::TSS));
 
-        gdt.append(Descriptor::user_code_segment());
-        gdt.append(Descriptor::user_data_segment());
+        let user_code = gdt.append(Descriptor::user_code_segment());
+        let user_data = gdt.append(Descriptor::user_data_segment());
 
-        (gdt, GDTSelectors { code_selector: kernel_code_selector, tss_selector })
+        (gdt, GDTSelectors { code_selector: kernel_code_selector, tss_selector, user_data, user_code })
     };
 }
 
-struct GDTSelectors {
-    code_selector: SegmentSelector,
-    tss_selector: SegmentSelector,
+pub struct GDTSelectors {
+    pub code_selector: SegmentSelector,
+    pub tss_selector: SegmentSelector,
+    pub user_data: SegmentSelector,
+    pub user_code: SegmentSelector,
 }
 
 pub fn init() {

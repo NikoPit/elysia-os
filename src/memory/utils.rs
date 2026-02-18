@@ -39,8 +39,9 @@ pub fn copy_kernel_mapping(table: &mut PageTable) {
     for i in 0..512 {
         table[i] = kernel_l4[i].clone();
     }
+
+    // TODO: idk if this is a good idea
     let stack_p4_index = VirtAddr::new(USER_STACK_BOTTOM).p4_index();
-    s_println!("{:?}", stack_p4_index);
     table[usize::from(stack_p4_index)] = PageTableEntry::new(); // 清空这一项
 }
 

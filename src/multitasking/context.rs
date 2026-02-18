@@ -1,6 +1,7 @@
 use x86_64::{VirtAddr, registers::control::Cr3Flags};
 
 use crate::{
+    gdt::GDT,
     memory::page_table_wrapper::PageTableWrapped,
     multitasking::{exit_handling::exit_handler, memory::allocate_stack},
     userspace::elf_loader::Function,
@@ -24,7 +25,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn kernel(entry_point: u64, table: &mut PageTableWrapped) -> Self {
+    fn new(entry_point: u64, table: &mut PageTableWrapped, context_type: ContextType) -> Self {
         let (virt_stack_addr, write_addr) = allocate_stack(16, &mut table.inner);
         let mut write_ptr: *mut u64 = (write_addr).as_mut_ptr();
 
@@ -40,7 +41,7 @@ impl Context {
         // EMPTY SPACE <-
         Self {
             cr3: calc_cr3_value(table.frame.start_address(), Cr3Flags::empty()),
-            rsp: init_memory(&mut write_ptr, entry_point, virt_stack_addr),
+            rsp: init_memory(&mut write_ptr, entry_point, virt_stack_addr, context_type),
             r15: 0,
             r14: 0,
             r13: 0,
@@ -50,14 +51,38 @@ impl Context {
         }
     }
 
+    pub fn kernel(entry_point: u64, table: &mut PageTableWrapped) -> Self {
+        Self::new(entry_point, table, ContextType::Kernel)
+    }
+
+    pub fn user(entry_point: u64, table: &mut PageTableWrapped) -> Self {
+        Self::new(entry_point, table, ContextType::User)
+    }
+
     pub fn as_ptr(&mut self) -> *mut Self {
         self as *mut Self
     }
 }
 
+fn init_memory(
+    write_ptr: &mut *mut u64,
+    entry_point: u64,
+    virt_stack_addr: VirtAddr,
+    context_type: ContextType,
+) -> u64 {
+    match context_type {
+        ContextType::Kernel => init_memory_kernel(write_ptr, entry_point, virt_stack_addr),
+        ContextType::User => init_memory_user(write_ptr, entry_point, virt_stack_addr),
+    }
+}
+
 /// Initalizes the memory of the context struct
 /// Returns the virtual address of the stack top
-fn init_memory(write_ptr: &mut *mut u64, entry_point: u64, virt_stack_addr: VirtAddr) -> u64 {
+fn init_memory_kernel(
+    write_ptr: &mut *mut u64,
+    entry_point: u64,
+    virt_stack_addr: VirtAddr,
+) -> u64 {
     unsafe {
         write_and_sub(write_ptr, exit_handler as *mut Function as u64);
         write_and_sub(write_ptr, entry_point);
@@ -72,4 +97,21 @@ fn init_memory(write_ptr: &mut *mut u64, entry_point: u64, virt_stack_addr: Virt
     }
 
     virt_stack_addr.as_u64() - 3 * 8
+}
+
+fn init_memory_user(write_ptr: &mut *mut u64, entry_point: u64, virt_stack_addr: VirtAddr) -> u64 {
+    unsafe {
+        write_and_sub(write_ptr, GDT.1.user_data.0 as u64); // SS
+        write_and_sub(write_ptr, virt_stack_addr.as_u64() - 5 * 8); // RSP
+        write_and_sub(write_ptr, 0x202); // RFlags
+        write_and_sub(write_ptr, GDT.1.user_code.0 as u64);
+        write_and_sub(write_ptr, entry_point);
+    }
+
+    virt_stack_addr.as_u64() - 5 * 8
+}
+
+pub enum ContextType {
+    Kernel,
+    User,
 }
