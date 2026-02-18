@@ -13,15 +13,14 @@ use crate::{
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default)]
 pub struct Context {
-    cr3: u64,
-    rsp: u64, // stack pointer. aka the stack for the process
-    rflags: u64,
-    r15: u64,
-    r14: u64,
-    r13: u64,
-    r12: u64,
-    rbx: u64,
-    rbp: u64,
+    cr3: u64, // +0
+    rsp: u64, // +8
+    r15: u64, // +16
+    r14: u64, // +24
+    r13: u64, // +32
+    r12: u64, // +40
+    rbx: u64, // +48
+    rbp: u64, // +56
 }
 
 impl Context {
@@ -42,7 +41,6 @@ impl Context {
         Self {
             cr3: calc_cr3_value(table.frame.start_address(), Cr3Flags::empty()),
             rsp: init_memory(&mut write_ptr, entry_point, virt_stack_addr),
-            rflags: 0x202,
             r15: 0,
             r14: 0,
             r13: 0,
@@ -66,17 +64,12 @@ fn init_memory(write_ptr: &mut *mut u64, entry_point: u64, virt_stack_addr: Virt
 
         // NOTE: the order which you write stuff into the stack
         // must be the EXACT SAME ORDER as its location
-        // in the context struct AND the order which
+        // in the the order which
         // you push/pop in the context switch
-
-        // rbp - r15
-        for _ in 0..6 {
-            write_and_sub(write_ptr, 0);
-        }
 
         // rflags
         write_and_sub(write_ptr, 0x202);
     }
 
-    virt_stack_addr.as_u64() - 9 * 8
+    virt_stack_addr.as_u64() - 3 * 8
 }

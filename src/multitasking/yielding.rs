@@ -21,19 +21,10 @@ pub enum WakeType {
     IO,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default)]
 pub struct BlockedQueues {
     pub keyboard: VecDeque<ProcessID>,
     pub io: VecDeque<ProcessID>,
-}
-
-impl Default for BlockedQueues {
-    fn default() -> Self {
-        Self {
-            keyboard: VecDeque::new(),
-            io: VecDeque::new(),
-        }
-    }
 }
 
 #[macro_export]
