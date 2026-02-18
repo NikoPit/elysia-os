@@ -1,5 +1,3 @@
-use core::any::Any;
-
 use alloc::collections::vec_deque::VecDeque;
 
 use crate::multitasking::{
@@ -29,8 +27,8 @@ pub struct BlockedQueues {
     pub io: VecDeque<ProcessID>,
 }
 
-impl BlockedQueues {
-    pub fn new() -> Self {
+impl Default for BlockedQueues {
+    fn default() -> Self {
         Self {
             keyboard: VecDeque::new(),
             io: VecDeque::new(),
@@ -39,7 +37,7 @@ impl BlockedQueues {
 }
 
 #[macro_export]
-macro_rules! register_wake {
+macro_rules! register_wake_func {
     ($type: ident) => {
         paste! {
         pub fn [<wake_$type>](&mut self) {
@@ -57,11 +55,10 @@ impl Manager {
             if matches!(process.state, State::Blocked(_)) {
                 process.state = State::Ready;
                 self.queue.push_back(process.pid);
-            } else {
             }
         }
     }
 
-    register_wake!(keyboard);
-    register_wake!(io);
+    register_wake_func!(keyboard);
+    register_wake_func!(io);
 }

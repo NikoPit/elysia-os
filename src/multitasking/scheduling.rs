@@ -1,15 +1,21 @@
 use x86_64::instructions::interrupts::without_interrupts;
 
 use crate::{
-    multitasking::{MANAGER, context::Context, manager::Manager, process::State},
+    multitasking::{
+        MANAGER,
+        context::Context,
+        manager::Manager,
+        process::State,
+        switch::{context_switch, context_switch_zombie},
+    },
     s_print,
 };
 
 impl Manager {
-    pub fn next(&mut self) -> Option<(*mut Context, *mut Context)> {
-        let mut current_task_id = self.current.take().unwrap();
+    fn run_next_unwrapped(&mut self) -> (*mut Context, *mut Context) {
+        let current_task_id = self.current.take().unwrap();
 
-        let mut current_task_ptr = {
+        let current_task_ptr = {
             let current_task = self.processes.get_mut(&current_task_id).unwrap();
 
             if current_task.state == State::Running {
@@ -25,40 +31,24 @@ impl Manager {
         };
 
         let next_task = if let Some(next) = self.queue.pop_front() {
-            let next_task = match self.processes.get_mut(&next) {
-                Some(task) => task,
-                // Possibly zombie task
-                None => return None,
-            };
-
-            next_task
+            self.processes.get_mut(&next).unwrap()
         } else {
-            match self.processes.get_mut(&self.idle_process.unwrap()) {
-                Some(task) => task,
-                None => panic!("This isnt supposed to happen"),
-            }
+            self.processes.get_mut(&self.idle_process.unwrap()).unwrap()
         };
 
         next_task.state = State::Running;
 
-        self.current = Some(next_task.pid.clone());
+        self.current = Some(next_task.pid);
 
-        return Some((current_task_ptr, next_task.context.as_ptr()));
-
-        None
+        (current_task_ptr, next_task.context.as_ptr())
     }
-    /// runs the next process. called from a zombie process
-    pub fn next_zombie(&mut self) -> Option<(*mut Context)> {
+
+    /// picks the next process. called from a zombie process
+    fn run_next_zombie_unwrapped(&mut self) -> *mut Context {
         self.clean_zombies();
 
-        let mut next_task = if let Some(next) = self.queue.pop_front() {
-            let next_task = match self.processes.get_mut(&next) {
-                Some(task) => task,
-                // Possibly zombie task
-                None => return None,
-            };
-
-            next_task
+        let next_task = if let Some(next) = self.queue.pop_front() {
+            self.processes.get_mut(&next).unwrap()
         } else {
             // call the idle process if there is nothing to do
             match self.processes.get_mut(&self.idle_process.unwrap()) {
@@ -67,44 +57,35 @@ impl Manager {
             }
         };
 
-        self.current = Some(next_task.pid.clone());
+        next_task.state = State::Running;
 
-        return Some((next_task.context.as_ptr()));
+        self.current = Some(next_task.pid);
 
-        None
+        next_task.context.as_ptr()
     }
 }
+
 pub fn run_next() {
     let targets = {
         without_interrupts(|| {
             let mut manager = MANAGER.lock();
-            manager.next()
+            manager.run_next_unwrapped()
         })
-    }
-    .unwrap();
-    s_print!("w");
+    };
 
     unsafe {
-        Manager::context_switch(targets.0, targets.1);
+        context_switch(targets.0, targets.1);
     }
 }
 
 /// runs the next process. called from a zombie process
 pub fn run_next_zombie() {
-    let target = match {
-        without_interrupts(|| {
-            let mut manager = MANAGER.lock();
-            manager
-        })
-    }
-    .next_zombie()
-    {
-        Some(val) => val,
-        None => {
-            return;
-        }
-    };
+    let target = without_interrupts(|| {
+        let mut manager = MANAGER.lock();
+        manager.run_next_zombie_unwrapped()
+    });
+
     unsafe {
-        Manager::context_switch_zombie(target);
+        context_switch_zombie(target);
     }
 }

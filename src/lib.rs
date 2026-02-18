@@ -24,6 +24,7 @@ pub mod systemcall;
 pub mod testing;
 pub mod tss;
 pub mod userspace;
+pub mod utils;
 pub mod vga_print;
 
 #[cfg(test)]
@@ -32,9 +33,6 @@ use core::panic::PanicInfo;
 use bootloader::BootInfo;
 #[cfg(test)]
 use bootloader::entry_point;
-use x86_64::instructions::interrupts::without_interrupts;
-
-use crate::multitasking::MANAGER;
 
 #[cfg(test)]
 entry_point!(test_k_main);
@@ -56,8 +54,7 @@ pub fn init(bootinfo: &'static BootInfo) {
     interrupts::init();
     systemcall::init();
     acpi::init();
-
-    without_interrupts(|| MANAGER.lock().init());
+    multitasking::init();
 }
 
 #[cfg(test)]

@@ -1,14 +1,17 @@
 use x86_64::{
     VirtAddr,
-    registers::control::{Cr3, Cr3Flags},
     structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB},
 };
 
 use crate::{
-    memory::{paging::FRAME_ALLOCATOR, utils::copy_kernel_mapping},
+    memory::{
+        paging::FRAME_ALLOCATOR,
+        utils::{apply_offset, copy_kernel_mapping},
+    },
     os::get_os,
 };
 
+#[derive(Debug)]
 pub struct PageTableWrapped {
     pub frame: PhysFrame<Size4KiB>,
     pub inner: OffsetPageTable<'static>,
@@ -24,12 +27,10 @@ impl Default for PageTableWrapped {
             .allocate_frame()
             .expect("No more space");
 
-        let table_virt_addr = VirtAddr::new(
-            page_table_frame.start_address().as_u64() + get_os().phys_mem_offset.unwrap().as_u64(),
-        );
+        let table_addr = VirtAddr::new(apply_offset(page_table_frame.start_address().as_u64()));
 
         // Get it as a page table
-        let page_table = unsafe { &mut *(table_virt_addr.as_mut_ptr() as *mut PageTable) };
+        let page_table: &mut PageTable = unsafe { &mut *(table_addr.as_mut_ptr()) };
 
         page_table.zero();
 
