@@ -16,7 +16,10 @@ lazy_static! {
         let kernel_code_selector = gdt.append(Descriptor::kernel_code_segment());
         let tss_selector = gdt.append(Descriptor::tss_segment(&tss::TSS));
 
-        (gdt, GDTSelectors { code_selector: kernel_code_selector, tss_selector: tss_selector })
+        gdt.append(Descriptor::user_code_segment());
+        gdt.append(Descriptor::user_data_segment());
+
+        (gdt, GDTSelectors { code_selector: kernel_code_selector, tss_selector })
     };
 }
 

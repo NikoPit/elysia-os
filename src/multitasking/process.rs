@@ -54,5 +54,5 @@ pub enum State {
     Ready, // ready to run (in a queue)
     Running,
     Blocked(BlockType), // stuck, waiting for something (like keyboard input)
-    Zombie,
+    Zombie,             // Exited process
 }

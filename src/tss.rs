@@ -8,6 +8,19 @@ lazy_static! {
     pub static ref TSS: TaskStateSegment = {
         let mut tss = TaskStateSegment::new();
 
+        tss.privilege_stack_table[0] = {
+            const STACK_SIZE: usize = 4096 * 5;
+
+            // doing some dark magic wizardy to create a stack by declaring a
+            // static mut array
+            static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
+
+            // load the stack created with the dark magic wizardy above with a refrence to the
+            // stack or something idk this shit is too dark magic to me
+            let stack_start = VirtAddr::from_ptr(&raw const STACK);
+            stack_start + STACK_SIZE as u64
+
+        };
         tss.interrupt_stack_table[DOUBLE_FAULT_IST_LOCATION as usize] = {
             const STACK_SIZE: usize = 4096 * 5;
 
@@ -18,8 +31,7 @@ lazy_static! {
             // load the stack created with the dark magic wizardy above with a refrence to the
             // stack or something idk this shit is too dark magic to me
             let stack_start = VirtAddr::from_ptr(&raw const STACK);
-            let stack_end = stack_start + STACK_SIZE as u64;
-            stack_end
+         stack_start + STACK_SIZE as u64
         };
 
         tss
