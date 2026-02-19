@@ -1,3 +1,5 @@
+use core::sync::atomic::AtomicU64;
+
 use x86_64::{
     VirtAddr,
     structures::paging::{
@@ -8,6 +10,7 @@ use x86_64::{
 use crate::memory::{paging::FRAME_ALLOCATOR, utils::apply_offset};
 
 pub const USER_STACK_BOTTOM: u64 = 0x7000_0000_0000;
+static KERNEL_STACK: AtomicU64 = AtomicU64::new(0x3333_0000);
 
 /// Returns the virtual address of the stack top
 /// and the offsetted physical address of the stack top
@@ -51,4 +54,35 @@ pub fn allocate_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> (Virt
         // Adds 4KiB because of off-by-one or something idk
         VirtAddr::new(apply_offset(last_frame.unwrap().start_address().as_u64()) + 4096),
     )
+}
+
+pub fn allocate_kernel_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> VirtAddr {
+    let guard_page = allocate_kernel_page(pages);
+    let start = guard_page + 1;
+    let mut frame_allocator = FRAME_ALLOCATOR.try_get().unwrap().lock();
+
+    for i in 0..pages {
+        let page = start + i;
+        let frame = frame_allocator.allocate_frame().expect("Memory full.");
+
+        unsafe {
+            table
+                .map_to(
+                    page,
+                    frame,
+                    PageTableFlags::PRESENT | PageTableFlags::WRITABLE,
+                    &mut *frame_allocator,
+                )
+                .unwrap()
+                .flush();
+        };
+    }
+
+    (start + pages).start_address()
+}
+
+fn allocate_kernel_page(count: u64) -> Page<Size4KiB> {
+    Page::containing_address(VirtAddr::new(
+        KERNEL_STACK.fetch_add((count + 1) * 4096, core::sync::atomic::Ordering::Relaxed),
+    ))
 }

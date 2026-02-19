@@ -1,9 +1,14 @@
+use core::iter::empty;
+
 use x86_64::{VirtAddr, registers::control::Cr3Flags};
 
 use crate::{
     gdt::GDT,
     memory::page_table_wrapper::PageTableWrapped,
-    multitasking::{exit_handling::exit_handler, memory::allocate_stack},
+    multitasking::{
+        exit_handling::exit_handler,
+        memory::{allocate_kernel_stack, allocate_stack},
+    },
     userspace::elf_loader::Function,
     utils::misc::{calc_cr3_value, write_and_sub},
 };
@@ -16,18 +21,24 @@ use crate::{
 pub struct Context {
     cr3: u64, // +0
     rsp: u64, // +8
+
     r15: u64, // +16
     r14: u64, // +24
     r13: u64, // +32
     r12: u64, // +40
     rbx: u64, // +48
     rbp: u64, // +56
+
+    ss: u64,       // +64
+    user_rsp: u64, // +72
+    rflags: u64,   // +80
+    cs: u64,       // +88
+    rip: u64,      // +96
 }
 
 impl Context {
     fn new(entry_point: u64, table: &mut PageTableWrapped, context_type: ContextType) -> Self {
         let (virt_stack_addr, write_addr) = allocate_stack(16, &mut table.inner);
-        let mut write_ptr: *mut u64 = (write_addr).as_mut_ptr();
 
         // Now the rsp is pointing at the stack top
         // under the entry point and all the other bs (r15-rbp)
@@ -41,13 +52,18 @@ impl Context {
         // EMPTY SPACE <-
         Self {
             cr3: calc_cr3_value(table.frame.start_address(), Cr3Flags::empty()),
-            rsp: init_memory(&mut write_ptr, entry_point, virt_stack_addr, context_type),
+            rsp: allocate_kernel_stack(16, &mut table.inner).as_u64(),
+            user_rsp: virt_stack_addr.as_u64(),
             r15: 0,
             r14: 0,
             r13: 0,
             r12: 0,
             rbx: 0,
             rbp: 0,
+            ss: GDT.1.user_data.0 as u64,
+            rflags: 0x202,
+            cs: GDT.1.user_code.0 as u64,
+            rip: entry_point,
         }
     }
 

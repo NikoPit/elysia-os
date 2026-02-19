@@ -5,7 +5,8 @@ use x86_64::{
 
 use crate::{
     interrupts::{print_stackframe, print_stackframe_m},
-    misc::hlt_loop, println,
+    misc::hlt_loop,
+    println,
     tss::DOUBLE_FAULT_IST_LOCATION,
 };
 

@@ -9,6 +9,7 @@ use crate::{
         switch::{context_switch, context_switch_zombie},
     },
     s_print,
+    tss::TSS,
 };
 
 impl Manager {
@@ -40,6 +41,10 @@ impl Manager {
 
         self.current = Some(next_task.pid);
 
+        unsafe {
+            TSS.privilege_stack_table[0] = next_task.kernel_stack_top;
+        }
+
         (current_task_ptr, next_task.context.as_ptr())
     }
 
@@ -60,6 +65,10 @@ impl Manager {
         next_task.state = State::Running;
 
         self.current = Some(next_task.pid);
+
+        unsafe {
+            TSS.privilege_stack_table[0] = next_task.kernel_stack_top;
+        }
 
         next_task.context.as_ptr()
     }

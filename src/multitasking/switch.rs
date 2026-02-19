@@ -18,31 +18,35 @@ pub unsafe extern "C" fn context_switch(current: *mut Context, next: *mut Contex
         // just ask ai lol
         //
         // Saves the registers into the context struct
+        // note to future me: the [] basically means refrence
+        // Updates the rsp of the context of the current process
+        // current.rsp = rsp;
+        "mov [rdi + 8], rsp",
         "mov [rdi + 56], rbp",
         "mov [rdi + 48], rbx",
         "mov [rdi + 40], r12",
         "mov [rdi + 32], r13",
         "mov [rdi + 24], r14",
         "mov [rdi + 16], r15",
-        // Pushes the rflags
-        // note to future me: the [] basically means refrence
-        // Updates the rsp of the context of the current process
-        // current.rsp = rsp;
-        "mov [rdi + 8], rsp",
         // Updates the page table
         // No need to save the current page table
         // because the pagetable for each process
         // should always be the same
         "mov rax, [rsi]",
         "mov cr3, rax",
-        // rsp = &next.rsp; (rsi = second arg)
-        "mov rsp, [rsi + 8]",
         "mov r15, [rsi + 16]",
         "mov r14, [rsi + 24]",
         "mov r13, [rsi + 32]",
         "mov r12, [rsi + 40]",
         "mov rbx, [rsi + 48]",
         "mov rbp, [rsi + 56]",
+        // rsp = &next.rsp; (rsi = second arg)
+        "mov rsp, [rsi + 8]",
+        "push [rsi + 64]",
+        "push [rsi + 72]",
+        "push [rsi + 80]",
+        "push [rsi + 88]",
+        "push [rsi + 96]",
         // Go back to the instruction pointer that the process is at
         // (its on the stack top right now so RET will go there)
         // We dont have to explicitly push it or something

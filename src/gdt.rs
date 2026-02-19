@@ -5,7 +5,7 @@ use x86_64::{
     structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector},
 };
 
-use crate::tss;
+use crate::tss::{self, TSS};
 
 lazy_static! {
     pub static ref GDT: (GlobalDescriptorTable, GDTSelectors)= {
@@ -14,7 +14,7 @@ lazy_static! {
         // a selector is just a fancy way of saying index. it stores the index and
         // other stuffs about the GDT entry
         let kernel_code_selector = gdt.append(Descriptor::kernel_code_segment());
-        let tss_selector = gdt.append(Descriptor::tss_segment(&tss::TSS));
+        let tss_selector = gdt.append(Descriptor::tss_segment(tss::get_ref()));
 
         let user_code = gdt.append(Descriptor::user_code_segment());
         let user_data = gdt.append(Descriptor::user_data_segment());

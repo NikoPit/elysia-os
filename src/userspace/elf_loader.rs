@@ -9,14 +9,19 @@ use elfloader::ElfBinary;
 use x86_64::{
     PhysAddr, VirtAddr,
     structures::paging::{
-        Mapper, OffsetPageTable, Page, PageTableFlags, PhysFrame, Size4KiB, Translate,
+        FrameAllocator, Mapper, OffsetPageTable, Page, PageTableFlags, PhysFrame, Size4KiB,
+        Translate, mapper::MapToError,
     },
 };
 use xmas_elf::{ElfFile, program};
 
-use crate::memory::{
-    paging::{FRAME_ALLOCATOR, MAPPER},
-    utils::{apply_offset, map_area, map_size},
+use crate::{
+    memory::{
+        page_table_wrapper::PageTableWrapped,
+        paging::{FRAME_ALLOCATOR, MAPPER},
+        utils::{apply_offset, page_range_from_size},
+    },
+    println, s_println,
 };
 
 pub type Function = *const extern "C" fn() -> !;
@@ -25,30 +30,55 @@ pub type Function = *const extern "C" fn() -> !;
 // code need to be loaded where, and which parts of the file are instructions,
 // which parts are memory, and which parts of the memory are read-only.
 #[derive(Debug)]
-pub struct ElfLoader {
-    page_table: &'static mut OffsetPageTable<'static>,
+pub struct ElfLoader<'a> {
+    page_table: &'a mut OffsetPageTable<'static>,
 }
 
-impl ElfLoader {
-    pub fn new(page_table: &'static mut OffsetPageTable<'static>) -> Self {
+impl<'a> ElfLoader<'a> {
+    pub fn new(page_table: &'a mut OffsetPageTable<'static>) -> Self {
         Self { page_table }
     }
 }
 
-impl elfloader::ElfLoader for ElfLoader {
+impl<'a> elfloader::ElfLoader for ElfLoader<'a> {
     fn allocate(
         &mut self,
         load_headers: elfloader::LoadableHeaders,
     ) -> Result<(), elfloader::ElfLoaderErr> {
         for header in load_headers {
             // TODO: use the proper flags
-            map_size(
-                self.page_table,
-                header.virtual_addr(),
-                header.mem_size(),
-                PageTableFlags::all(),
-            )
-            .unwrap();
+            let page_range = page_range_from_size(header.virtual_addr(), header.mem_size());
+            let flags = PageTableFlags::USER_ACCESSIBLE
+                | PageTableFlags::PRESENT
+                | PageTableFlags::WRITABLE;
+
+            for page in page_range {
+                if let Ok(_frame) = self.page_table.translate_page(page) {
+                    unsafe {
+                        self.page_table.update_flags(page, flags).unwrap().flush();
+                    }
+                    continue;
+                }
+
+                let frame = FRAME_ALLOCATOR
+                    .get()
+                    .unwrap()
+                    .lock()
+                    .allocate_frame()
+                    .unwrap();
+
+                unsafe {
+                    self.page_table
+                        .map_to(
+                            page,
+                            frame,
+                            flags,
+                            &mut *FRAME_ALLOCATOR.get().unwrap().lock(),
+                        )
+                        .unwrap()
+                        .flush();
+                };
+            }
         }
         Ok(())
     }
@@ -95,12 +125,18 @@ impl elfloader::ElfLoader for ElfLoader {
 }
 
 /// Returns the entry point
-pub fn load_elf(page_table: &'static mut OffsetPageTable<'static>, program: &[u8]) -> Function {
+pub fn load_elf(page_table: &mut PageTableWrapped, program: &[u8]) -> Function {
     let binary = ElfBinary::new(program).expect("Failed to parse elf binary");
 
+    s_println!("{:?}", program as *const [u8]);
+
     binary
-        .load(&mut ElfLoader::new(page_table))
+        .load(&mut ElfLoader::new(&mut page_table.inner))
         .expect("Failed to load ELF");
 
-    binary.entry_point() as Function
+    let entry_point = binary.entry_point() as Function;
+
+    s_println!("{:?}", entry_point);
+
+    entry_point
 }

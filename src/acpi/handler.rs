@@ -3,10 +3,7 @@ use core::ptr::NonNull;
 use acpi::{Handler, PhysicalMapping};
 use x86_64::instructions::port::Port;
 
-use crate::{
-    memory::utils::get_offsetted_location, read_addr, read_port,
-    write_addr, write_port,
-};
+use crate::{memory::utils::apply_offset, read_addr, read_port, write_addr, write_port};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ACPIHandler;
@@ -24,8 +21,7 @@ impl Handler for ACPIHandler {
             mapped_length: size,
             handler: self.clone(),
             region_length: size,
-            virtual_start: NonNull::new(get_offsetted_location(physical_address as u64) as *mut T)
-                .unwrap(),
+            virtual_start: NonNull::new(apply_offset(physical_address as u64) as *mut T).unwrap(),
         }
     }
 

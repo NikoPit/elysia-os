@@ -23,6 +23,7 @@ use elysia_os::multitasking::kernel_task::executor::Executor;
 use elysia_os::multitasking::kernel_task::task::Task;
 use elysia_os::multitasking::scheduling::run_next;
 use elysia_os::println;
+use elysia_os::userspace::elf_loader::load_elf;
 use elysia_os::{init, s_println};
 
 entry_point!(k_main);

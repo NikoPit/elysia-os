@@ -28,11 +28,21 @@ pub struct Manager {
     pub idle_process: Option<ProcessID>,
 }
 
+#[repr(align(8))]
+struct AlignedElf {
+    data: [u8; include_bytes!("../../../test-init/target/x86_64-elysia-os/debug/test-init").len()],
+}
+
+// 使用这个结构体来包裹你的 ELF
+static ELF_HOLDER: AlignedElf = AlignedElf {
+    data: *include_bytes!("../../../test-init/target/x86_64-elysia-os/debug/test-init"),
+};
+
 impl Manager {
     pub fn init(&mut self) {
         without_interrupts(|| {
             let kernel_process = Process::default();
-            let idle_process = Process::new(idle as Function);
+            let idle_process = Process::new(&ELF_HOLDER.data);
 
             self.current = Some(kernel_process.pid);
             self.processes.insert(kernel_process.pid, kernel_process);
@@ -41,14 +51,12 @@ impl Manager {
             self.processes.insert(idle_process.pid, idle_process);
 
             // TODO: remove these test processes
-            self.spawn(test3 as Function);
-            self.spawn(testz as Function);
-            self.spawn(test2 as Function);
+            self.spawn(&ELF_HOLDER.data);
         });
     }
 
-    pub fn spawn(&mut self, entry_point: Function) {
-        let process = Process::new(entry_point);
+    pub fn spawn(&mut self, program: &[u8]) {
+        let process = Process::new(program);
         let pid = process.pid;
         self.processes.insert(pid, process);
         self.queue.push_back(pid);
