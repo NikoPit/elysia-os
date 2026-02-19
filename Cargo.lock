@@ -115,6 +115,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "460fbee9c2c2f33933d720630a6a0bac33ba7053db5344fac858d4b8952d77d5"
 
 [[package]]
+name = "elfloader"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a7b18d35bf8ec3bac59c3ec29cf1f1b46e764e00b42a9c0c754d06e38e78f3b"
+dependencies = [
+ "bitflags 1.3.2",
+ "log",
+ "xmas-elf 0.8.0",
+]
+
+[[package]]
 name = "elysia-os"
 version = "0.1.0"
 dependencies = [
@@ -123,6 +134,7 @@ dependencies = [
  "conquer-once",
  "const-random",
  "crossbeam-queue",
+ "elfloader",
  "futures-util",
  "lazy_static",
  "linked_list_allocator",
@@ -135,7 +147,7 @@ dependencies = [
  "uart_16550",
  "volatile 0.6.1",
  "x86_64 0.15.4",
- "xmas-elf",
+ "xmas-elf 0.10.0",
 ]
 
 [[package]]
@@ -426,6 +438,15 @@ dependencies = [
  "const_fn",
  "rustversion",
  "volatile 0.4.6",
+]
+
+[[package]]
+name = "xmas-elf"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d29b4d8e7beaceb4e77447ba941a7600d23d0319ab52da0461abea214832d5a"
+dependencies = [
+ "zero",
 ]
 
 [[package]]

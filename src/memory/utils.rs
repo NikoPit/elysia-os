@@ -1,8 +1,8 @@
 use x86_64::{
     VirtAddr,
     structures::paging::{
-        FrameAllocator, Mapper, Page, PageTable, PageTableFlags, PhysFrame, Size4KiB,
-        mapper::MapToError, page_table::PageTableEntry,
+        FrameAllocator, Mapper, OffsetPageTable, Page, PageTable, PageTableFlags, PhysFrame,
+        Size4KiB, mapper::MapToError, page_table::PageTableEntry,
     },
 };
 
@@ -49,11 +49,21 @@ pub fn apply_offset(num: u64) -> u64 {
     num + get_os().phys_mem_offset.unwrap().as_u64()
 }
 
-pub fn map_size(start: u64, size: u64) -> Result<(), MapToError<Size4KiB>> {
-    map_area(start, start + size - 1u64)
+pub fn map_size(
+    mapper: &mut OffsetPageTable<'static>,
+    start: u64,
+    size: u64,
+    flags: PageTableFlags,
+) -> Result<(), MapToError<Size4KiB>> {
+    map_area(mapper, start, start + size - 1u64, flags)
 }
 
-pub fn map_area(start: u64, end: u64) -> Result<(), MapToError<Size4KiB>> {
+pub fn map_area(
+    mapper: &mut OffsetPageTable,
+    start: u64,
+    end: u64,
+    flags: PageTableFlags,
+) -> Result<(), MapToError<Size4KiB>> {
     let page_range = {
         let heap_start = VirtAddr::new(start);
         let heap_end = VirtAddr::new(end);
@@ -70,12 +80,8 @@ pub fn map_area(start: u64, end: u64) -> Result<(), MapToError<Size4KiB>> {
             .lock()
             .allocate_frame()
             .ok_or(MapToError::FrameAllocationFailed)?;
-        let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
         unsafe {
-            MAPPER
-                .get()
-                .unwrap()
-                .lock()
+            mapper
                 .map_to(
                     page,
                     frame,

@@ -1,78 +1,106 @@
+use core::{cmp::min, ptr::copy_nonoverlapping};
+
 use alloc::{
     collections::{btree_map::Range, vec_deque::VecDeque},
     vec::Vec,
 };
 use bootloader::bootinfo::FrameRange;
+use elfloader::ElfBinary;
 use x86_64::{
     PhysAddr, VirtAddr,
-    structures::paging::{Mapper, Page, PageTableFlags, PhysFrame, Size4KiB, Translate},
+    structures::paging::{
+        Mapper, OffsetPageTable, Page, PageTableFlags, PhysFrame, Size4KiB, Translate,
+    },
 };
 use xmas_elf::{ElfFile, program};
 
-use crate::memory::paging::{FRAME_ALLOCATOR, MAPPER};
+use crate::memory::{
+    paging::{FRAME_ALLOCATOR, MAPPER},
+    utils::{apply_offset, map_area, map_size},
+};
 
 pub type Function = *const extern "C" fn() -> !;
 
 // ELF is a file format that contains the actual code and instructions on which parts of the
 // code need to be loaded where, and which parts of the file are instructions,
 // which parts are memory, and which parts of the memory are read-only.
-#[derive()]
+#[derive(Debug)]
 pub struct ElfLoader {
-    pub file: ElfFile<'static>,
+    page_table: &'static mut OffsetPageTable<'static>,
 }
 
 impl ElfLoader {
-    pub fn new(file: &'static [u8]) -> Self {
-        let file = ElfFile::new(file).expect("Failed to parse elf file");
-
-        Self { file: file }
+    pub fn new(page_table: &'static mut OffsetPageTable<'static>) -> Self {
+        Self { page_table }
     }
+}
 
-    pub fn load(&mut self) -> Function {
-        // Loads all the segments that required loading into memory
-        for segment in self
-            .file
-            .program_iter()
-            .filter(|p| p.get_type().unwrap() == program::Type::Load)
-        {
-            let file_origin = MAPPER
-                .try_get()
-                .unwrap()
-                .lock()
-                .translate_addr(VirtAddr::from_ptr(self.file.input.as_ptr()));
-
-            let virt_start = VirtAddr::new(segment.virtual_addr());
-            let virt_end = virt_start + segment.mem_size();
-
-            let phys_start = PhysAddr::new(segment.physical_addr());
-            let phys_end = phys_start + segment.mem_size();
-
-            let page_start: Page<Size4KiB> = Page::containing_address(virt_start);
-            let page_end = Page::containing_address(virt_end - 1u64);
-
-            let frame_start: PhysFrame<Size4KiB> = PhysFrame::containing_address(phys_start);
-            let frame_end = PhysFrame::containing_address(phys_end - 1u64);
-
-            for ele in Page::range_inclusive(page_start, page_end)
-                .zip(PhysFrame::range_inclusive(frame_start, frame_end))
-            {
-                unsafe {
-                    MAPPER
-                        .try_get()
-                        .unwrap()
-                        .lock()
-                        .map_to(
-                            ele.0,
-                            ele.1,
-                            PageTableFlags::all(),
-                            &mut *FRAME_ALLOCATOR.try_get().unwrap().lock(),
-                        )
-                        .unwrap()
-                        .flush();
-                }
-            }
+impl elfloader::ElfLoader for ElfLoader {
+    fn allocate(
+        &mut self,
+        load_headers: elfloader::LoadableHeaders,
+    ) -> Result<(), elfloader::ElfLoaderErr> {
+        for header in load_headers {
+            // TODO: use the proper flags
+            map_size(
+                self.page_table,
+                header.virtual_addr(),
+                header.mem_size(),
+                PageTableFlags::all(),
+            )
+            .unwrap();
         }
-
-        self.file.header.pt2.entry_point() as Function
+        Ok(())
     }
+
+    fn load(
+        &mut self,
+        flags: elfloader::Flags,
+        base: elfloader::VAddr,
+        region: &[u8],
+    ) -> Result<(), elfloader::ElfLoaderErr> {
+        let addr = VirtAddr::new(base);
+        let mut offset = 0;
+
+        while offset < region.len() {
+            let addr = addr + offset as u64;
+            let phys_addr = self.page_table.translate_addr(addr).unwrap();
+            let phys_addr = apply_offset(phys_addr.as_u64());
+
+            // Get how long the page lasts (We dont want to accidently write to
+            // a different page, which might not be connected on the physical memory)
+            let page_offset = phys_addr & 0xfff;
+            let write_len = min(region.len() - offset, (4096 - page_offset) as usize);
+
+            unsafe {
+                copy_nonoverlapping(
+                    // TODO is this correct?
+                    region[offset..offset + write_len].as_ptr(),
+                    phys_addr as *mut u8,
+                    write_len,
+                );
+            }
+
+            offset += write_len;
+        }
+        Ok(())
+    }
+
+    fn relocate(
+        &mut self,
+        _entry: elfloader::RelocationEntry,
+    ) -> Result<(), elfloader::ElfLoaderErr> {
+        Ok(())
+    }
+}
+
+/// Returns the entry point
+pub fn load_elf(page_table: &'static mut OffsetPageTable<'static>, program: &[u8]) -> Function {
+    let binary = ElfBinary::new(program).expect("Failed to parse elf binary");
+
+    binary
+        .load(&mut ElfLoader::new(page_table))
+        .expect("Failed to load ELF");
+
+    binary.entry_point() as Function
 }
