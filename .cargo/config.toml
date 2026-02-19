@@ -8,3 +8,9 @@ target = "x86_64-elysia-os.json"
 
 [target.'cfg(target_os = "none")']
 runner = "bootimage runner"
+
+rustflags = [
+    # 告诉链接器将内核起始地址设为高地址 (Higher Half)
+    # 0xffffffff80000000 是 x86_64 常见的内核位置
+    "-C", "link-args=-z max-page-size=0x1000 -Ttext=0xffffffff80000000"
+]

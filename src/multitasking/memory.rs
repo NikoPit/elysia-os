@@ -9,7 +9,7 @@ use x86_64::{
 
 use crate::memory::{paging::FRAME_ALLOCATOR, utils::apply_offset};
 
-pub const USER_STACK_BOTTOM: u64 = 0x7000_0000_0000;
+pub const USER_STACK_BOTTOM: u64 = 0x2000_0000_0000;
 static KERNEL_STACK: AtomicU64 = AtomicU64::new(0x3333_0000);
 
 /// Returns the virtual address of the stack top

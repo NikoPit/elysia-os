@@ -36,15 +36,11 @@ pub fn copy_kernel_mapping(table: &mut PageTable) {
     let kernel_l4 = l4_binding.level_4_table();
     //s_println!("{:#?}", kernel_l4[0]);
 
-    for i in 0..512 {
+    for i in 128..512 {
         table[i] = kernel_l4[i].clone();
     }
 
-    // TODO: idk if this is a good idea
-    let stack_p4_index = VirtAddr::new(USER_STACK_BOTTOM).p4_index();
-    table[usize::from(stack_p4_index)] = PageTableEntry::new(); // 清空这一项
-    let tmp = VirtAddr::new(0x4000_0000_0000).p4_index();
-    table[usize::from(tmp)] = PageTableEntry::new();
+    s_println!("{:?}", kernel_l4[0].clone());
 }
 
 pub fn apply_offset(num: u64) -> u64 {
