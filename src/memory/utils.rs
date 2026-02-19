@@ -44,7 +44,6 @@ pub fn copy_kernel_mapping(table: &mut PageTable) {
     let stack_p4_index = VirtAddr::new(USER_STACK_BOTTOM).p4_index();
     table[usize::from(stack_p4_index)] = PageTableEntry::new(); // 清空这一项
     let tmp = VirtAddr::new(0x4000_0000_0000).p4_index();
-    s_println!("{:?}", tmp);
     table[usize::from(tmp)] = PageTableEntry::new();
 }
 

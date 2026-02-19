@@ -18,12 +18,11 @@ static KERNEL_STACK: AtomicU64 = AtomicU64::new(0x3333_0000);
 /// Note: The phys addr of the stack top is the addr of the
 /// last frame, so if you writes more then 4KiB of memory
 /// it will cause undefined behaviour
-pub fn allocate_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> (VirtAddr, VirtAddr) {
+pub fn allocate_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> VirtAddr {
     // skips the guard page
     let guard_page = Page::containing_address(VirtAddr::new(USER_STACK_BOTTOM));
 
     let mut frame_allocator = FRAME_ALLOCATOR.try_get().unwrap().lock();
-    let mut last_frame: Option<PhysFrame> = None;
 
     let start = guard_page + 1;
     for i in 0..pages {
@@ -43,17 +42,10 @@ pub fn allocate_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> (Virt
                 .unwrap()
                 .flush();
         };
-
-        last_frame = Some(frame);
     }
 
-    (
-        // Stack top
-        (start + pages).start_address(),
-        // offsetted physical address of stack top
-        // Adds 4KiB because of off-by-one or something idk
-        VirtAddr::new(apply_offset(last_frame.unwrap().start_address().as_u64()) + 4096),
-    )
+    // Stack top
+    (start + pages).start_address()
 }
 
 pub fn allocate_kernel_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> VirtAddr {

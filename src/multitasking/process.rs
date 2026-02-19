@@ -37,9 +37,7 @@ impl Process {
     pub fn new(program: &[u8]) -> Self {
         let mut table = PageTableWrapped::default();
         let entry_point = load_elf(&mut table, program);
-        let result = table.inner.translate(VirtAddr::new(0x4000_0000_0000));
-        s_println!("{:?}", result);
-        let contxt = Context::user(entry_point as u64, &mut table);
+        let contxt = Context::new(entry_point as u64, &mut table);
         let kernel_stack_top = allocate_kernel_stack(16, &mut table.inner);
 
         Self {
