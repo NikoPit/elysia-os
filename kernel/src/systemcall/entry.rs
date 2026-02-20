@@ -5,6 +5,11 @@ use crate::print;
 #[unsafe(naked)]
 pub extern "C" fn syscall_entry() {
     core::arch::naked_asm!(
+        "swapgs",
+        // Saves the userspace RSP into gs
+        "mov gs:[0x8], rsp",
+        // loads the stack saved in gs
+        "mov rsp, gs:[0x0]",
         // Pushing arguments required for SyscallSnapshot
         "push rcx",
         "push r11",
@@ -25,6 +30,9 @@ pub extern "C" fn syscall_entry() {
         "pop rax", // rust have modified it to be the return value
         "pop r11",
         "pop rcx",
+        // Loads the userspace rsp from gs
+        "mov rsp, gs:[0x8]",
+        "swapgs",
         // resume the state
         "sysret"
     )

@@ -10,7 +10,7 @@ use crate::{
     exception_interrupt::init_exception_interrupts,
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET, init_hardware_interrupts},
     os::get_os,
-    print, println, test,
+    print, println, s_println, test,
     vga_print::PICS,
 };
 use lazy_static::lazy_static;
@@ -36,7 +36,7 @@ pub fn init() {
 }
 
 pub fn print_stackframe_m(stack_frame: InterruptStackFrame) {
-    println!("{:#?}", stack_frame);
+    s_println!("{:#?}", stack_frame);
 }
 
 pub fn print_stackframe(message: &str, stack_frame: InterruptStackFrame) {

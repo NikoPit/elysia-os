@@ -1,4 +1,27 @@
+use alloc::boxed::Box;
+use conquer_once::spin::OnceCell;
 use x86_64::instructions::hlt;
+
+use crate::{
+    memory::paging::MAPPER, misc::others::CpuCoreContext,
+    multitasking::memory::allocate_kernel_stack,
+};
+
+pub mod others;
+
+pub static CPU_CORE_CONTEXT: OnceCell<&mut CpuCoreContext> = OnceCell::uninit();
+
+pub fn init() {
+    CPU_CORE_CONTEXT
+        .try_get_or_init(|| {
+            Box::leak(Box::new(CpuCoreContext {
+                gs_kernel_stack_top: allocate_kernel_stack(16, &mut MAPPER.get().unwrap().lock())
+                    .as_u64(),
+                gs_user_stack_top: 0,
+            }))
+        })
+        .unwrap();
+}
 
 pub fn hlt_loop() -> ! {
     loop {

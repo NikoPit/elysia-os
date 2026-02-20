@@ -61,6 +61,7 @@ pub fn init(bootinfo: &'static BootInfo) {
     tss::init();
     memory::init(bootinfo);
     gdt::init();
+    misc::init();
     systemcall::init();
     acpi::init();
     multitasking::init();
