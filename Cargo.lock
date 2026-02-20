@@ -126,31 +126,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "elysia-os"
-version = "0.1.0"
-dependencies = [
- "acpi",
- "bootloader",
- "conquer-once",
- "const-random",
- "crossbeam-queue",
- "elfloader",
- "futures-util",
- "lazy_static",
- "linked_list_allocator",
- "num_enum",
- "paste",
- "pc-keyboard",
- "pic8259",
- "qemu-exit",
- "spin 0.5.2",
- "uart_16550",
- "volatile 0.6.1",
- "x86_64 0.15.4",
- "xmas-elf 0.10.0",
-]
-
-[[package]]
 name = "futures-core"
 version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -183,6 +158,31 @@ dependencies = [
  "cfg-if",
  "libc",
  "wasi",
+]
+
+[[package]]
+name = "kernel"
+version = "0.1.0"
+dependencies = [
+ "acpi",
+ "bootloader",
+ "conquer-once",
+ "const-random",
+ "crossbeam-queue",
+ "elfloader",
+ "futures-util",
+ "lazy_static",
+ "linked_list_allocator",
+ "num_enum",
+ "paste",
+ "pc-keyboard",
+ "pic8259",
+ "qemu-exit",
+ "spin 0.5.2",
+ "uart_16550",
+ "volatile 0.6.1",
+ "x86_64 0.15.4",
+ "xmas-elf 0.10.0",
 ]
 
 [[package]]

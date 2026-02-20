@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 #![feature(custom_test_frameworks)]
-#![test_runner(elysia_os::testing::run_tests)]
+#![test_runner(kernel::testing::run_tests)]
 #![reexport_test_harness_main = "test_main"]
 
 extern crate alloc;
@@ -15,7 +15,7 @@ use alloc::{
 use bootloader::{BootInfo, entry_point};
 use core::panic::PanicInfo;
 use crossbeam_queue::ArrayQueue;
-use elysia_os::{
+use kernel::{
     init, memory::heap::HEAP_SIZE, misc::hlt_loop, multitasking::task::TaskID,
     panic_handler::test_handle_panic, test,
 };

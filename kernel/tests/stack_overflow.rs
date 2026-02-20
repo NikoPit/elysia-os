@@ -7,10 +7,10 @@
 #![test_runner(testing::run_tests)]
 use bootloader::BootInfo;
 use bootloader::entry_point;
-use elysia_os::debug_exit::debug_exit;
-use elysia_os::init;
-use elysia_os::s_print;
-use elysia_os::s_println;
+use kernel::debug_exit::debug_exit;
+use kernel::init;
+use kernel::s_print;
+use kernel::s_println;
 // Disable dynamic linking with the std library because there is no std library in our own os
 
 use core::panic::PanicInfo;
@@ -26,7 +26,7 @@ fn _start(bootinfo: &'static BootInfo) -> ! {
 
     s_println!("[FAILED]\n");
     s_println!("Test continued to run after stack overflow\n");
-    debug_exit(elysia_os::debug_exit::QemuExitCode::Failed);
+    debug_exit(kernel::debug_exit::QemuExitCode::Failed);
 
     loop {}
 }
@@ -40,6 +40,6 @@ fn stack_overflow() {
 fn panic(_info: &PanicInfo) -> ! {
     s_println!("[OK]\n");
     s_println!("Test success!");
-    debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
+    debug_exit(kernel::debug_exit::QemuExitCode::Success);
     loop {}
 }

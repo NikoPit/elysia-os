@@ -7,20 +7,20 @@
 #![test_runner(testing::run_tests)]
 use bootloader::BootInfo;
 use bootloader::entry_point;
-use elysia_os::debug_exit::debug_exit;
-use elysia_os::hardware_interrupt::HardwareInterrupt;
-use elysia_os::init;
-use elysia_os::print;
-use elysia_os::s_print;
-use elysia_os::s_println;
-use elysia_os::testing;
+use kernel::debug_exit::debug_exit;
+use kernel::hardware_interrupt::HardwareInterrupt;
+use kernel::init;
+use kernel::print;
+use kernel::s_print;
+use kernel::s_println;
+use kernel::testing;
 use x86_64::structures::idt::InterruptDescriptorTable;
 use x86_64::structures::idt::InterruptStackFrame;
 // Disable dynamic linking with the std library because there is no std library in our own os
 
 use core::panic::PanicInfo;
 
-use elysia_os::panic_handler::test_handle_panic;
+use kernel::panic_handler::test_handle_panic;
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -49,7 +49,7 @@ fn _start(bootinfo: &'static BootInfo) -> ! {
     }
 
     s_println!("[OK]\n");
-    debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
+    debug_exit(kernel::debug_exit::QemuExitCode::Success);
 
     loop {}
 }

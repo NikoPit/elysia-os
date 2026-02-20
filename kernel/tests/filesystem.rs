@@ -3,12 +3,12 @@
 #![no_main]
 #![feature(abi_x86_interrupt, custom_test_frameworks)]
 #![reexport_test_harness_main = "test_main"]
-#![test_runner(elysia_os::testing::run_tests)]
+#![test_runner(kernel::testing::run_tests)]
 
 use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
-use elysia_os::{
+use kernel::{
     debug_exit::debug_exit, init, misc::hlt_loop, panic_handler::test_handle_panic, s_println,
 };
 
@@ -20,7 +20,7 @@ fn k_main(bootinfo: &'static BootInfo) -> ! {
     test_main();
 
     s_println!("\nSomething went wrong. Process contiuned after test");
-    debug_exit(elysia_os::debug_exit::QemuExitCode::Failed);
+    debug_exit(kernel::debug_exit::QemuExitCode::Failed);
 
     hlt_loop();
 }
@@ -29,7 +29,7 @@ extern crate alloc;
 
 use alloc::string::ToString;
 
-use elysia_os::{
+use kernel::{
     filesystem::{
         path::Path,
         vfs::{FileData, VirtualFS},

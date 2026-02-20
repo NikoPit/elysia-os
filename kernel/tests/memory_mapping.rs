@@ -7,14 +7,14 @@
 #![test_runner(testing::run_tests)]
 use bootloader::BootInfo;
 use bootloader::entry_point;
-use elysia_os::debug_exit::debug_exit;
-use elysia_os::init;
-use elysia_os::memory::paging::FRAME_ALLOCATOR;
-use elysia_os::memory::paging::MAPPER;
-use elysia_os::misc::hlt_loop;
-use elysia_os::s_print;
-use elysia_os::s_println;
-use elysia_os::testing;
+use kernel::debug_exit::debug_exit;
+use kernel::init;
+use kernel::memory::paging::FRAME_ALLOCATOR;
+use kernel::memory::paging::MAPPER;
+use kernel::misc::hlt_loop;
+use kernel::s_print;
+use kernel::s_println;
+use kernel::testing;
 use x86_64::PhysAddr;
 use x86_64::VirtAddr;
 use x86_64::structures::paging::FrameAllocator;
@@ -27,7 +27,7 @@ use x86_64::structures::paging::Size4KiB;
 
 use core::panic::PanicInfo;
 
-use elysia_os::panic_handler::test_handle_panic;
+use kernel::panic_handler::test_handle_panic;
 
 const RANDOM_ADDR: u64 = 0x153212562324;
 
@@ -54,7 +54,7 @@ fn _start(bootinfo: &'static BootInfo) -> ! {
     s_println!("--------------------------------------------------------");
     s_println!("not fully implemented");
 
-    debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
+    debug_exit(kernel::debug_exit::QemuExitCode::Success);
 
     hlt_loop();
 }

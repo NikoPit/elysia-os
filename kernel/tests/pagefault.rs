@@ -8,15 +8,15 @@
 #![allow(dead_code)]
 use bootloader::BootInfo;
 use bootloader::entry_point;
-use elysia_os::debug_exit::debug_exit;
-use elysia_os::misc::hlt_loop;
-use elysia_os::s_println;
-use elysia_os::testing;
+use kernel::debug_exit::debug_exit;
+use kernel::misc::hlt_loop;
+use kernel::s_println;
+use kernel::testing;
 // Disable dynamic linking with the std library because there is no std library in our own os
 
 use core::panic::PanicInfo;
 
-use elysia_os::panic_handler::test_handle_panic;
+use kernel::panic_handler::test_handle_panic;
 
 entry_point!(_start);
 fn _start(_bootinfo: &'static BootInfo) -> ! {
@@ -26,7 +26,7 @@ fn _start(_bootinfo: &'static BootInfo) -> ! {
     //pagefault();
 
     //s_print!("[OK]\n\n");
-    //debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
+    //debug_exit(kernel::debug_exit::QemuExitCode::Success);
 
     // TODO implement this. note for future me:
     // the reason that i didnt is becuase when the pagefault was successfully handled
@@ -40,7 +40,7 @@ fn _start(_bootinfo: &'static BootInfo) -> ! {
         "------------------------------------------------------------------------------------------"
     );
 
-    debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
+    debug_exit(kernel::debug_exit::QemuExitCode::Success);
 
     hlt_loop();
 }

@@ -3,7 +3,7 @@
 #![no_main]
 #![feature(abi_x86_interrupt, custom_test_frameworks, naked_functions)]
 #![reexport_test_harness_main = "test_main"]
-#![test_runner(elysia_os::testing::run_tests)]
+#![test_runner(kernel::testing::run_tests)]
 // renames main function for testing because we disabled main with #[no_main]
 // Disable dynamic linking with the std library because there is no std library in our own os
 //
@@ -14,23 +14,23 @@ use core::panic::PanicInfo;
 use alloc::string::ToString;
 use bootloader::{BootInfo, entry_point};
 #[cfg(test)]
-use elysia_os::debug_exit::debug_exit;
-use elysia_os::driver::keyboard::scancode_processing::process_keypresses;
-use elysia_os::filesystem::path::Path;
-use elysia_os::filesystem::vfs::{FileData, VirtualFS};
-use elysia_os::multitasking::MANAGER;
-use elysia_os::multitasking::kernel_task::executor::Executor;
-use elysia_os::multitasking::kernel_task::task::Task;
-use elysia_os::multitasking::scheduling::run_next;
-use elysia_os::println;
-use elysia_os::userspace::elf_loader::load_elf;
-use elysia_os::{init, s_println};
+use kernel::debug_exit::debug_exit;
+use kernel::driver::keyboard::scancode_processing::process_keypresses;
+use kernel::filesystem::path::Path;
+use kernel::filesystem::vfs::{FileData, VirtualFS};
+use kernel::multitasking::MANAGER;
+use kernel::multitasking::kernel_task::executor::Executor;
+use kernel::multitasking::kernel_task::task::Task;
+use kernel::multitasking::scheduling::run_next;
+use kernel::println;
+use kernel::userspace::elf_loader::load_elf;
+use kernel::{init, s_println};
 
 entry_point!(k_main);
 
 fn k_main(bootinfo: &'static BootInfo) -> ! {
     #[cfg(test)]
-    debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
+    debug_exit(kernel::debug_exit::QemuExitCode::Success);
     s_println!("Welcome  Elysia-OS v0.1.0");
 
     init(bootinfo);
@@ -55,13 +55,13 @@ async fn taskz() {
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     test_handle_panic(_info);
-    use elysia_os::panic_handler::test_handle_panic;
+    use kernel::panic_handler::test_handle_panic;
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    use elysia_os::panic_handler::handle_panic;
+    use kernel::panic_handler::handle_panic;
 
     handle_panic(_info);
 }
