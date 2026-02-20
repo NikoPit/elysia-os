@@ -33,7 +33,6 @@ struct AlignedElf {
     data: [u8; include_bytes!("../../../target/x86_64-elysia-os/debug/test-init").len()],
 }
 
-// 使用这个结构体来包裹你的 ELF
 static ELF_HOLDER: AlignedElf = AlignedElf {
     data: *include_bytes!("../../../target/x86_64-elysia-os/debug/test-init"),
 };
