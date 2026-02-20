@@ -265,6 +265,7 @@ dependencies = [
  "bootloader",
  "kernel",
  "ovmf-prebuilt",
+ "test-init",
 ]
 
 [[package]]

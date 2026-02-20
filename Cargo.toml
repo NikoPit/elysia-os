@@ -18,5 +18,9 @@ panic = "abort"
 ovmf-prebuilt = "0.2"
 
 [build-dependencies]
-kernel = { path = "kernel", artifact = "bin", target = "x86_64-unknown-none" }
 bootloader = "0.11"
+kernel = { path = "kernel", artifact = "bin", target = "x86_64-unknown-none" }
+
+# Automatically build everythign else with the kernel
+test-init = { path = "test-init", artifact = "bin", target = "x86_64-unknown-none"}
+
