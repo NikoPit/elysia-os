@@ -3,16 +3,6 @@ name = "kernel"
 version = "0.1.0"
 edition = "2024"
 
-# abort on panic
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"
-
-[profile.test]
-panic = "unwind"
-
 [dependencies]
 x86_64 = "0.15.4"
 xmas-elf = "0.10.0"
