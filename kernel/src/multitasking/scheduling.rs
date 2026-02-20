@@ -1,4 +1,4 @@
-use x86_64::instructions::interrupts::without_interrupts;
+use x86_64::{instructions::interrupts::without_interrupts, structures::idt::InterruptStackFrame};
 
 use crate::{
     multitasking::{
@@ -75,7 +75,7 @@ impl Manager {
 }
 
 pub fn run_next() {
-    let targets = {
+    let (current, next) = {
         without_interrupts(|| {
             let mut manager = MANAGER.lock();
             manager.run_next_unwrapped()
@@ -83,18 +83,18 @@ pub fn run_next() {
     };
 
     unsafe {
-        context_switch(targets.0, targets.1);
+        context_switch(current, next);
     }
 }
 
 /// runs the next process. called from a zombie process
 pub fn run_next_zombie() {
-    let target = without_interrupts(|| {
+    let next = without_interrupts(|| {
         let mut manager = MANAGER.lock();
         manager.run_next_zombie_unwrapped()
     });
 
     unsafe {
-        context_switch_zombie(target);
+        context_switch_zombie(next);
     }
 }
