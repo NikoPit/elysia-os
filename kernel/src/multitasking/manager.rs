@@ -2,7 +2,7 @@ use alloc::{
     collections::{btree_map::BTreeMap, vec_deque::VecDeque},
     vec::Vec,
 };
-use x86_64::instructions::interrupts::without_interrupts;
+use x86_64::{instructions::interrupts::without_interrupts, structures::idt::InterruptStackFrame};
 
 use crate::{
     hardware_interrupt::notify_end_of_interrupt,
@@ -69,6 +69,8 @@ impl Manager {
     }
 
     pub fn block_current(&mut self, block_type: BlockType) {
+        unimplemented!();
+
         let current = self.processes.get_mut(&self.current.unwrap()).unwrap();
 
         current.state = process::State::Blocked(block_type);
@@ -82,7 +84,7 @@ impl Manager {
             _ => {}
         }
 
-        run_next();
+        //run_next();
     }
 }
 

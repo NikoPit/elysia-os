@@ -69,6 +69,6 @@ impl HardwareInterruptHandler for TimerHandler {
     fn handle_hardware_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {
         notify_end_of_interrupt(Self::HARDWARE_INTERRUPT);
 
-        run_next();
+        run_next(_stack_frame);
     }
 }

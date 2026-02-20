@@ -30,12 +30,12 @@ pub struct Context {
     rbx: u64, // +48
     rbp: u64, // +56
 
-    ss: u64, // +64
+    pub ss: u64, // +64
     // The actural RSP when the program is running
-    user_rsp: u64, // +72
-    rflags: u64,   // +80
-    cs: u64,       // +88
-    rip: u64,      // +96
+    pub user_rsp: u64, // +72
+    pub rflags: u64,   // +80
+    pub cs: u64,       // +88
+    pub rip: u64,      // +96
 }
 
 impl Context {

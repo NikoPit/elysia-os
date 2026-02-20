@@ -74,7 +74,7 @@ impl Manager {
     }
 }
 
-pub fn run_next() {
+pub fn run_next(interrupt_stack_frame: InterruptStackFrame) {
     let (current, next) = {
         without_interrupts(|| {
             let mut manager = MANAGER.lock();
@@ -83,6 +83,9 @@ pub fn run_next() {
     };
 
     unsafe {
+        (*current).rip = interrupt_stack_frame.instruction_pointer.as_u64();
+        (*current).rflags = interrupt_stack_frame.cpu_flags.bits();
+
         context_switch(current, next);
     }
 }
