@@ -27,18 +27,23 @@ pub mod userspace;
 pub mod utils;
 pub mod vga_print;
 
+pub static BOOTLOADER_CONFIG: BootloaderConfig = {
+    let mut config = BootloaderConfig::new_default();
+    config.mappings.physical_memory = Some(Mapping::Dynamic);
+    config
+};
+
 #[cfg(test)]
 use core::panic::PanicInfo;
 
-use bootloader::BootInfo;
-#[cfg(test)]
-use bootloader::entry_point;
+use bootloader_api::{BootInfo, entry_point};
+use bootloader_api::{BootloaderConfig, config::Mapping};
 
 #[cfg(test)]
-entry_point!(test_k_main);
+entry_point!(test_k_main, config = &BOOTLOADER_CONFIG);
 
 #[cfg(test)]
-fn test_k_main(_boot_info: &'static BootInfo) -> ! {
+fn test_k_main(_boot_info: &'static mut BootInfo) -> ! {
     use crate::misc::hlt_loop;
 
     init(_boot_info);

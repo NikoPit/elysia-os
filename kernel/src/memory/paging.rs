@@ -1,7 +1,7 @@
 use alloc::sync::Arc;
-use bootloader::{
+use bootloader_api::{
     BootInfo,
-    bootinfo::{MemoryMap, MemoryRegionType},
+    info::{MemoryRegionKind, MemoryRegions},
 };
 use conquer_once::spin::OnceCell;
 use spin::Mutex;
@@ -20,8 +20,10 @@ pub static FRAME_ALLOCATOR: OnceCell<Arc<Mutex<BootinfoFrameAllocator>>> = OnceC
 pub fn init_mapper(bootinfo: &'static BootInfo) -> OffsetPageTable<'static> {
     unsafe {
         OffsetPageTable::new(
-            get_l4_table(VirtAddr::new(bootinfo.physical_memory_offset)),
-            VirtAddr::new(bootinfo.physical_memory_offset),
+            get_l4_table(VirtAddr::new(
+                bootinfo.physical_memory_offset.into_option().unwrap(),
+            )),
+            VirtAddr::new(bootinfo.physical_memory_offset.into_option().unwrap()),
         )
     }
 }
@@ -37,12 +39,12 @@ pub fn get_l4_table(phys_mem_offset: VirtAddr) -> &'static mut PageTable {
 // allocates avalible frames based on bootinfos memory map
 #[derive(Clone, Copy)]
 pub struct BootinfoFrameAllocator {
-    memory_map: &'static MemoryMap,
+    memory_map: &'static MemoryRegions,
     index: usize,
 }
 
 impl BootinfoFrameAllocator {
-    pub unsafe fn new(memory_map: &'static MemoryMap) -> Self {
+    pub unsafe fn new(memory_map: &'static MemoryRegions) -> Self {
         Self {
             memory_map,
             index: 0,
@@ -51,10 +53,10 @@ impl BootinfoFrameAllocator {
 
     fn get_usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
         let regions = self.memory_map.iter();
-        let usable_regions = regions.filter(|r| r.region_type == MemoryRegionType::Usable);
+        let usable_regions = regions.filter(|r| r.kind == MemoryRegionKind::Usable);
 
         // Converts a list of usable regions into a list of addresses of usable regions
-        let usable_regions_addr = usable_regions.map(|r| r.range.start_addr()..r.range.end_addr());
+        let usable_regions_addr = usable_regions.map(|r| r.start..r.end);
         // aglien them. note to future me: i also dont know wtf is
         // happening here, just ask AI or something lolz
         let frame_addresses = usable_regions_addr.flat_map(|r| r.step_by(4096));

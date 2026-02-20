@@ -12,7 +12,8 @@ extern crate alloc;
 use core::panic::PanicInfo;
 
 use alloc::string::ToString;
-use bootloader::{BootInfo, entry_point};
+use bootloader_api::config::Mapping;
+use bootloader_api::{BootInfo, BootloaderConfig, entry_point};
 #[cfg(test)]
 use kernel::debug_exit::debug_exit;
 use kernel::driver::keyboard::scancode_processing::process_keypresses;
@@ -22,13 +23,13 @@ use kernel::multitasking::MANAGER;
 use kernel::multitasking::kernel_task::executor::Executor;
 use kernel::multitasking::kernel_task::task::Task;
 use kernel::multitasking::scheduling::run_next;
-use kernel::println;
 use kernel::userspace::elf_loader::load_elf;
+use kernel::{BOOTLOADER_CONFIG, println};
 use kernel::{init, s_println};
 
-entry_point!(k_main);
+entry_point!(k_main, config = &BOOTLOADER_CONFIG);
 
-fn k_main(bootinfo: &'static BootInfo) -> ! {
+fn k_main(bootinfo: &'static mut BootInfo) -> ! {
     #[cfg(test)]
     debug_exit(kernel::debug_exit::QemuExitCode::Success);
     s_println!("Welcome  Elysia-OS v0.1.0");

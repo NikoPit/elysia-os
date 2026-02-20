@@ -4,7 +4,6 @@ use alloc::{
     collections::{btree_map::Range, vec_deque::VecDeque},
     vec::Vec,
 };
-use bootloader::bootinfo::FrameRange;
 use elfloader::ElfBinary;
 use x86_64::{
     PhysAddr, VirtAddr,
@@ -13,7 +12,6 @@ use x86_64::{
         Translate, mapper::MapToError,
     },
 };
-use xmas_elf::{ElfFile, program};
 
 use crate::{
     memory::{

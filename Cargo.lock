@@ -35,10 +35,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
-name = "bootloader"
-version = "0.9.33"
+name = "bootloader_api"
+version = "0.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7bdfddac270bbdd45903296bc1caf29a7fdce6b326aaf0bbab7f04c5f98b7447"
+checksum = "5c074a3d1075b26ed77e502d6af8ab1263abbdc3d026c166e46480f973287293"
 
 [[package]]
 name = "byteorder"
@@ -165,7 +165,7 @@ name = "kernel"
 version = "0.1.0"
 dependencies = [
  "acpi",
- "bootloader",
+ "bootloader_api",
  "conquer-once",
  "const-random",
  "crossbeam-queue",
