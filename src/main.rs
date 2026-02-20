@@ -24,10 +24,7 @@ fn main() {
             println!("  bios  - boot using legacy BIOS");
             exit(0);
         }
-        _ => {
-            eprintln!("Usage: {prog} [uefi|bios]");
-            exit(1);
-        }
+        _ => false,
     };
 
     let mut cmd = Command::new("qemu-system-x86_64");
