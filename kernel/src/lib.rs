@@ -29,7 +29,10 @@ pub mod vga_print;
 
 pub static BOOTLOADER_CONFIG: BootloaderConfig = {
     let mut config = BootloaderConfig::new_default();
+
     config.mappings.physical_memory = Some(Mapping::Dynamic);
+    config.mappings.dynamic_range_start = Some(0xffff_8000_0000_0000);
+
     config
 };
 

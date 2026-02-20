@@ -6,3 +6,17 @@ members = ["kernel", "test-init"]
 name = "elysia-os-runner"
 version = "0.1.0"
 edition = "2024"
+build = "build.rs"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]
+ovmf-prebuilt = "0.2"
+
+[build-dependencies]
+kernel = { path = "kernel", artifact = "bin", target = "x86_64-unknown-none" }
+bootloader = "0.11"

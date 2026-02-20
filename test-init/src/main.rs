@@ -15,7 +15,7 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 fn trigger_syscall() {
     let syscall_number = 1; // write
     let fd = 1;
-    let msg = b"helloworldz";
+    let msg = b"goodbye world XDDD";
     let buf = msg.as_ptr();
     let count = msg.len();
 
