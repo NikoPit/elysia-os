@@ -1,11 +1,17 @@
+use pic8259::ChainedPics;
+use spin::Mutex;
 use x86_64::{
     instructions::interrupts::{self},
     structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
 };
 
 use crate::{
-    driver::init_interrupt_drivers, exception_interrupt::init_exception_interrupts,
-    hardware_interrupt::init_hardware_interrupts, os::get_os, print, println, test,
+    driver::init_interrupt_drivers,
+    exception_interrupt::init_exception_interrupts,
+    hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET, init_hardware_interrupts},
+    os::get_os,
+    print, println, test,
+    vga_print::PICS,
 };
 use lazy_static::lazy_static;
 
@@ -23,7 +29,9 @@ lazy_static! {
 
 pub fn init() {
     IDT.load();
-    unsafe { get_os().pics.initialize() };
+    PICS.get_or_init(|| unsafe { Mutex::new(ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET)) });
+
+    unsafe { PICS.get().unwrap().lock().initialize() };
     interrupts::enable();
 }
 

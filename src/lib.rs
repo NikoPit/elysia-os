@@ -49,6 +49,7 @@ fn test_k_main(_boot_info: &'static BootInfo) -> ! {
 }
 
 pub fn init(bootinfo: &'static BootInfo) {
+    vga_print::init();
     tss::init();
     memory::init(bootinfo);
     gdt::init();

@@ -5,6 +5,7 @@ use x86_64::{
 
 use crate::{
     memory::{
+        PHYSICAL_MEMORY_OFFSET,
         paging::FRAME_ALLOCATOR,
         utils::{apply_offset, copy_kernel_mapping},
     },
@@ -38,7 +39,12 @@ impl Default for PageTableWrapped {
 
         Self {
             frame: page_table_frame,
-            inner: unsafe { OffsetPageTable::new(page_table, get_os().phys_mem_offset.unwrap()) },
+            inner: unsafe {
+                OffsetPageTable::new(
+                    page_table,
+                    VirtAddr::new(*PHYSICAL_MEMORY_OFFSET.get().unwrap()),
+                )
+            },
         }
     }
 }

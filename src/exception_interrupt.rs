@@ -6,7 +6,7 @@ use x86_64::{
 use crate::{
     interrupts::{print_stackframe, print_stackframe_m},
     misc::hlt_loop,
-    println,
+    println, s_println,
     tss::DOUBLE_FAULT_IST_LOCATION,
 };
 
@@ -68,9 +68,9 @@ extern "x86-interrupt" fn pagefault_handler(
     _stack_frame: InterruptStackFrame,
     err_code: PageFaultErrorCode,
 ) {
-    println!("Page fault");
-    println!("Adress: {:?}", Cr2::read());
-    println!("Error code: {:?}", err_code);
+    s_println!("Page fault");
+    s_println!("Adress: {:?}", Cr2::read());
+    s_println!("Error code: {:?}", err_code);
     print_stackframe_m(_stack_frame);
     hlt_loop();
 }

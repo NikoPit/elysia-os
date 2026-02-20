@@ -1,5 +1,6 @@
 use alloc::sync::Arc;
 use bootloader::BootInfo;
+use conquer_once::spin::OnceCell;
 use spin::Mutex;
 use x86_64::VirtAddr;
 
@@ -17,6 +18,8 @@ pub mod page_table_wrapper;
 pub mod paging;
 pub mod utils;
 
+pub static PHYSICAL_MEMORY_OFFSET: OnceCell<u64> = OnceCell::uninit();
+
 pub fn init(bootinfo: &'static BootInfo) {
     let mut mapper = init_mapper(bootinfo);
     let mut frame_allocator = unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_map) };
@@ -29,5 +32,5 @@ pub fn init(bootinfo: &'static BootInfo) {
     // inits mapper and frame allocator
     MAPPER.get_or_init(|| mapper.clone());
     FRAME_ALLOCATOR.get_or_init(|| frame_allocator.clone());
-    get_os().phys_mem_offset = Some(VirtAddr::new(bootinfo.physical_memory_offset));
+    PHYSICAL_MEMORY_OFFSET.get_or_init(|| bootinfo.physical_memory_offset);
 }

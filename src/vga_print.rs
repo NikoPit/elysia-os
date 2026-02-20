@@ -1,12 +1,25 @@
 use core::fmt::{self, Write};
 
+use conquer_once::spin::OnceCell;
+use pic8259::ChainedPics;
+use spin::Mutex;
+
+use crate::hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET};
+use crate::memory::utils::apply_offset;
 use crate::os::get_os_no_interrupt;
 use crate::test;
 
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 // TODO: make it volatile
-const VGA_BUFFER: *mut u8 = 0xb8000 as *mut u8;
+const VGA_BUFFER: u64 = 0xb8000u64;
+
+pub static PRINTER: OnceCell<Mutex<Printer>> = OnceCell::uninit();
+pub static PICS: OnceCell<Mutex<ChainedPics>> = OnceCell::uninit();
+
+pub fn init() {
+    PRINTER.get_or_init(|| Mutex::new(Printer::new()));
+}
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -90,8 +103,8 @@ impl Printer {
         let color_location = self.get_buffer_location() * 2 + 1;
 
         unsafe {
-            *VGA_BUFFER.offset(char_location) = character;
-            *VGA_BUFFER.offset(color_location) = cell_color.0;
+            *get_vga_buffer().offset(char_location) = character;
+            *get_vga_buffer().offset(color_location) = cell_color.0;
         }
 
         // TODO self.buffer_tracker[self.column][self.row] = character;
@@ -128,6 +141,10 @@ impl Printer {
     }
 }
 
+fn get_vga_buffer() -> *mut u8 {
+    (VGA_BUFFER) as *mut u8
+}
+
 impl fmt::Write for Printer {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.print_string(s, CellColor::new(VgaColor::White, VgaColor::Black));
@@ -149,9 +166,7 @@ macro_rules! println {
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    get_os_no_interrupt(|mut os| {
-        os.printer.write_fmt(args).unwrap();
-    });
+    //PRINTER.get().unwrap().lock().write_fmt(args).unwrap();
 }
 
 test!("Basic VGA Print", || println!("Hello world!"));

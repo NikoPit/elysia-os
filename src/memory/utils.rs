@@ -7,7 +7,10 @@ use x86_64::{
 };
 
 use crate::{
-    memory::paging::{FRAME_ALLOCATOR, MAPPER, get_l4_table},
+    memory::{
+        PHYSICAL_MEMORY_OFFSET,
+        paging::{FRAME_ALLOCATOR, MAPPER, get_l4_table},
+    },
     multitasking::memory::USER_STACK_BOTTOM,
     os::get_os,
     println, s_println,
@@ -44,7 +47,7 @@ pub fn copy_kernel_mapping(table: &mut PageTable) {
 }
 
 pub fn apply_offset(num: u64) -> u64 {
-    num + get_os().phys_mem_offset.unwrap().as_u64()
+    num + PHYSICAL_MEMORY_OFFSET.get().unwrap()
 }
 
 pub fn page_range_from_size(start: u64, size: u64) -> PageRangeInclusive {

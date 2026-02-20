@@ -8,6 +8,7 @@ use crate::{
     multitasking::{MANAGER, manager::Manager, scheduling::run_next},
     os::get_os,
     print, println, s_print,
+    vga_print::PICS,
 };
 
 pub const PIC_1_OFFSET: u8 = 32;
@@ -42,7 +43,10 @@ pub trait HardwareInterruptHandler {
 
 pub fn notify_end_of_interrupt(interrupt: HardwareInterrupt) {
     unsafe {
-        get_os().pics.notify_end_of_interrupt(interrupt.as_u8());
+        PICS.get()
+            .unwrap()
+            .lock()
+            .notify_end_of_interrupt(interrupt.as_u8());
     }
 }
 

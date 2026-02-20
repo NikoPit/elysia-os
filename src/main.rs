@@ -31,7 +31,7 @@ entry_point!(k_main);
 fn k_main(bootinfo: &'static BootInfo) -> ! {
     #[cfg(test)]
     debug_exit(elysia_os::debug_exit::QemuExitCode::Success);
-    println!("Welcome to Elysia-OS v0.1.0");
+    s_println!("Welcome  Elysia-OS v0.1.0");
 
     init(bootinfo);
 

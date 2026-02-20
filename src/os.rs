@@ -16,23 +16,17 @@ lazy_static! {
 }
 
 pub struct OS {
-    pub printer: Printer,
     pub serial_port: SerialPort,
-    pub pics: ChainedPics,
-    pub phys_mem_offset: Option<VirtAddr>,
 }
 
 impl OS {
     pub fn new() -> Self {
         Self {
-            printer: Printer::new(),
             serial_port: {
                 let mut serial_port = unsafe { SerialPort::new(0x3F8) };
                 serial_port.init();
                 serial_port
             },
-            pics: unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) },
-            phys_mem_offset: None,
         }
     }
 }
