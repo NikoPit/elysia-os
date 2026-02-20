@@ -61,10 +61,10 @@ pub fn init(bootinfo: &'static BootInfo) {
     tss::init();
     memory::init(bootinfo);
     gdt::init();
-    interrupts::init();
     systemcall::init();
     acpi::init();
     multitasking::init();
+    interrupts::init();
 }
 
 #[cfg(test)]
