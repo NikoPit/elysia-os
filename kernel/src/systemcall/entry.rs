@@ -34,6 +34,6 @@ pub extern "C" fn syscall_entry() {
         "mov rsp, gs:[0x8]",
         "swapgs",
         // resume the state
-        "sysret"
+        "sysretq"
     )
 }
