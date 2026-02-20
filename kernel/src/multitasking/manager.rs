@@ -30,12 +30,12 @@ pub struct Manager {
 
 #[repr(align(8))]
 struct AlignedElf {
-    data: [u8; include_bytes!("../../../test-init/target/x86_64-elysia-os/debug/test-init").len()],
+    data: [u8; include_bytes!("../../../target/x86_64-elysia-os/debug/test-init").len()],
 }
 
 // 使用这个结构体来包裹你的 ELF
 static ELF_HOLDER: AlignedElf = AlignedElf {
-    data: *include_bytes!("../../../test-init/target/x86_64-elysia-os/debug/test-init"),
+    data: *include_bytes!("../../../target/x86_64-elysia-os/debug/test-init"),
 };
 
 impl Manager {
