@@ -20,12 +20,12 @@ pub extern "C" fn syscall_entry() {
         "push r10",
         "push r8",
         "push r9",
-        // rsp: stack pointer
-        // rdi: 1st argument
-        // calls syscall_handler with the things
-        // we've pushed to the stack
+        // 16 bits align the rsp
+        "sub rsp, 8",
         "mov rdi, rsp",
+        "add rdi, 8",
         "call syscall_handler",
+        "add rsp, 8",
         // resume
         "pop r9",
         "pop r8",
