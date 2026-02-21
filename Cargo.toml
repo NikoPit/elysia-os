@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["kernel", "test-init"]
+members = ["elysia-os-lib","kernel", "test-init"]
 
 [package]
 name = "elysia-os-runner"
