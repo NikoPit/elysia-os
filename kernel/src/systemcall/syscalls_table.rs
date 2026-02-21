@@ -3,7 +3,8 @@ use crate::{
     systemcall::{
         error::SyscallError,
         implementations::{
-            print::PrintImpl, set_fs::SetFSImpl, set_gs::SetGSImpl, utils::SystemCallImpl,
+            get_fs::GetFSImpl, print::PrintImpl, set_fs::SetFSImpl, set_gs::SetGSImpl,
+            utils::SystemCallImpl,
         },
         syscall_no::SystemCallNo,
     },
@@ -18,6 +19,7 @@ pub static SYSCALL_TABLE: [Option<SyscallHandler>; 512] = {
     register_syscall!(table, SystemCallNo::Print, PrintImpl);
     register_syscall!(table, SystemCallNo::SetGs, SetGSImpl);
     register_syscall!(table, SystemCallNo::SetFs, SetFSImpl);
+    register_syscall!(table, SystemCallNo::GetFs, GetFSImpl);
 
     table
 };
