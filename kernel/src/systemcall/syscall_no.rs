@@ -4,4 +4,6 @@ use num_enum::TryFromPrimitive;
 #[repr(usize)]
 pub enum SystemCallNo {
     Print = 1,
+    SetFs = 2,
+    SetGs = 3,
 }

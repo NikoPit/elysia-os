@@ -45,6 +45,7 @@ impl Process {
     pub fn new(program: &[u8]) -> Self {
         let mut table = PageTableWrapped::default();
 
+        // TODO: Maybe let write_and_sub also take virt_stack_addr and sub it
         let (virt_stack_addr, mut virt_stack_write) = allocate_stack(16, &mut table.inner);
 
         init_stack_layout(&mut table, &mut virt_stack_write);
