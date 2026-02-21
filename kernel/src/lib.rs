@@ -12,6 +12,7 @@ pub mod driver;
 pub mod exception_interrupt;
 pub mod filesystem;
 pub mod gdt;
+pub mod graphics;
 pub mod hardware_interrupt;
 pub mod interrupts;
 pub mod memory;
@@ -56,10 +57,14 @@ fn test_k_main(_boot_info: &'static mut BootInfo) -> ! {
     hlt_loop();
 }
 
-pub fn init(bootinfo: &'static BootInfo) {
+pub fn init(bootinfo: &'static mut BootInfo) {
     vga_print::init();
+    graphics::init(bootinfo.framebuffer.as_mut().unwrap());
     tss::init();
-    memory::init(bootinfo);
+    memory::init(
+        bootinfo.physical_memory_offset.into_option().unwrap(),
+        &bootinfo.memory_regions,
+    );
     gdt::init();
     misc::init();
     systemcall::init();

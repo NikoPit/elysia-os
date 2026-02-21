@@ -1,5 +1,5 @@
 use alloc::sync::Arc;
-use bootloader_api::BootInfo;
+use bootloader_api::{BootInfo, info::MemoryRegions};
 use conquer_once::spin::OnceCell;
 use spin::Mutex;
 use x86_64::VirtAddr;
@@ -20,9 +20,9 @@ pub mod utils;
 
 pub static PHYSICAL_MEMORY_OFFSET: OnceCell<u64> = OnceCell::uninit();
 
-pub fn init(bootinfo: &'static BootInfo) {
-    let mut mapper = init_mapper(bootinfo);
-    let mut frame_allocator = unsafe { BootinfoFrameAllocator::new(&bootinfo.memory_regions) };
+pub fn init(physical_memory_offset: u64, memory_regions: &'static MemoryRegions) {
+    let mut mapper = init_mapper(physical_memory_offset);
+    let mut frame_allocator = unsafe { BootinfoFrameAllocator::new(memory_regions) };
     init_heap(&mut mapper, &mut frame_allocator).expect("Failed heap initilization");
 
     // [TODO] maybe i should move some stuff out of the os struct? tho if it works, dont touch it
@@ -32,5 +32,5 @@ pub fn init(bootinfo: &'static BootInfo) {
     // inits mapper and frame allocator
     MAPPER.get_or_init(|| mapper.clone());
     FRAME_ALLOCATOR.get_or_init(|| frame_allocator.clone());
-    PHYSICAL_MEMORY_OFFSET.get_or_init(|| bootinfo.physical_memory_offset.into_option().unwrap());
+    PHYSICAL_MEMORY_OFFSET.get_or_init(|| physical_memory_offset);
 }

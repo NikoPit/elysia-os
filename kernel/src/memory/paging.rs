@@ -17,13 +17,11 @@ pub static MAPPER: OnceCell<Arc<Mutex<OffsetPageTable<'static>>>> = OnceCell::un
 pub static FRAME_ALLOCATOR: OnceCell<Arc<Mutex<BootinfoFrameAllocator>>> = OnceCell::uninit();
 
 // initalize the mapper thats based on offset page table
-pub fn init_mapper(bootinfo: &'static BootInfo) -> OffsetPageTable<'static> {
+pub fn init_mapper(physcal_memory_offset: u64) -> OffsetPageTable<'static> {
     unsafe {
         OffsetPageTable::new(
-            get_l4_table(VirtAddr::new(
-                bootinfo.physical_memory_offset.into_option().unwrap(),
-            )),
-            VirtAddr::new(bootinfo.physical_memory_offset.into_option().unwrap()),
+            get_l4_table(VirtAddr::new(physcal_memory_offset)),
+            VirtAddr::new(physcal_memory_offset),
         )
     }
 }
