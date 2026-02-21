@@ -1,3 +1,4 @@
+use conquer_once::spin::OnceCell;
 use pic8259::ChainedPics;
 use spin::Mutex;
 use x86_64::{
@@ -11,9 +12,9 @@ use crate::{
     hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET, init_hardware_interrupts},
     os::get_os,
     print, println, s_println, test,
-    vga_print::PICS,
 };
 use lazy_static::lazy_static;
+pub static PICS: OnceCell<Mutex<ChainedPics>> = OnceCell::uninit();
 
 lazy_static! {
     static ref IDT: InterruptDescriptorTable = {

@@ -1,3 +1,6 @@
+use conquer_once::spin::OnceCell;
+use pic8259::ChainedPics;
+use spin::Mutex;
 use x86_64::{
     instructions::interrupts::without_interrupts,
     structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
@@ -5,10 +8,10 @@ use x86_64::{
 
 use crate::{
     debug_exit::debug_exit,
+    interrupts::PICS,
     multitasking::{MANAGER, manager::Manager, scheduling::run_next},
     os::get_os,
     print, println, s_print,
-    vga_print::PICS,
 };
 
 pub const PIC_1_OFFSET: u8 = 32;

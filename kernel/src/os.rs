@@ -1,7 +1,4 @@
-use crate::{
-    hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET},
-    vga_print::Printer,
-};
+use crate::hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET};
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin::*;
