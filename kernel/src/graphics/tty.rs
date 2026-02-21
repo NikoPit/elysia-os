@@ -1,13 +1,35 @@
+use conquer_once::spin::OnceCell;
+use spin::{Mutex, MutexGuard};
+use spleen_font::PSF2Font;
+
 use crate::{
     graphics::framebuffer::{Canvas, FRAME_BUFFER},
     s_println,
 };
 
+pub mod text;
+
 pub static WALLPAPER: &[u8] = include_bytes!("../../../resources/wallpaper.bin");
+pub static TTY: OnceCell<Mutex<Tty>> = OnceCell::uninit();
 
-pub struct TTY {}
+pub struct Tty<'a> {
+    font: PSF2Font<'a>,
+    canvas: &'a Mutex<Canvas>,
 
-impl TTY {
+    row: u32,
+    col: u32,
+}
+
+impl<'a> Tty<'a> {
+    pub fn new(font: PSF2Font<'a>) -> Self {
+        Self {
+            font,
+            canvas: FRAME_BUFFER.get().unwrap(),
+            row: 0,
+            col: 0,
+        }
+    }
+
     pub fn draw_wallpaper(&mut self) {
         let mut fb = FRAME_BUFFER.get().unwrap().lock();
 

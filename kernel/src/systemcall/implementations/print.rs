@@ -3,7 +3,7 @@ use core::str::from_utf8;
 use crate::{
     new_syscall,
     os::get_os,
-    s_println,
+    println, s_println,
     systemcall::{
         error::SyscallError, implementations::utils::SystemCallImpl, syscall_no::SystemCallNo,
     },
@@ -26,7 +26,7 @@ new_syscall!(PrintImpl, SystemCallNo::Print, fd: i32, buf: *const u8, count: usi
 fn write_to_stdio(buf: *const u8, count: usize, error: bool) -> usize {
     let test = unsafe { core::slice::from_raw_parts(buf, count) };
     let test = from_utf8(test).unwrap();
-    s_println!("{}", test);
+    println!("{}", test);
 
     0
 }

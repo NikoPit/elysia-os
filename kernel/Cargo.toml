@@ -18,6 +18,7 @@ const-random = "0.1.18"
 uart_16550 = "0.2.0"
 qemu-exit = "3.0.2"
 pic8259 = "0.11.0"
+spleen-font = { version = "0.2", features = ["all"] }
 
 [dependencies.lazy_static]
 version = "1.0"

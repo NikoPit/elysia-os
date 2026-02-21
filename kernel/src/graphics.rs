@@ -1,9 +1,10 @@
 use bootloader_api::BootInfo;
 use spin::Mutex;
+use spleen_font::{FONT_6X12, FONT_16X32, FONT_32X64, PSF2Font};
 
 use crate::graphics::{
     framebuffer::{Canvas, FRAME_BUFFER},
-    tty::TTY,
+    tty::{TTY, Tty},
 };
 
 pub mod framebuffer;
@@ -11,6 +12,7 @@ pub mod tty;
 
 pub fn init(boot_info: &'static mut bootloader_api::info::FrameBuffer) {
     FRAME_BUFFER.get_or_init(|| Mutex::new(Canvas::new(boot_info)));
+    let tty = TTY.get_or_init(|| Mutex::new(Tty::new(PSF2Font::new(FONT_16X32).unwrap())));
 
-    TTY {}.draw_wallpaper();
+    tty.lock().draw_wallpaper();
 }

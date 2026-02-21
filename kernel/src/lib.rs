@@ -26,7 +26,6 @@ pub mod testing;
 pub mod tss;
 pub mod userspace;
 pub mod utils;
-pub mod vga_print;
 
 pub static BOOTLOADER_CONFIG: BootloaderConfig = {
     let mut config = BootloaderConfig::new_default();
@@ -58,7 +57,6 @@ fn test_k_main(_boot_info: &'static mut BootInfo) -> ! {
 }
 
 pub fn init(bootinfo: &'static mut BootInfo) {
-    vga_print::init();
     tss::init();
     memory::init(
         bootinfo.physical_memory_offset.into_option().unwrap(),

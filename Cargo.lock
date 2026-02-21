@@ -490,6 +490,7 @@ dependencies = [
  "pic8259",
  "qemu-exit",
  "spin 0.5.2",
+ "spleen-font",
  "uart_16550",
  "volatile 0.6.1",
  "x86_64 0.15.4",
@@ -915,6 +916,12 @@ checksum = "d96d2d1d716fb500937168cc09353ffdc7a012be8475ac7308e1bdf0e3923300"
 dependencies = [
  "lock_api",
 ]
+
+[[package]]
+name = "spleen-font"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "43744d8a750592871f6182fd1b9ba6a341d31da3ebf430c9d9d3634d49296600"
 
 [[package]]
 name = "subtle"
