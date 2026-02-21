@@ -2,6 +2,8 @@ use bootloader_api::info::PixelFormat;
 use conquer_once::spin::OnceCell;
 use spin::Mutex;
 
+use crate::s_println;
+
 pub static FRAME_BUFFER: OnceCell<Mutex<FrameBuffer>> = OnceCell::uninit();
 
 pub struct FrameBuffer {
@@ -20,6 +22,7 @@ impl FrameBuffer {
         Self { info, buffer }
     }
 
+    #[inline(always)]
     pub fn write_pixel(&mut self, x: usize, y: usize, r: u8, g: u8, b: u8) {
         // Offset of the pixel from the start
         // of the framebuffer (in pixels)
