@@ -1,5 +1,5 @@
 use crate::{
-    graphics::framebuffer::{FRAME_BUFFER, FrameBuffer},
+    graphics::framebuffer::{Canvas, FRAME_BUFFER},
     s_println,
 };
 

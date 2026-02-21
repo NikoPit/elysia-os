@@ -4,14 +4,14 @@ use spin::Mutex;
 
 use crate::s_println;
 
-pub static FRAME_BUFFER: OnceCell<Mutex<FrameBuffer>> = OnceCell::uninit();
+pub static FRAME_BUFFER: OnceCell<Mutex<Canvas>> = OnceCell::uninit();
 
-pub struct FrameBuffer {
+pub struct Canvas {
     buffer: &'static mut [u8],
     info: bootloader_api::info::FrameBufferInfo,
 }
 
-impl FrameBuffer {
+impl Canvas {
     pub fn new(frame_buffer: &'static mut bootloader_api::info::FrameBuffer) -> Self {
         let info = frame_buffer.info();
         let buffer = frame_buffer.buffer_mut();
