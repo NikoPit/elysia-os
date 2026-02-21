@@ -39,9 +39,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(entry_point: u64, table: &mut PageTableWrapped) -> Self {
-        let virt_stack_addr = allocate_stack(16, &mut table.inner);
-
+    pub fn new(entry_point: u64, table: &mut PageTableWrapped, virt_stack_addr: u64) -> Self {
         Self {
             cr3: calc_cr3_value(table.frame.start_address(), Cr3Flags::empty()),
             kernel_rsp: allocate_kernel_stack(1, &mut table.inner).as_u64(),
@@ -54,7 +52,7 @@ impl Context {
             rbp: 0,
 
             ss: GDT.1.user_data.0 as u64,
-            user_rsp: virt_stack_addr.0.as_u64(),
+            user_rsp: virt_stack_addr,
             rflags: 0x202,
             cs: GDT.1.user_code.0 as u64,
             rip: entry_point,

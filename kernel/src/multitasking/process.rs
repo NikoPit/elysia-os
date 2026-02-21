@@ -16,6 +16,7 @@ use crate::{
     },
     s_println,
     userspace::elf_loader::{Function, load_elf},
+    utils::misc::write_and_sub,
 };
 
 #[derive(Debug)]
@@ -27,6 +28,7 @@ pub struct Process {
     pub kernel_stack_top: VirtAddr,
 }
 
+// TODO: add threads, and make process just a wrapper/container of threads
 impl Default for Process {
     fn default() -> Self {
         Self {
@@ -42,8 +44,17 @@ impl Default for Process {
 impl Process {
     pub fn new(program: &[u8]) -> Self {
         let mut table = PageTableWrapped::default();
+
+        let (virt_stack_addr, mut virt_stack_write) = allocate_stack(16, &mut table.inner);
+
+        init_stack_layout(&mut table, &mut virt_stack_write);
+
         let entry_point = load_elf(&mut table, program);
-        let contxt = Context::new(entry_point as u64, &mut table);
+        let contxt = Context::new(
+            entry_point as u64,
+            &mut table,
+            virt_stack_addr.as_u64() - 5 * 8,
+        );
         let kernel_stack_top = allocate_kernel_stack(16, &mut table.inner);
 
         init_tls(&mut table);
@@ -56,6 +67,16 @@ impl Process {
             kernel_stack_top,
         }
     }
+}
+
+fn init_stack_layout(table: &mut PageTableWrapped, virt_stack_write: &mut *mut u64) {
+    unsafe {
+        write_and_sub(virt_stack_write, 0);
+        write_and_sub(virt_stack_write, 0);
+        write_and_sub(virt_stack_write, 0);
+        write_and_sub(virt_stack_write, 0);
+        write_and_sub(virt_stack_write, 1);
+    };
 }
 
 fn init_tls(table: &mut PageTableWrapped) {
