@@ -9,23 +9,7 @@ use crate::{
     },
 };
 
-new_syscall!(PrintImpl, SystemCallNo::Print, fd: i32, buf: *const u8, count: usize, |fd, buf: *const u8, count: usize| -> Result<usize, SyscallError> {
-    if fd < 0 {
-        // Bad file descripter
-        return Err(SyscallError::InvalidFileDescriptor);
-    }
-
-    match fd {
-        1 => Ok(write_to_stdio(buf, count, false)),
-        2 => Ok(write_to_stdio(buf, count, true)),
-        _ => Err(SyscallError::InvalidFileDescriptor),
-    }
+new_syscall!(PrintImpl, SystemCallNo::Print, buf: *const u8, count: usize, empty: u64, |buf: *const u8, count: usize, empty: u64| -> Result<usize, SyscallError> {
+    println!("{}", from_utf8(unsafe { core::slice::from_raw_parts(buf, count) }).unwrap());
+    Ok(0)
 });
-
-fn write_to_stdio(buf: *const u8, count: usize, error: bool) -> usize {
-    let test = unsafe { core::slice::from_raw_parts(buf, count) };
-    let test = from_utf8(test).unwrap();
-    println!("{}", test);
-
-    0
-}

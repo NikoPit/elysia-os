@@ -23,9 +23,8 @@ fn trigger_syscall() {
         core::arch::asm!(
             "syscall",
             in("rax") syscall_number,
-            in("rdi") fd,
-            in("rsi") buf,
-            in("rdx") count,
+            in("rdi") buf,
+            in("rsi") count,
             out("rcx") _, // 系统调用会破坏rcx和r11
             out("r11") _,
         );
