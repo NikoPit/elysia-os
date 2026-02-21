@@ -21,6 +21,7 @@ pub fn set_fs(addr: u64) -> SyscallResult {
 }
 
 pub fn get_fs() -> SyscallResult {
+    print("getz fs");
     syscall!(GetFs)
 }
 

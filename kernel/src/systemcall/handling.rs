@@ -22,7 +22,7 @@ struct SyscallSnapshot {
 extern "C" fn syscall_handler(snapshot_ptr: *mut SyscallSnapshot) {
     let snapshot = unsafe { &mut *snapshot_ptr };
 
-    println!("[DEBUG] Syscall: {}", (snapshot.syscall_no));
+    s_println!("[DEBUG] Syscall: {}", (snapshot.syscall_no));
 
     let result = syscall_handler_unwrapped(
         snapshot.syscall_no,
@@ -34,7 +34,7 @@ extern "C" fn syscall_handler(snapshot_ptr: *mut SyscallSnapshot) {
         snapshot.arg6,
     );
 
-    s_println!("{:?}", snapshot.rip);
+    s_println!("{:?}", result);
 
     snapshot.syscall_no = result;
 }

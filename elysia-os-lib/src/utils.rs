@@ -1,6 +1,6 @@
 use core::arch;
 
-use crate::{errors::SyscallError, numbers::SyscallNumber};
+use crate::{errors::SyscallError, numbers::SyscallNumber, syscalls::print};
 
 pub type SyscallResult = Result<usize, SyscallError>;
 
@@ -30,6 +30,7 @@ pub fn raw_syscall(
                lateout("rax") return_value,
         );
         if return_value.is_positive() {
+            print("positiv");
             Ok(return_value as usize)
         } else {
             Err(SyscallError::from(return_value))
