@@ -85,6 +85,7 @@ pub fn run_next(interrupt_stack_frame: InterruptStackFrame) {
     unsafe {
         (*current).rip = interrupt_stack_frame.instruction_pointer.as_u64();
         (*current).rflags = interrupt_stack_frame.cpu_flags.bits();
+        (*current).user_rsp = interrupt_stack_frame.stack_pointer.as_u64();
 
         context_switch(current, next);
     }
