@@ -42,8 +42,6 @@ pub fn copy_kernel_mapping(table: &mut PageTable) {
     for i in 128..512 {
         table[i] = kernel_l4[i].clone();
     }
-
-    s_println!("{:?}", kernel_l4[0].clone());
 }
 
 pub fn apply_offset(num: u64) -> u64 {

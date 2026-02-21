@@ -55,7 +55,6 @@ impl Canvas {
 
     // Flushes the contents of the buffer into the real fb
     pub fn flush(&mut self) {
-        s_println!("FLUSH");
         self.fb.copy_from_slice(&self.buffer);
     }
 
