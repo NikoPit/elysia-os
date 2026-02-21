@@ -977,6 +977,9 @@ dependencies = [
 [[package]]
 name = "test-init"
 version = "0.1.0"
+dependencies = [
+ "elysia-os-lib",
+]
 
 [[package]]
 name = "thiserror"

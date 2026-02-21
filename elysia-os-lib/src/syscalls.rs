@@ -1,5 +1,6 @@
 use crate::{errors::SyscallError, numbers::SyscallNumber, syscall, utils::SyscallResult};
 
+#[inline(always)]
 pub fn print(value: &str) -> SyscallResult {
     let msg = value.as_bytes();
     let buf = msg.as_ptr();

@@ -4,6 +4,7 @@ use crate::{errors::SyscallError, numbers::SyscallNumber};
 
 pub type SyscallResult = Result<usize, SyscallError>;
 
+#[inline(always)]
 pub fn raw_syscall(
     num: SyscallNumber,
     arg1: u64,

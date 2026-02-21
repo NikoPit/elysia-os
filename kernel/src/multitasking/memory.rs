@@ -12,7 +12,7 @@ use crate::{
     s_println,
 };
 
-static USER_STACK: AtomicU64 = AtomicU64::new(0x2000_0000);
+static USER_STACK: AtomicU64 = AtomicU64::new(0x3000_0000);
 static KERNEL_STACK: AtomicU64 = AtomicU64::new(0xFFFF_8000_1000_0000);
 
 /// Returns the virtual address of the stack top

@@ -17,6 +17,9 @@ pub extern "C" fn syscall_entry() {
         "push rdi",
         "push rsi",
         "push rdx",
+        "push r10",
+        "push r8",
+        "push r9",
         // rsp: stack pointer
         // rdi: 1st argument
         // calls syscall_handler with the things
@@ -24,6 +27,9 @@ pub extern "C" fn syscall_entry() {
         "mov rdi, rsp",
         "call syscall_handler",
         // resume
+        "pop r9",
+        "pop r8",
+        "pop r10",
         "pop rdx",
         "pop rsi",
         "pop rdi",

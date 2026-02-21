@@ -1,9 +1,20 @@
 #![no_std]
 #![no_main]
 
+use core::arch;
+
+use elysia_os_lib::syscalls::print;
+
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    trigger_syscall();
+    syscall();
+    syscall();
+    let mut x = [0u8; 1024]; // 撑大栈空间
+    core::hint::black_box(&x); // 防止被优化
+
+    syscall();
+
+    print("hello world from syscall wrapper!\n").unwrap();
     loop {}
 }
 
@@ -12,21 +23,19 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 
-fn trigger_syscall() {
-    let syscall_number = 1; // write
-    let fd = 1;
-    let msg = b"GOODBYE WORLD XDDDDDD";
-    let buf = msg.as_ptr();
-    let count = msg.len();
-
+fn syscall() {
     unsafe {
-        core::arch::asm!(
-            "syscall",
-            in("rax") syscall_number,
-            in("rdi") buf,
-            in("rsi") count,
-            out("rcx") _, // 系统调用会破坏rcx和r11
-            out("r11") _,
-        );
-    }
+        let msg = "abc".as_bytes();
+        let buf = msg.as_ptr();
+        let count = msg.len();
+
+        arch::asm!(
+               "syscall",
+               in("rax") 1 as isize,
+               in("rdi") buf,
+               in("rsi") count,
+               out("rcx") _, // syscall 会覆盖 rcx
+               out("r11") _, // syscall 会覆盖 r11
+        )
+    };
 }

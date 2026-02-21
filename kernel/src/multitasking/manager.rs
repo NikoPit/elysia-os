@@ -30,11 +30,11 @@ pub struct Manager {
 
 #[repr(align(8))]
 struct AlignedElf {
-    data: [u8; include_bytes!("../../../libc-test/test.elf").len()],
+    data: [u8; include_bytes!("../../../target/x86_64-unknown-none/debug/test-init").len()],
 }
 
 static ELF_HOLDER: AlignedElf = AlignedElf {
-    data: *include_bytes!("../../../libc-test/test.elf"),
+    data: *include_bytes!("../../../target/x86_64-unknown-none/debug/test-init"),
 };
 
 impl Manager {
