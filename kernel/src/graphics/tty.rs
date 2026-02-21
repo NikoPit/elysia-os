@@ -32,5 +32,7 @@ impl TTY {
                 fb.write_pixel(x, y, r, g, b);
             }
         }
+
+        fb.flush();
     }
 }

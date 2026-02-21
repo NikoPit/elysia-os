@@ -59,12 +59,12 @@ fn test_k_main(_boot_info: &'static mut BootInfo) -> ! {
 
 pub fn init(bootinfo: &'static mut BootInfo) {
     vga_print::init();
-    graphics::init(bootinfo.framebuffer.as_mut().unwrap());
     tss::init();
     memory::init(
         bootinfo.physical_memory_offset.into_option().unwrap(),
         &bootinfo.memory_regions,
     );
+    graphics::init(bootinfo.framebuffer.as_mut().unwrap());
     gdt::init();
     misc::init();
     systemcall::init();

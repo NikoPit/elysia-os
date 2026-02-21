@@ -13,7 +13,7 @@ static HEAP_ALLOCATOR: Locked<FixedBlockSizeAllocator> =
 
 // Memory area for the heap
 pub const HEAP_START: usize = 0x_4444_4444_0000;
-pub const HEAP_SIZE: usize = 100 * 1024; // 100 KiB
+pub const HEAP_SIZE: usize = 10000 * 1024; // 100 KiB
 
 // Map the memory area for the heap from physical memory to virt memory
 // and do some other stuff

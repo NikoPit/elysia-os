@@ -1,3 +1,4 @@
+use alloc::vec::{self};
 use bootloader_api::info::PixelFormat;
 use conquer_once::spin::OnceCell;
 use spin::Mutex;
@@ -7,19 +8,24 @@ use crate::s_println;
 pub static FRAME_BUFFER: OnceCell<Mutex<Canvas>> = OnceCell::uninit();
 
 pub struct Canvas {
-    buffer: &'static mut [u8],
+    fb: &'static mut [u8],
+    buffer: alloc::vec::Vec<u8>,
     info: bootloader_api::info::FrameBufferInfo,
 }
 
 impl Canvas {
     pub fn new(frame_buffer: &'static mut bootloader_api::info::FrameBuffer) -> Self {
         let info = frame_buffer.info();
-        let buffer = frame_buffer.buffer_mut();
+        let fb = frame_buffer.buffer_mut();
 
         // Clear screen
-        buffer.fill(0);
+        fb.fill(0);
 
-        Self { info, buffer }
+        Self {
+            info,
+            fb,
+            buffer: alloc::vec![0u8; info.byte_len],
+        }
     }
 
     #[inline(always)]
@@ -47,7 +53,12 @@ impl Canvas {
         }
     }
 
+    pub fn flush(&mut self) {
+        s_println!("FLUSH");
+        self.fb.copy_from_slice(&self.buffer);
+    }
+
     pub fn clear(&mut self) {
-        self.buffer.fill(0);
+        self.fb.fill(0);
     }
 }
