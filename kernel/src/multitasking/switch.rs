@@ -34,6 +34,8 @@ pub unsafe extern "C" fn context_switch(current: *mut Context, next: *mut Contex
         // Loads the kernel stack so it wont messup the user stack
         "mov rsp, [rsi + 8]",
         // Pushes the things required for iretq
+        // TODO: use ret to return to whatever it came from
+        // instead of just straightup jumping to userspace with iretq
         "push [rsi + 64]", // SS
         "push [rsi + 72]", // RSP
         "push [rsi + 80]", // RFlags
