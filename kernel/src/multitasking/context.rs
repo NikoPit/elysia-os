@@ -54,7 +54,7 @@ impl Context {
             rbp: 0,
 
             ss: GDT.1.user_data.0 as u64,
-            user_rsp: virt_stack_addr.as_u64(),
+            user_rsp: virt_stack_addr.0.as_u64(),
             rflags: 0x202,
             cs: GDT.1.user_code.0 as u64,
             rip: entry_point,

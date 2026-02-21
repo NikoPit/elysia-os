@@ -11,7 +11,6 @@ use crate::{
         PHYSICAL_MEMORY_OFFSET,
         paging::{FRAME_ALLOCATOR, MAPPER, get_l4_table},
     },
-    multitasking::memory::USER_STACK_BOTTOM,
     os::get_os,
     println, s_println,
 };

@@ -1,13 +1,19 @@
 use core::sync::atomic::AtomicU64;
 
+use alloc::boxed::Box;
 use x86_64::{
     VirtAddr,
+    registers::model_specific::Msr,
     structures::paging::{Mapper, Page, Size4KiB, Translate},
 };
 
 use crate::{
     memory::page_table_wrapper::PageTableWrapped,
-    multitasking::{context::Context, memory::allocate_kernel_stack, yielding::BlockType},
+    multitasking::{
+        context::Context,
+        memory::{allocate_kernel_stack, allocate_stack},
+        yielding::BlockType,
+    },
     s_println,
     userspace::elf_loader::{Function, load_elf},
 };
@@ -40,6 +46,8 @@ impl Process {
         let contxt = Context::new(entry_point as u64, &mut table);
         let kernel_stack_top = allocate_kernel_stack(16, &mut table.inner);
 
+        init_tls(&mut table);
+
         Self {
             page_table: table,
             pid: ProcessID::default(),
@@ -48,6 +56,16 @@ impl Process {
             kernel_stack_top,
         }
     }
+}
+
+fn init_tls(table: &mut PageTableWrapped) {
+    // Allocates space for the TLS
+    let (tls, tls_write) = allocate_stack(16, &mut table.inner);
+
+    unsafe {
+        tls_write.offset(-1).write(tls.as_u64() - 8);
+        Msr::new(0xC0000100).write(tls.as_u64() - 8);
+    };
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
