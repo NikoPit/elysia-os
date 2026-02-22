@@ -10,7 +10,7 @@ use crate::{
         memory::{allocate_kernel_stack, allocate_stack},
     },
     userspace::elf_loader::Function,
-    utils::misc::{calc_cr3_value, write_and_sub},
+    utils::misc::calc_cr3_value,
 };
 
 // NOTE: the direction of the struct in memory and the stack is REVERSED
@@ -42,7 +42,7 @@ impl Context {
     pub fn new(entry_point: u64, table: &mut PageTableWrapped, virt_stack_addr: u64) -> Self {
         Self {
             cr3: calc_cr3_value(table.frame.start_address(), Cr3Flags::empty()),
-            kernel_rsp: allocate_kernel_stack(1, &mut table.inner).as_u64(),
+            kernel_rsp: allocate_kernel_stack(1, &mut table.inner).finish().as_u64(),
 
             r15: 0,
             r14: 0,

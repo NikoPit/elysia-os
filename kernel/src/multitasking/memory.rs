@@ -14,6 +14,7 @@ use crate::{
         utils::apply_offset,
     },
     s_println,
+    utils::stack_builder::StackBuilder,
 };
 
 /// Returns the virtual address of the stack top
@@ -22,17 +23,16 @@ use crate::{
 /// Note: The phys addr of the stack top is the addr of the
 /// last frame, so if you writes more then 4KiB of memory
 /// it will cause undefined behaviour
-pub fn allocate_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> (VirtAddr, *mut u64) {
-    let (_, end_addr, write_ptr) = allocate_user_mem(
+pub fn allocate_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> StackBuilder {
+    allocate_user_mem(
         pages,
         table,
         PageTableFlags::USER_ACCESSIBLE | PageTableFlags::WRITABLE | PageTableFlags::PRESENT,
-    );
-
-    (end_addr, write_ptr)
+    )
+    .1
 }
 
-pub fn allocate_kernel_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> VirtAddr {
+pub fn allocate_kernel_stack(pages: u64, table: &mut OffsetPageTable<'static>) -> StackBuilder {
     allocate_kernel_mem(
         pages,
         table,

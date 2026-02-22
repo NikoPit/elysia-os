@@ -3,15 +3,6 @@ use x86_64::{
     registers::control::{Cr0, Cr0Flags, Cr3, Cr3Flags, Cr4, Cr4Flags},
 };
 
-/// # Safety
-/// Must provide valid pointer
-pub unsafe fn write_and_sub(ptr: &mut *mut u64, data: u64) {
-    unsafe {
-        *ptr = ptr.sub(1);
-        ptr.write(data);
-    }
-}
-
 pub fn calc_cr3_value(addr: PhysAddr, flags: Cr3Flags) -> u64 {
     ((false as u64) << 63) | addr.as_u64() | flags.bits()
 }

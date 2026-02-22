@@ -8,6 +8,7 @@ use x86_64::{
 use crate::{
     graphics::framebuffer::FRAME_BUFFER,
     memory::{paging::FRAME_ALLOCATOR, utils::apply_offset},
+    utils::stack_builder::StackBuilder,
 };
 
 static USER_MEM: AtomicU64 = AtomicU64::new(0x30_0000_0000);
@@ -22,7 +23,7 @@ pub fn allocate_user_mem(
     pages: u64,
     table: &mut OffsetPageTable<'static>,
     flags: PageTableFlags,
-) -> (VirtAddr, VirtAddr, *mut u64) {
+) -> (VirtAddr, StackBuilder) {
     // skips the guard page
     let guard_page = allocate_user_page(pages);
     let start = guard_page + 1;
@@ -59,18 +60,22 @@ pub fn allocate_user_mem(
         core::ptr::write_bytes(start_ptr, 0, bytes as usize);
     }
 
-    (start_addr, end_addr, write_addr as *mut u64)
+    (
+        start_addr,
+        StackBuilder::new(end_addr.as_u64(), write_addr as *mut u64),
+    )
 }
 
 pub fn allocate_kernel_mem(
     pages: u64,
     table: &mut OffsetPageTable<'static>,
     flags: PageTableFlags,
-) -> (VirtAddr, VirtAddr) {
+) -> (VirtAddr, StackBuilder) {
     let guard_page = allocate_kernel_page(pages);
     let start = guard_page + 1;
 
     let mut frame_allocator = FRAME_ALLOCATOR.try_get().unwrap().lock();
+    let mut last_frame = None;
 
     for i in 0..pages {
         let page = start + i;
@@ -82,12 +87,18 @@ pub fn allocate_kernel_mem(
                 .unwrap()
                 .flush();
         };
+
+        last_frame = Some(frame);
     }
 
     let start_addr = start.start_address();
     let end_addr = (start + pages).start_address();
+    let write_addr = apply_offset(last_frame.unwrap().start_address().as_u64() + 4096);
 
-    (start_addr, end_addr)
+    (
+        start_addr,
+        StackBuilder::new(end_addr.as_u64(), write_addr as *mut u64),
+    )
 }
 
 fn allocate_user_page(count: u64) -> Page<Size4KiB> {

@@ -16,6 +16,7 @@ pub fn init() {
         .try_get_or_init(|| {
             Box::leak(Box::new(CpuCoreContext {
                 gs_kernel_stack_top: allocate_kernel_stack(16, &mut MAPPER.get().unwrap().lock())
+                    .finish()
                     .as_u64(),
                 gs_user_stack_top: 0,
             }))
