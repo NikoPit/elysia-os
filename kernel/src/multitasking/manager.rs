@@ -86,6 +86,12 @@ impl Manager {
 
         //run_next();
     }
+
+    pub fn get_current(&mut self) -> &mut Process {
+        self.processes
+            .get_mut(&self.current.unwrap())
+            .expect("The current process doesnt exist on process list WTF")
+    }
 }
 
 pub extern "C" fn test3() -> ! {
