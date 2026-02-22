@@ -1,11 +1,11 @@
 use alloc::str;
 
-use crate::systemcall::{implementations::utils::SystemCallImpl, syscall_no::SystemCallNo};
+use crate::systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo};
 
 pub struct GetTIDImpl;
 
-impl SystemCallImpl for GetTIDImpl {
-    const ENTRY: crate::systemcall::syscall_no::SystemCallNo = SystemCallNo::GetThreadID;
+impl SyscallImpl for GetTIDImpl {
+    const ENTRY: crate::systemcall::syscall_no::SyscallNo = SyscallNo::GetThreadID;
 
     fn handle_call(
         arg1: u64,

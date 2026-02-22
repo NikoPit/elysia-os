@@ -4,13 +4,13 @@ use crate::{
     memory::manager::allocate_user_mem,
     multitasking::MANAGER,
     s_println,
-    systemcall::{implementations::utils::SystemCallImpl, syscall_no::SystemCallNo},
+    systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 
 pub struct AllocMemImpl;
 
-impl SystemCallImpl for AllocMemImpl {
-    const ENTRY: crate::systemcall::syscall_no::SystemCallNo = SystemCallNo::AllocateMem;
+impl SyscallImpl for AllocMemImpl {
+    const ENTRY: crate::systemcall::syscall_no::SyscallNo = SyscallNo::AllocateMem;
 
     fn handle_call(
         arg1: u64,

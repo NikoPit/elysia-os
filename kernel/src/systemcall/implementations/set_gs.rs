@@ -1,9 +1,9 @@
-use crate::systemcall::{implementations::utils::SystemCallImpl, syscall_no::SystemCallNo};
+use crate::systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo};
 
 pub struct SetGSImpl;
 
-impl SystemCallImpl for SetGSImpl {
-    const ENTRY: crate::systemcall::syscall_no::SystemCallNo = SystemCallNo::SetGs;
+impl SyscallImpl for SetGSImpl {
+    const ENTRY: crate::systemcall::syscall_no::SyscallNo = SyscallNo::SetGs;
 
     fn handle_call(
         arg1: u64,

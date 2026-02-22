@@ -5,9 +5,9 @@ use crate::{
         implementations::{
             allocate_mem::AllocMemImpl, get_fs::GetFSImpl, get_process_id::GetPIDImpl,
             get_thread_id::GetTIDImpl, print::PrintImpl, set_fs::SetFSImpl, set_gs::SetGSImpl,
-            utils::SystemCallImpl,
+            utils::SyscallImpl,
         },
-        syscall_no::SystemCallNo,
+        syscall_no::SyscallNo,
     },
 };
 
@@ -17,13 +17,13 @@ pub static SYSCALL_TABLE: [Option<SyscallHandler>; 512] = {
     let mut table = [None; 512];
 
     // 编译时初始化表
-    register_syscall!(table, SystemCallNo::Print, PrintImpl);
-    register_syscall!(table, SystemCallNo::SetGs, SetGSImpl);
-    register_syscall!(table, SystemCallNo::SetFs, SetFSImpl);
-    register_syscall!(table, SystemCallNo::GetFs, GetFSImpl);
-    register_syscall!(table, SystemCallNo::AllocateMem, AllocMemImpl);
-    register_syscall!(table, SystemCallNo::GetProcessID, GetPIDImpl);
-    register_syscall!(table, SystemCallNo::GetThreadID, GetTIDImpl);
+    register_syscall!(table, SyscallNo::Print, PrintImpl);
+    register_syscall!(table, SyscallNo::SetGs, SetGSImpl);
+    register_syscall!(table, SyscallNo::SetFs, SetFSImpl);
+    register_syscall!(table, SyscallNo::GetFs, GetFSImpl);
+    register_syscall!(table, SyscallNo::AllocateMem, AllocMemImpl);
+    register_syscall!(table, SyscallNo::GetProcessID, GetPIDImpl);
+    register_syscall!(table, SyscallNo::GetThreadID, GetTIDImpl);
 
     table
 };

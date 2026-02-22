@@ -2,13 +2,13 @@ use alloc::str;
 
 use crate::{
     multitasking::MANAGER,
-    systemcall::{implementations::utils::SystemCallImpl, syscall_no::SystemCallNo},
+    systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 
 pub struct GetPIDImpl;
 
-impl SystemCallImpl for GetPIDImpl {
-    const ENTRY: crate::systemcall::syscall_no::SystemCallNo = SystemCallNo::GetProcessID;
+impl SyscallImpl for GetPIDImpl {
+    const ENTRY: crate::systemcall::syscall_no::SyscallNo = SyscallNo::GetProcessID;
 
     fn handle_call(
         arg1: u64,

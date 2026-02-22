@@ -2,15 +2,13 @@ use x86_64::registers::model_specific::Msr;
 
 use crate::{
     new_syscall,
-    systemcall::{
-        error::SyscallError, implementations::utils::SystemCallImpl, syscall_no::SystemCallNo,
-    },
+    systemcall::{error::SyscallError, implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 
 pub struct SetFSImpl;
 
-impl SystemCallImpl for SetFSImpl {
-    const ENTRY: SystemCallNo = SystemCallNo::SetFs;
+impl SyscallImpl for SetFSImpl {
+    const ENTRY: SyscallNo = SyscallNo::SetFs;
 
     fn handle_call(
         arg1: u64,

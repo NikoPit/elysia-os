@@ -2,7 +2,7 @@ use num_enum::TryFromPrimitive;
 
 #[derive(Debug, Clone, Copy, PartialEq, TryFromPrimitive)]
 #[repr(usize)]
-pub enum SystemCallNo {
+pub enum SyscallNo {
     Print = 1,
     SetFs = 2,
     SetGs = 3,

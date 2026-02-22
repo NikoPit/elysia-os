@@ -1,7 +1,7 @@
-use crate::systemcall::{error::SyscallError, syscall_no::SystemCallNo};
+use crate::systemcall::{error::SyscallError, syscall_no::SyscallNo};
 
-pub trait SystemCallImpl {
-    const ENTRY: SystemCallNo;
+pub trait SyscallImpl {
+    const ENTRY: SyscallNo;
 
     fn handle_call(
         arg1: u64,
@@ -26,8 +26,8 @@ macro_rules! new_syscall {
         #[derive(Clone, Copy)]
         pub struct $name;
 
-        impl SystemCallImpl for $name {
-            const ENTRY: SystemCallNo = $num;
+        impl SyscallImpl for $name {
+            const ENTRY: SyscallNo = $num;
 
             // depreacted
             fn handle_call(
