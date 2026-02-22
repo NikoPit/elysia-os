@@ -3,6 +3,7 @@ use x86_64::structures::paging::PageTableFlags;
 use crate::{
     memory::manager::allocate_user_mem,
     multitasking::MANAGER,
+    s_println,
     systemcall::{implementations::utils::SystemCallImpl, syscall_no::SystemCallNo},
 };
 
@@ -19,13 +20,14 @@ impl SystemCallImpl for AllocMemImpl {
         arg5: u64,
         arg6: u64,
     ) -> Result<usize, crate::systemcall::error::SyscallError> {
+        s_println!("Allocating {} pages, requested by user via arg1", arg1);
         let mut manager = MANAGER.lock();
-        Ok(allocate_user_mem(
-            arg1,
-            &mut manager.get_current().page_table.inner,
-            PageTableFlags::from_bits(arg2).unwrap(),
+        let flags =
+            PageTableFlags::USER_ACCESSIBLE | PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
+        Ok(
+            allocate_user_mem(arg1, &mut manager.get_current().page_table.inner, flags)
+                .0
+                .as_u64() as usize,
         )
-        .0
-        .as_u64() as usize)
     }
 }

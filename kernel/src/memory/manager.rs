@@ -10,7 +10,7 @@ use crate::{
     memory::{paging::FRAME_ALLOCATOR, utils::apply_offset},
 };
 
-static USER_MEM: AtomicU64 = AtomicU64::new(0x3000_0000);
+static USER_MEM: AtomicU64 = AtomicU64::new(0x30_0000_0000);
 static KERNEL_MEM: AtomicU64 = AtomicU64::new(0xFFFF_8000_1000_0000);
 
 /// Returns the virt addr of the mem start and mem end
@@ -53,6 +53,11 @@ pub fn allocate_user_mem(
     let start_addr = start.start_address();
     let end_addr = (start + pages).start_address();
     let write_addr = apply_offset(last_frame.unwrap().start_address().as_u64() + 4096);
+    unsafe {
+        let bytes = 4096;
+        let start_ptr = (write_addr as usize - bytes as usize) as *mut u8;
+        core::ptr::write_bytes(start_ptr, 0, bytes as usize);
+    }
 
     (start_addr, end_addr, write_addr as *mut u64)
 }
