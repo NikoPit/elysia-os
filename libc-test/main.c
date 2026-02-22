@@ -1,6 +1,8 @@
 //extern int write(int fd, const void *buf, unsigned long count);
 #include <stdint.h>
+#include <stdio.h>
 // 声明 relibc 真正的初始化逻辑入口
+extern long write(int fd, const void *buf, unsigned long count);
 extern void relibc_crt0(uintptr_t* sp);
 
 // 使用 naked 属性，防止 GCC 自动生成 push %rbp 等导致栈进一步乱掉的指令
@@ -23,7 +25,8 @@ __attribute__((naked)) void _start() {
     );
 }
 
-void main() {
-//    write(1, "Hello Relibc!\n", 14);
+int main() {
+	printf("Hello world from Relibc printf LETSGOOOOOOOOO!!!!!!");
     while(1);
+    return 0;
 }

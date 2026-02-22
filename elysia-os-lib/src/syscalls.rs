@@ -1,5 +1,7 @@
 use crate::{errors::SyscallError, numbers::SyscallNumber, syscall, utils::SyscallResult};
 
+pub mod futex;
+
 #[inline(always)]
 pub fn print(value: &str) -> SyscallResult {
     let msg = value.as_bytes();

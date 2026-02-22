@@ -13,6 +13,7 @@ use paste::paste;
 pub enum BlockType {
     SetTime,
     WakeRequired(WakeType),
+    Futex,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]

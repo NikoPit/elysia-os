@@ -6,4 +6,6 @@ pub enum SyscallNumber {
     AllocateMem = 5,
     GetProcessID = 6,
     GetThreadID = 7,
+    FutexWait = 8,
+    FutexWake = 9,
 }

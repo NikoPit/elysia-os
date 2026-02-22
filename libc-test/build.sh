@@ -2,7 +2,7 @@
 
 # 1. 路径配置
 RELIBC_PATH="../relibc/target/x86_64-unknown-linux-gnu/release"
-RELIBC_INCLUDE="../relibc/include"
+RELIBC_INCLUDE="../relibc/target/x86_64-unknown-linux-gnu/include"
 
 # 2. 编译器设置 (Nix pkgsCross 提供的名称)
 CC="x86_64-elf-gcc"

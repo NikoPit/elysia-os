@@ -3,8 +3,14 @@ use crate::{
     systemcall::{
         error::SyscallError,
         implementations::{
-            allocate_mem::AllocMemImpl, get_fs::GetFSImpl, get_process_id::GetPIDImpl,
-            get_thread_id::GetTIDImpl, print::PrintImpl, set_fs::SetFSImpl, set_gs::SetGSImpl,
+            allocate_mem::AllocMemImpl,
+            futex::{FutexWaitImpl, FutexWakeImpl},
+            get_fs::GetFSImpl,
+            get_process_id::GetPIDImpl,
+            get_thread_id::GetTIDImpl,
+            print::PrintImpl,
+            set_fs::SetFSImpl,
+            set_gs::SetGSImpl,
             utils::SyscallImpl,
         },
         syscall_no::SyscallNo,
@@ -24,6 +30,8 @@ pub static SYSCALL_TABLE: [Option<SyscallHandler>; 512] = {
     register_syscall!(table, SyscallNo::AllocateMem, AllocMemImpl);
     register_syscall!(table, SyscallNo::GetProcessID, GetPIDImpl);
     register_syscall!(table, SyscallNo::GetThreadID, GetTIDImpl);
+    register_syscall!(table, SyscallNo::FutexWait, FutexWaitImpl);
+    register_syscall!(table, SyscallNo::FutexWake, FutexWakeImpl);
 
     table
 };
