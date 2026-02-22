@@ -8,6 +8,10 @@ version = "0.1.0"
 edition = "2024"
 build = "build.rs"
 
+[[bin]]
+name = "elysia-os-runner"
+path = "runner.rs"
+
 [profile.dev]
 panic = "abort"
 
