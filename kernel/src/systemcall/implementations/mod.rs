@@ -1,3 +1,4 @@
+pub mod allocate_mem;
 pub mod get_fs;
 pub mod print;
 pub mod set_fs;

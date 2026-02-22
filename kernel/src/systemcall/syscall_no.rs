@@ -7,4 +7,5 @@ pub enum SystemCallNo {
     SetFs = 2,
     SetGs = 3,
     GetFs = 4,
+    AllocateMem = 5,
 }

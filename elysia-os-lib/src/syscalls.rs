@@ -27,3 +27,11 @@ pub fn get_fs() -> SyscallResult {
 pub fn set_gs(addr: u64) -> SyscallResult {
     syscall!(SetGs, addr)
 }
+
+fn allocate_mem_pages(pages: u64, flags: u64) -> SyscallResult {
+    syscall!(AllocateMem, pages, flags)
+}
+
+pub fn allocate_mem(len: u64, flags: u64) -> SyscallResult {
+    allocate_mem_pages((len + 4095) / 4096, flags)
+}
