@@ -1,28 +1,39 @@
 #!/bin/sh
 
-# 1. 配置路径 (根据你的实际存放位置修改)
+# 1. 路径配置
 RELIBC_PATH="../relibc/target/x86_64-unknown-linux-gnu/release"
 RELIBC_INCLUDE="../relibc/include"
-RELIBC_LIB="$RELIBC_PATH"
 
-# 2. 编译参数
-# --target: 指定目标为 x86_64-unknown-redox
-# -ffreestanding: 不使用宿主机的标准库
-TARGET="x86_64-unknown-none"
+# 2. 编译器设置 (Nix pkgsCross 提供的名称)
+CC="x86_64-elf-gcc"
+LD="x86_64-elf-ld"
 
-# 3. 编译源文件为对象文件
-clang --target=$TARGET \
-      -ffreestanding \
-      -fno-stack-protector \
-      -I$RELIBC_INCLUDE \
-      -c main.c -o main.o
+# 3. 编译参数
+# -mno-sse: 禁用 SSE，防止生成 ldmxcsr 等对齐敏感指令
+# -mno-red-zone: 禁止使用栈下方 128 字节，这对内核/底层开发是安全的
+# -fno-stack-protector: 禁用栈保护，避免链接到不存在的符号
+CFLAGS="-ffreestanding \
+        -mno-sse \
+        -mno-red-zone \
+        -fno-stack-protector \
+        -fno-builtin \
+        -nostdinc \
+        -I$RELIBC_INCLUDE"
 
-# 4. 链接阶段 (核心步骤)
-# -static: 静态链接
-# -nostdlib: 禁用所有默认库，我们要手动指定
-# 顺序极其重要: crt0.o 必须在最前面
-ld.lld -nostdlib -static \
-       ./crt0.o \
-       main.o \
-       $RELIBC_LIB/librelibc.a \
-       -o test.elf
+echo "Compiling main.c..."
+$CC $CFLAGS -c main.c -o main.o
+
+echo "Linking test.elf..."
+# 注意：relibc 自带的 crt0 可能会调用 SSE 指令，
+# 如果链接后仍然崩在 _start，说明 crt0 需要重新用 -mno-sse 编译
+$LD -static -nostdlib \
+    --allow-multiple-definition \
+    main.o \
+    $RELIBC_PATH/crt0.o \
+    $RELIBC_PATH/crti.o \
+    $RELIBC_PATH/librelibc.a \
+    $RELIBC_PATH/crtn.o \
+    -o test.elf
+
+echo "Build Done. Entry Point:"
+readelf -h test.elf | grep Entry
