@@ -1,6 +1,7 @@
 use core::sync::atomic::AtomicU64;
 
 use alloc::boxed::Box;
+use elfloader::ElfBinary;
 use x86_64::{
     VirtAddr,
     registers::model_specific::Msr,
@@ -16,7 +17,7 @@ use crate::{
     },
     s_println,
     userspace::elf_loader::{Function, load_elf},
-    utils::stack_builder::StackBuilder,
+    utils::{aux::AuxType, stack_builder::StackBuilder},
 };
 
 #[derive(Debug)]
@@ -47,11 +48,14 @@ impl Process {
 
         let mut stack_builder = allocate_stack(16, &mut page_table.inner);
 
-        init_stack_layout(&mut stack_builder);
+        let program = load_elf(&mut page_table, program);
 
-        let entry_point = load_elf(&mut page_table, program);
+        assert!(!program.is_pie(), "Pie program is not supported for now");
+
+        init_stack_layout(&mut stack_builder, &program);
+
         let context = Context::new(
-            entry_point as u64,
+            program.entry_point() as u64,
             &mut page_table,
             stack_builder.finish().as_u64(),
         );
@@ -67,38 +71,24 @@ impl Process {
     }
 }
 
-fn init_stack_layout(builder: &mut StackBuilder) {
-    unsafe {
-        // A. 先在栈的最顶端存入字符串 "init\0"
-        // 字符串占用 5 字节，为了对齐我们按 8 字节处理
-        let arg_str = "init\0";
-        let str_len = arg_str.len();
+fn init_stack_layout(builder: &mut StackBuilder, file: &ElfBinary) {
+    // A. 先在栈的最顶端存入字符串 "init\0"
+    // 字符串占用 5 字节，为了对齐我们按 8 字节处理
+    let arg_str = "init\0";
+    let str_len = arg_str.len();
 
-        // 手动移动指针存入字符串
-        //*virt_stack_write = (virt_stack_write).sub(16);
-        //core::ptr::copy_nonoverlapping(arg_str.as_ptr(), *virt_stack_write as *mut u8, str_len);
+    // 手动移动指针存入字符串
+    //*virt_stack_write = (virt_stack_write).sub(16);
+    //core::ptr::copy_nonoverlapping(arg_str.as_ptr(), *virt_stack_write as *mut u8, str_len);
 
-        // B. 使用你的 write_and_sub 按照 ABI 逆序压栈
+    // B. 使用你的 write_and_sub 按照 ABI 逆序压栈
+    builder.push_aux_entries(file);
 
-        // 1. 压入辅助向量结束符 AT_NULL (2个u64)
-        builder.push(0);
-        builder.push(0);
+    builder.push(0); // envp
 
-        // 2. 压入环境变量结束符 envp[0] = NULL
-        builder.push(0);
-
-        // 3. 压入 argv[1] = NULL (argv 结束符)
-        builder.push(0);
-
-        // 4. 压入 argv[0] 指向我们刚才写的字符串地址
-        builder.push(0);
-
-        // 5. 压入 argc = 1
-        builder.push(1);
-
-        // 此时一共用了 6 个 u64，加上前面的字符串占用的 8 字节，
-        // 最终 user_rsp 应该减去 (6 * 8 + 8) = 56 字节
-    }
+    builder.push(0); // argv [1]
+    builder.push(0); // argv
+    builder.push(1); // argc
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]

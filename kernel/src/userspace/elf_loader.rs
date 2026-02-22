@@ -123,12 +123,12 @@ impl<'a> elfloader::ElfLoader for ElfLoader<'a> {
 }
 
 /// Returns the entry point
-pub fn load_elf(page_table: &mut PageTableWrapped, program: &[u8]) -> Function {
+pub fn load_elf<'a>(page_table: &mut PageTableWrapped, program: &'a [u8]) -> ElfBinary<'a> {
     let binary = ElfBinary::new(program).expect("Failed to parse elf binary");
 
     binary
         .load(&mut ElfLoader::new(&mut page_table.inner))
         .expect("Failed to load ELF");
 
-    binary.entry_point() as Function
+    binary
 }
