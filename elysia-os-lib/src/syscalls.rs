@@ -35,3 +35,12 @@ fn allocate_mem_pages(pages: u64, flags: u64) -> SyscallResult {
 pub fn allocate_mem(len: u64, flags: u64) -> SyscallResult {
     allocate_mem_pages((len + 4095) / 4096, flags)
 }
+
+pub fn get_process_id() -> SyscallResult {
+    syscall!(GetProcessID)
+}
+
+pub fn get_thread_id() -> SyscallResult {
+    // TODO not yet implemented
+    get_process_id()
+}

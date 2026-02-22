@@ -1,5 +1,7 @@
 pub mod allocate_mem;
 pub mod get_fs;
+pub mod get_process_id;
+pub mod get_thread_id;
 pub mod print;
 pub mod set_fs;
 pub mod set_gs;

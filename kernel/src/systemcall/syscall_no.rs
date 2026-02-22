@@ -8,4 +8,6 @@ pub enum SystemCallNo {
     SetGs = 3,
     GetFs = 4,
     AllocateMem = 5,
+    GetProcessID = 6,
+    GetThreadID = 7,
 }
