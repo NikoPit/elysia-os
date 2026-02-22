@@ -68,9 +68,7 @@ impl Manager {
         }
     }
 
-    pub fn block_current(&mut self, block_type: BlockType) {
-        unimplemented!();
-
+    pub fn block_current_unwrappped(&mut self, block_type: BlockType) {
         let current = self.processes.get_mut(&self.current.unwrap()).unwrap();
 
         current.state = process::State::Blocked(block_type);
@@ -92,6 +90,12 @@ impl Manager {
             .get_mut(&self.current.unwrap())
             .expect("The current process doesnt exist on process list WTF")
     }
+}
+
+pub fn block_current(block_type: BlockType) {
+    MANAGER.lock().block_current_unwrappped(block_type);
+    // TODO
+    //run_next(InterruptStackFrame::new(fwefwefas, code_segment, cpu_flags, stack_pointer, stack_segment));
 }
 
 pub extern "C" fn test3() -> ! {

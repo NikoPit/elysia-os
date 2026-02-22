@@ -2,7 +2,7 @@ use alloc::collections::{btree_map::BTreeMap, vec_deque::VecDeque};
 use spin::Mutex;
 
 use crate::{
-    multitasking::{MANAGER, process::ProcessID, yielding::BlockType},
+    multitasking::{MANAGER, manager::block_current, process::ProcessID, yielding::BlockType},
     systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 
@@ -46,8 +46,7 @@ impl SyscallImpl for FutexWaitImpl {
 
         drop(queue);
 
-        // TODO: fix this lol (dead lock)
-        // MANAGER.lock().block_current(BlockType::Futex);
+        //block_current(BlockType::Futex);
         Ok(FutexResultType::Success as usize)
     }
 }
