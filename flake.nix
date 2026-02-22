@@ -26,7 +26,6 @@
             nativeBuildInputs = [ rustup ];
             buildInputs = [
               cargo
-              pkgs.pkgsCross.x86_64-embedded.buildPackages.gcc
               clang
               lld
               rustc
