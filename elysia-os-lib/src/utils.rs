@@ -29,8 +29,7 @@ pub fn raw_syscall(
                out("r11") _, // syscall 会覆盖 r11
                lateout("rax") return_value,
         );
-        if return_value.is_positive() {
-            print("positiv");
+        if return_value >= 0 {
             Ok(return_value as usize)
         } else {
             Err(SyscallError::from(return_value))

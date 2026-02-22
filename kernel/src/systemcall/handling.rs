@@ -34,7 +34,7 @@ extern "C" fn syscall_handler(snapshot_ptr: *mut SyscallSnapshot) {
         snapshot.arg6,
     );
 
-    s_println!("{:?}", result);
+    s_println!("Syscall result:{:?}", result);
 
     snapshot.syscall_no = result;
 }

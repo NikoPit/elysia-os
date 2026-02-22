@@ -260,7 +260,7 @@ dependencies = [
 
 [[package]]
 name = "elysia-os-lib"
-version = "0.1.1"
+version = "0.1.4"
 
 [[package]]
 name = "elysia-os-runner"
@@ -269,7 +269,6 @@ dependencies = [
  "bootloader",
  "kernel",
  "ovmf-prebuilt",
- "test-init",
 ]
 
 [[package]]
