@@ -14,10 +14,12 @@ lazy_static! {
         // a selector is just a fancy way of saying index. it stores the index and
         // other stuffs about the GDT entry
         let kernel_code_selector = gdt.append(Descriptor::kernel_code_segment());
-        let tss_selector = gdt.append(Descriptor::tss_segment(tss::get_ref()));
+        gdt.append(Descriptor::kernel_data_segment());
 
         let user_code = gdt.append(Descriptor::user_code_segment());
         let user_data = gdt.append(Descriptor::user_data_segment());
+
+        let tss_selector = gdt.append(Descriptor::tss_segment(tss::get_ref()));
 
         (gdt, GDTSelectors { code_selector: kernel_code_selector, tss_selector, user_data, user_code })
     };

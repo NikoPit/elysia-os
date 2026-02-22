@@ -7,60 +7,39 @@ use crate::{
     interrupts::{print_stackframe, print_stackframe_m},
     misc::hlt_loop,
     println, s_println,
-    tss::DOUBLE_FAULT_IST_LOCATION,
+    tss::{DOUBLE_FAULT_IST_LOCATION, GP_IST_LOCATION, PAGE_FAULT_IST_LOCATION},
 };
 
-pub trait ExceptionInterruptHandler {
-    fn handle_exception_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {}
-    fn handle_exception_interrupt_unwrapped_err_code(
-        _stack_frame: InterruptStackFrame,
-        _err_code: u64,
-    ) -> ! {
-        unimplemented!();
-    }
-
-    extern "x86-interrupt" fn handle_exception_interrupt(_stack_frame: InterruptStackFrame) {
-        Self::handle_exception_interrupt_unwrapped(_stack_frame);
-    }
-
-    extern "x86-interrupt" fn handle_exception_interrupt_err_code(
-        _stack_frame: InterruptStackFrame,
-        err_code: u64,
-    ) -> ! {
-        Self::handle_exception_interrupt_unwrapped_err_code(_stack_frame, err_code);
-    }
-}
-
 pub fn init_exception_interrupts(idt: &mut InterruptDescriptorTable) {
-    idt.breakpoint
-        .set_handler_fn(BreakpointHandler::handle_exception_interrupt);
+    idt.breakpoint.set_handler_fn(breakpoint_handler);
     unsafe {
         idt.double_fault
-            .set_handler_fn(DoublefaultHandler::handle_exception_interrupt_err_code)
-            .set_stack_index(DOUBLE_FAULT_IST_LOCATION)
-    };
-    idt.page_fault.set_handler_fn(pagefault_handler);
-}
-
-struct BreakpointHandler;
-struct DoublefaultHandler;
-
-impl ExceptionInterruptHandler for BreakpointHandler {
-    fn handle_exception_interrupt_unwrapped(_stack_frame: InterruptStackFrame) {
-        print_stackframe("Breakpoint exception:\n", _stack_frame);
+            .set_handler_fn(double_fault_handler)
+            .set_stack_index(DOUBLE_FAULT_IST_LOCATION);
+        idt.page_fault
+            .set_handler_fn(pagefault_handler)
+            .set_stack_index(PAGE_FAULT_IST_LOCATION);
+        idt.general_protection_fault
+            .set_handler_fn(gp_handler)
+            .set_stack_index(GP_IST_LOCATION);
     }
 }
 
-impl ExceptionInterruptHandler for DoublefaultHandler {
-    fn handle_exception_interrupt_unwrapped_err_code(
-        _stack_frame: InterruptStackFrame,
-        err_code: u64,
-    ) -> ! {
-        panic!(
-            "Double fault:\n\n{:#?}\nError code: {err_code}",
-            _stack_frame
-        );
-    }
+extern "x86-interrupt" fn breakpoint_handler(_stack_frame: InterruptStackFrame) {}
+
+extern "x86-interrupt" fn gp_handler(_stack_frame: InterruptStackFrame, err_code: u64) {
+    s_println!("gp");
+    s_println!("{:?}", _stack_frame);
+}
+
+extern "x86-interrupt" fn double_fault_handler(
+    _stack_frame: InterruptStackFrame,
+    err_code: u64,
+) -> ! {
+    panic!(
+        "Double fault:\n\n{:#?}\nError code: {err_code}",
+        _stack_frame
+    );
 }
 
 // i gave up on trying to wrap everything behind a abstraction layer.
