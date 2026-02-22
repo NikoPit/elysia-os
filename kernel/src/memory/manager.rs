@@ -1,0 +1,97 @@
+use core::sync::atomic::{AtomicU64, Ordering};
+
+use x86_64::{
+    VirtAddr,
+    structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Page, PageTableFlags, Size4KiB},
+};
+
+use crate::{
+    graphics::framebuffer::FRAME_BUFFER,
+    memory::{paging::FRAME_ALLOCATOR, utils::apply_offset},
+};
+
+static USER_MEM: AtomicU64 = AtomicU64::new(0x3000_0000);
+static KERNEL_MEM: AtomicU64 = AtomicU64::new(0xFFFF_8000_1000_0000);
+
+/// Returns the virt addr of the mem start and mem end
+///
+/// Note: The phys addr of the stack top is the addr of the
+/// last frame, so if you writes more then 4KiB of memory
+/// it will cause undefined behaviour
+pub fn allocate_user_mem(
+    pages: u64,
+    table: &mut OffsetPageTable<'static>,
+    flags: PageTableFlags,
+) -> (VirtAddr, VirtAddr, *mut u64) {
+    // skips the guard page
+    let guard_page = allocate_user_page(pages);
+    let start = guard_page + 1;
+
+    let mut last_frame = None;
+    let mut frame_allocator = FRAME_ALLOCATOR.try_get().unwrap().lock();
+
+    let mut flags = flags;
+
+    if !flags.contains(PageTableFlags::USER_ACCESSIBLE) {
+        flags |= PageTableFlags::USER_ACCESSIBLE;
+    }
+
+    for i in 0..pages {
+        let page = start + i;
+        let frame = frame_allocator.allocate_frame().expect("Memory full.");
+
+        unsafe {
+            table
+                .map_to(page, frame, flags, &mut *frame_allocator)
+                .unwrap()
+                .flush();
+        };
+
+        last_frame = Some(frame);
+    }
+
+    let start_addr = start.start_address();
+    let end_addr = (start + pages).start_address();
+    let write_addr = apply_offset(last_frame.unwrap().start_address().as_u64() + 4096);
+
+    (start_addr, end_addr, write_addr as *mut u64)
+}
+
+pub fn allocate_kernel_mem(
+    pages: u64,
+    table: &mut OffsetPageTable<'static>,
+    flags: PageTableFlags,
+) -> (VirtAddr, VirtAddr) {
+    let guard_page = allocate_kernel_page(pages);
+    let start = guard_page + 1;
+
+    let mut frame_allocator = FRAME_ALLOCATOR.try_get().unwrap().lock();
+
+    for i in 0..pages {
+        let page = start + i;
+        let frame = frame_allocator.allocate_frame().expect("Memory full.");
+
+        unsafe {
+            table
+                .map_to(page, frame, flags, &mut *frame_allocator)
+                .unwrap()
+                .flush();
+        };
+    }
+
+    let start_addr = start.start_address();
+    let end_addr = (start + pages).start_address();
+
+    (start_addr, end_addr)
+}
+
+fn allocate_user_page(count: u64) -> Page<Size4KiB> {
+    Page::containing_address(VirtAddr::new(
+        USER_MEM.fetch_add((count + 1) * 4096, Ordering::Relaxed),
+    ))
+}
+fn allocate_kernel_page(count: u64) -> Page<Size4KiB> {
+    Page::containing_address(VirtAddr::new(
+        KERNEL_MEM.fetch_add((count + 1) * 4096, Ordering::Relaxed),
+    ))
+}
