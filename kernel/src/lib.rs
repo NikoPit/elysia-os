@@ -42,6 +42,8 @@ use core::panic::PanicInfo;
 use bootloader_api::{BootInfo, entry_point};
 use bootloader_api::{BootloaderConfig, config::Mapping};
 
+use crate::utils::misc::enable_sse;
+
 #[cfg(test)]
 entry_point!(test_k_main, config = &BOOTLOADER_CONFIG);
 
@@ -57,6 +59,7 @@ fn test_k_main(_boot_info: &'static mut BootInfo) -> ! {
 }
 
 pub fn init(bootinfo: &'static mut BootInfo) {
+    enable_sse();
     tss::init();
     memory::init(
         bootinfo.physical_memory_offset.into_option().unwrap(),
