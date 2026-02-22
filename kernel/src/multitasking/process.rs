@@ -54,7 +54,7 @@ impl Process {
         let contxt = Context::new(
             entry_point as u64,
             &mut table,
-            virt_stack_addr.as_u64() - 15 * 8,
+            virt_stack_addr.as_u64() - 6 * 8,
         );
         let kernel_stack_top = allocate_kernel_stack(16, &mut table.inner);
 
@@ -80,7 +80,7 @@ fn init_stack_layout(
         let str_len = arg_str.len();
 
         // 手动移动指针存入字符串
-        *virt_stack_write = (virt_stack_write).sub(8);
+        *virt_stack_write = (virt_stack_write).sub(16);
         core::ptr::copy_nonoverlapping(arg_str.as_ptr(), *virt_stack_write as *mut u8, str_len);
 
         // B. 使用你的 write_and_sub 按照 ABI 逆序压栈
