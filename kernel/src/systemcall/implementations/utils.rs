@@ -3,7 +3,14 @@ use crate::systemcall::{error::SyscallError, syscall_no::SystemCallNo};
 pub trait SystemCallImpl {
     const ENTRY: SystemCallNo;
 
-    fn handle_call(arg1: u64, arg2: u64, arg3: u64) -> Result<usize, SyscallError>;
+    fn handle_call(
+        arg1: u64,
+        arg2: u64,
+        arg3: u64,
+        arg4: u64,
+        arg5: u64,
+        arg6: u64,
+    ) -> Result<usize, SyscallError>;
 }
 
 #[macro_export]
@@ -22,7 +29,15 @@ macro_rules! new_syscall {
         impl SystemCallImpl for $name {
             const ENTRY: SystemCallNo = $num;
 
-            fn handle_call(arg1: u64, arg2: u64, arg3: u64) -> Result<usize, SyscallError> {
+            // depreacted
+            fn handle_call(
+                arg1: u64,
+                arg2: u64,
+                arg3: u64,
+                arg4: u64,
+                arg5: u64,
+                arg6: u64,
+            ) -> Result<usize, SyscallError> {
                 // 宏会自动生成转换代码
                 let $arg1 = arg1 as $type1;
                 let $arg2 = arg2 as $type2;

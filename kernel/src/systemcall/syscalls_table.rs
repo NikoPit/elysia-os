@@ -10,7 +10,7 @@ use crate::{
     },
 };
 
-type SyscallHandler = fn(u64, u64, u64) -> Result<usize, SyscallError>;
+type SyscallHandler = fn(u64, u64, u64, u64, u64, u64) -> Result<usize, SyscallError>;
 
 pub static SYSCALL_TABLE: [Option<SyscallHandler>; 512] = {
     let mut table = [None; 512];

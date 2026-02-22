@@ -11,7 +11,15 @@ pub struct SetFSImpl;
 
 impl SystemCallImpl for SetFSImpl {
     const ENTRY: SystemCallNo = SystemCallNo::SetFs;
-    fn handle_call(arg1: u64, arg2: u64, arg3: u64) -> Result<usize, SyscallError> {
+
+    fn handle_call(
+        arg1: u64,
+        arg2: u64,
+        arg3: u64,
+        arg4: u64,
+        arg5: u64,
+        arg6: u64,
+    ) -> Result<usize, SyscallError> {
         unsafe {
             Msr::new(0xC0000100).write(arg1);
         };

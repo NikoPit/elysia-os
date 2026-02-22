@@ -49,7 +49,7 @@ fn syscall_handler_unwrapped(
     arg6: u64,
 ) -> isize {
     if let Some(handler) = SYSCALL_TABLE.get(syscall_no as usize) {
-        match handler.unwrap()(arg1, arg2, arg3) {
+        match handler.unwrap()(arg1, arg2, arg3, arg4, arg5, arg6) {
             Ok(value) => value as isize,
             Err(err) => err as isize,
         }
