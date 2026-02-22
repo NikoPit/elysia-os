@@ -58,8 +58,6 @@ impl Process {
         );
         let kernel_stack_top = allocate_kernel_stack(16, &mut table.inner);
 
-        init_tls(&mut table);
-
         Self {
             page_table: table,
             pid: ProcessID::default(),
@@ -77,17 +75,6 @@ fn init_stack_layout(table: &mut PageTableWrapped, virt_stack_write: &mut *mut u
         write_and_sub(virt_stack_write, 0);
         write_and_sub(virt_stack_write, 0);
         write_and_sub(virt_stack_write, 1);
-    };
-}
-
-fn init_tls(table: &mut PageTableWrapped) {
-    // Allocates space for the TLS
-    //let (tls, tls_write) = allocate_stack(16, &mut table.inner);
-
-    unsafe {
-        //tls_write.offset(-1).write(tls.as_u64() - 8);
-        //Msr::new(0xC0000100).write(tls.as_u64() - 8);
-        Msr::new(0xC0000100).write(0);
     };
 }
 
