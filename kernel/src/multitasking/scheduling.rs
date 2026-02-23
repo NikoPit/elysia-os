@@ -8,7 +8,7 @@ use crate::{
         process::State,
         switch::{context_switch, context_switch_zombie},
     },
-    s_print,
+    s_print, s_println,
     tss::TSS,
 };
 
@@ -97,6 +97,8 @@ pub fn run_next_zombie() {
         let mut manager = MANAGER.lock();
         manager.run_next_zombie_unwrapped()
     });
+
+    s_println!("next task: {:?}", next);
 
     unsafe {
         context_switch_zombie(next);

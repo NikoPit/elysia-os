@@ -17,10 +17,13 @@ impl SyscallImpl for ExitImpl {
         arg6: u64,
     ) -> Result<usize, crate::systemcall::error::SyscallError> {
         // TODO: release the memory when exitting
+        // TODO: it seemed to also be broken, ill fix it later
         let mut manager = MANAGER.lock();
         if let Some(pid) = manager.current {
             manager.zombies.push(pid);
         }
+
+        drop(manager);
 
         run_next_zombie();
         Ok(0)
