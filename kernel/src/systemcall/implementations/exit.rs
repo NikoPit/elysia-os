@@ -1,5 +1,5 @@
 use crate::{
-    multitasking::{MANAGER, exit_handling::exit_handler, scheduling::run_next_zombie},
+    multitasking::{MANAGER, scheduling::run_next_zombie},
     systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 

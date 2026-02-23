@@ -5,10 +5,7 @@ use x86_64::{VirtAddr, registers::control::Cr3Flags};
 use crate::{
     gdt::GDT,
     memory::page_table_wrapper::PageTableWrapped,
-    multitasking::{
-        exit_handling::exit_handler,
-        memory::{allocate_kernel_stack, allocate_stack},
-    },
+    multitasking::memory::{allocate_kernel_stack, allocate_stack},
     userspace::elf_loader::Function,
     utils::misc::calc_cr3_value,
 };
