@@ -44,9 +44,13 @@ impl<'a> Tty<'a> {
 
                 // 从静态数组中读取颜色分量
                 // 注意：由于我们转换时用了 BGRA，所以顺序是 B, G, R, A
-                let b = WALLPAPER[i];
-                let g = WALLPAPER[i + 1];
-                let r = WALLPAPER[i + 2];
+                let mut b = WALLPAPER[i];
+                let mut g = WALLPAPER[i + 1];
+                let mut r = WALLPAPER[i + 2];
+
+                b = b - (b >> 1);
+                g = g - (g >> 1);
+                r = r - (r >> 1);
 
                 // 第 4 位是 Alpha(i+3)，我们通常跳过它，或者用来做透明度计算
 
