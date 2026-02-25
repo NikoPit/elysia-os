@@ -9,6 +9,7 @@ use crate::{
 
 pub mod aux;
 pub mod others;
+pub mod snapshot;
 pub mod stack_builder;
 
 pub static mut CPU_CORE_CONTEXT: &mut CpuCoreContext = &mut CpuCoreContext {
