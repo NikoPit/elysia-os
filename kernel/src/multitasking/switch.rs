@@ -2,7 +2,7 @@ use core::arch::{self, naked_asm};
 
 use x86_64::{
     VirtAddr,
-    registers::model_specific::{FsBase, Msr},
+    registers::model_specific::{FsBase, GsBase, KernelGsBase, Msr},
 };
 
 use crate::{
@@ -28,7 +28,9 @@ impl Context {
     fn update_gs(&mut self) {
         unsafe {
             CPU_CORE_CONTEXT.gs_kernel_stack_top = self.kernel_rsp;
-            Msr::new(0xC0000102).write(((CPU_CORE_CONTEXT) as *const CpuCoreContext) as u64);
+            KernelGsBase::write(VirtAddr::new(
+                ((CPU_CORE_CONTEXT) as *const CpuCoreContext) as u64,
+            ));
         }
     }
 

@@ -4,7 +4,7 @@ use x86_64::{
     instructions::interrupts::without_interrupts,
     registers::{
         control::{Efer, EferFlags},
-        model_specific::{LStar, Msr, SFMask},
+        model_specific::{GsBase, KernelGsBase, LStar, Msr, SFMask},
         rflags::RFlags,
     },
 };
@@ -39,7 +39,9 @@ pub fn init() {
         LStar::write(syscall_entry_addr);
 
         unsafe {
-            Msr::new(0xC0000102).write(((CPU_CORE_CONTEXT) as *const CpuCoreContext) as u64);
+            KernelGsBase::write(VirtAddr::new(
+                ((CPU_CORE_CONTEXT) as *const CpuCoreContext) as u64,
+            ));
         }
     })
 }
