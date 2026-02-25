@@ -29,7 +29,8 @@ extern "x86-interrupt" fn breakpoint_handler(_stack_frame: InterruptStackFrame) 
 
 extern "x86-interrupt" fn gp_handler(_stack_frame: InterruptStackFrame, err_code: u64) {
     s_println!("gp");
-    s_println!("{:?}", _stack_frame);
+    print_stackframe_m(_stack_frame);
+    hlt_loop()
 }
 
 extern "x86-interrupt" fn double_fault_handler(
