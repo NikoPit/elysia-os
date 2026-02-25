@@ -6,7 +6,6 @@ use x86_64::{
 };
 
 use crate::{
-    load_registers,
     misc::{CPU_CORE_CONTEXT, others::CpuCoreContext, snapshot::Snapshot},
     multitasking::{self, context::ProcessSnapshot, manager::Manager},
     new_syscall, s_println,
