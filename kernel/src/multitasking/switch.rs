@@ -6,18 +6,27 @@ use x86_64::{
 };
 
 use crate::{
-    misc::{CPU_CORE_CONTEXT, others::CpuCoreContext},
+    misc::{
+        CPU_CORE_CONTEXT,
+        others::CpuCoreContext,
+        snapshot::{Snapshot, UserSnapshot},
+    },
     multitasking::{self, context::ProcessSnapshot, manager::Manager},
     new_syscall,
 };
 
 impl ProcessSnapshot {
     /// Switches from [`source`] to [`self`]
-    pub fn switch_from(&mut self, source: Option<&mut ProcessSnapshot>) {
+    pub fn switch_from(
+        &mut self,
+        source: Option<&mut ProcessSnapshot>,
+        snapshot: &mut UserSnapshot,
+    ) {
         if let Some(source) = source {
-            source.save();
+            source.save(snapshot);
             source.save_msr();
         }
+
         self.update_gs();
         self.load();
         self.load_page_table();
@@ -43,18 +52,8 @@ impl ProcessSnapshot {
     }
 
     /// Save all the cpu registers into [`self`]
-    #[unsafe(naked)]
-    extern "C" fn save(&mut self) {
-        naked_asm!(
-            "mov [rdi + 8], rsp",
-            "mov [rdi + 56], rbp",
-            "mov [rdi + 48], rbx",
-            "mov [rdi + 40], r12",
-            "mov [rdi + 32], r13",
-            "mov [rdi + 24], r14",
-            "mov [rdi + 16], r15",
-            "ret"
-        );
+    extern "C" fn save(&mut self, snapshot: &mut UserSnapshot) {
+        self.inner = *snapshot;
     }
 
     /// Laods all the cpu registers from [`self`]
