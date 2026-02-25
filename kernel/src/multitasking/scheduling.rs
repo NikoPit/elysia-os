@@ -1,13 +1,13 @@
 use x86_64::{instructions::interrupts::without_interrupts, structures::idt::InterruptStackFrame};
 
 use crate::{
-    multitasking::{MANAGER, context::Context, manager::Manager, process::State},
+    multitasking::{MANAGER, context::ProcessSnapshot, manager::Manager, process::State},
     s_print, s_println,
     tss::TSS,
 };
 
 impl Manager {
-    fn run_next_unwrapped(&mut self) -> (*mut Context, *mut Context) {
+    fn run_next_unwrapped(&mut self) -> (*mut ProcessSnapshot, *mut ProcessSnapshot) {
         let current_task_id = self.current.take().unwrap();
 
         let current_task_ptr = {
@@ -43,7 +43,7 @@ impl Manager {
     }
 
     /// picks the next process. called from a zombie process
-    fn run_next_zombie_unwrapped(&mut self) -> *mut Context {
+    fn run_next_zombie_unwrapped(&mut self) -> *mut ProcessSnapshot {
         self.clean_zombies();
 
         let next_task = if let Some(next) = self.queue.pop_front() {

@@ -12,7 +12,7 @@ use crate::{
     memory::page_table_wrapper::PageTableWrapped,
     misc::{aux::AuxType, stack_builder::StackBuilder},
     multitasking::{
-        context::Context,
+        context::ProcessSnapshot,
         memory::{allocate_kernel_stack, allocate_stack},
         yielding::BlockType,
     },
@@ -23,7 +23,7 @@ use crate::{
 #[derive(Debug)]
 pub struct Process {
     pub pid: ProcessID,
-    pub context: Context,
+    pub context: ProcessSnapshot,
     pub state: State,
     pub page_table: PageTableWrapped,
     pub kernel_stack_top: VirtAddr,
@@ -35,7 +35,7 @@ impl Default for Process {
         Self {
             page_table: PageTableWrapped::default(),
             pid: ProcessID::default(),
-            context: Context::default(),
+            context: ProcessSnapshot::default(),
             state: State::Ready,
             kernel_stack_top: VirtAddr::zero(),
         }
@@ -54,7 +54,7 @@ impl Process {
 
         init_stack_layout(&mut stack_builder, &program);
 
-        let context = Context::new(
+        let context = ProcessSnapshot::new(
             program.entry_point() as u64,
             &mut page_table,
             stack_builder.finish().as_u64(),

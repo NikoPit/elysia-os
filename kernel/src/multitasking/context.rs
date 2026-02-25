@@ -15,7 +15,7 @@ use crate::{
 // and also, ptr.sub(1) 6 times (rbp-r15) and then write the rflags
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default)]
-pub struct Context {
+pub struct ProcessSnapshot {
     cr3: u64, // +0
     // RSP used on context switching in kernel space to not messup the userstack
     pub kernel_rsp: u64, // +8
@@ -37,7 +37,7 @@ pub struct Context {
     pub fs_base: u64,
 }
 
-impl Context {
+impl ProcessSnapshot {
     pub fn new(entry_point: u64, table: &mut PageTableWrapped, virt_stack_addr: u64) -> Self {
         Self {
             cr3: calc_cr3_value(table.frame.start_address(), Cr3Flags::empty()),

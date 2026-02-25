@@ -7,13 +7,13 @@ use x86_64::{
 
 use crate::{
     misc::{CPU_CORE_CONTEXT, others::CpuCoreContext},
-    multitasking::{self, context::Context, manager::Manager},
+    multitasking::{self, context::ProcessSnapshot, manager::Manager},
     new_syscall,
 };
 
-impl Context {
+impl ProcessSnapshot {
     /// Switches from [`source`] to [`self`]
-    pub fn switch_from(&mut self, source: Option<&mut Context>) {
+    pub fn switch_from(&mut self, source: Option<&mut ProcessSnapshot>) {
         if let Some(source) = source {
             source.save();
             source.save_msr();
@@ -97,7 +97,7 @@ impl Context {
 /// # Safety
 /// Must provide valid pointer to context
 #[unsafe(naked)]
-pub unsafe extern "C" fn context_switch_zombie(next: *mut Context) {
+pub unsafe extern "C" fn context_switch_zombie(next: *mut ProcessSnapshot) {
     arch::naked_asm!(
         "mov rax, [rdi]",
         "mov cr3, rax",
