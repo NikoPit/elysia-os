@@ -31,7 +31,7 @@ impl<'a> Tty<'a> {
     }
 
     pub fn draw_wallpaper(&mut self) {
-        let mut fb = FRAME_BUFFER.get().unwrap().lock();
+        let mut fb = self.canvas.lock();
 
         let width = 1280;
         let height = 720;

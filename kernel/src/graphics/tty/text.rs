@@ -7,6 +7,8 @@ use crate::graphics::{
     tty::{TTY, Tty},
 };
 
+const PADDING: u32 = 50;
+
 impl<'a> Tty<'a> {
     pub fn print_string(&mut self, string: &str) {
         let mut buf = [0u8; 4]; // utf-8 is maximum 4 bytes
@@ -37,8 +39,8 @@ impl<'a> Tty<'a> {
     fn print_char(&mut self, char: &[u8]) {
         let glyph = self.font.glyph_for_utf8(char).expect("Invalid charcter");
 
-        let base_x = (self.col * self.font.width) as usize;
-        let base_y = (self.row * self.font.height) as usize;
+        let base_x = (PADDING + (self.col * self.font.width)) as usize;
+        let base_y = (PADDING + (self.row * self.font.height)) as usize;
 
         for (y, row) in glyph.enumerate() {
             for (x, visible) in row.enumerate() {
@@ -58,11 +60,11 @@ impl<'a> Tty<'a> {
     }
 
     fn screen_width(&self) -> u32 {
-        self.canvas.lock().width / self.font.width
+        (self.canvas.lock().width - PADDING * 2) / self.font.width
     }
 
     fn screen_height(&self) -> u32 {
-        self.canvas.lock().height / self.font.height
+        (self.canvas.lock().height - PADDING * 2) / self.font.height
     }
 
     fn new_line(&mut self) {
@@ -91,5 +93,5 @@ macro_rules! println {
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    TTY.get().unwrap().lock().write_fmt(args);
+    TTY.get().unwrap().lock().write_fmt(args).unwrap();
 }
