@@ -46,7 +46,7 @@ impl Process {
     pub fn new(program: &[u8]) -> Self {
         let mut page_table = PageTableWrapped::default();
 
-        let mut stack_builder = allocate_stack(16, &mut page_table.inner);
+        let mut stack_builder = allocate_stack(160, &mut page_table.inner);
 
         let program = load_elf(&mut page_table, program);
 
@@ -59,7 +59,7 @@ impl Process {
             &mut page_table,
             stack_builder.finish().as_u64(),
         );
-        let kernel_stack_top = allocate_kernel_stack(16, &mut page_table.inner).finish();
+        let kernel_stack_top = allocate_kernel_stack(160, &mut page_table.inner).finish();
 
         Self {
             page_table,
