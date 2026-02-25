@@ -6,6 +6,7 @@ use x86_64::{
 };
 
 use crate::{
+    load_registers,
     misc::{CPU_CORE_CONTEXT, others::CpuCoreContext, snapshot::Snapshot},
     multitasking::{self, context::ProcessSnapshot, manager::Manager},
     new_syscall, s_println,
@@ -25,7 +26,6 @@ impl ProcessSnapshot {
         }
 
         self.update_gs();
-        self.inner.load();
         self.load_page_table();
         self.load_msr();
         self.switch_user();
@@ -59,13 +59,27 @@ impl ProcessSnapshot {
             // Loads the kernel stack so it wont messup the user stack
             "mov rsp, [rdi + 168]",
             // Pushes the things required for iretq
-            // TODO: use ret to return to whatever it came from
-            // instead of just straightup jumping to userspace with iretq
             "push [rdi + 152]", // SS
             "push [rdi + 144]", // RSP
             "push [rdi + 136]", // RFlags
             "push [rdi + 128]", // CS
             "push [rdi + 120]", // RIP
+            // load registers
+            "mov r15, [rdi + 0]",
+            "mov r14, [rdi + 8]",
+            "mov r13, [rdi + 16]",
+            "mov r12, [rdi + 24]",
+            "mov r11, [rdi + 32]",
+            "mov r10, [rdi + 40]",
+            "mov r9,  [rdi + 48]",
+            "mov r8,  [rdi + 56]",
+            "mov rsi, [rdi + 72]",
+            "mov rbp, [rdi + 80]",
+            "mov rbx, [rdi + 88]",
+            "mov rdx, [rdi + 96]",
+            "mov rcx, [rdi + 104]",
+            "mov rax, [rdi + 112]",
+            "mov rdi, [rdi + 64]",
             "iretq"
         )
     }
