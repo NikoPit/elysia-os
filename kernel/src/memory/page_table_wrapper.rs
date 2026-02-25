@@ -1,13 +1,14 @@
 use x86_64::{
     VirtAddr,
+    registers::control::{Cr3, Cr3Flags},
     structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB},
 };
 
 use crate::memory::{
-        PHYSICAL_MEMORY_OFFSET,
-        paging::FRAME_ALLOCATOR,
-        utils::{apply_offset, copy_kernel_mapping},
-    };
+    PHYSICAL_MEMORY_OFFSET,
+    paging::FRAME_ALLOCATOR,
+    utils::{apply_offset, copy_kernel_mapping},
+};
 
 #[derive(Debug)]
 pub struct PageTableWrapped {
@@ -42,6 +43,14 @@ impl Default for PageTableWrapped {
                     VirtAddr::new(*PHYSICAL_MEMORY_OFFSET.get().unwrap()),
                 )
             },
+        }
+    }
+}
+
+impl PageTableWrapped {
+    pub fn load(&mut self) {
+        unsafe {
+            Cr3::write(self.frame, Cr3Flags::empty());
         }
     }
 }
