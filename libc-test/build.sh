@@ -17,6 +17,7 @@ CFLAGS="-ffreestanding \
         -mno-red-zone \
         -fno-stack-protector \
         -fno-builtin \
+	-no-pie \
         -nostdinc \
         -I$RELIBC_INCLUDE"
 
