@@ -19,7 +19,12 @@ pub struct Snapshot {
     pub rdx: u64,
     pub rcx: u64,
     pub rax: u64,
+}
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct UserSnapshot {
+    pub inner: Snapshot,
     pub rip: u64,
     pub cs: u16,
     pub rflags: u64,
@@ -27,16 +32,15 @@ pub struct Snapshot {
     pub ss: u16,
 }
 
-impl Snapshot {
+impl UserSnapshot {
     pub fn default_regs(rip: u64, cs: u16, rflags: u64, rsp: u64, ss: u16) -> Self {
-        let mut snapshot = Snapshot::default();
-
-        snapshot.rip = rip;
-        snapshot.cs = cs;
-        snapshot.rflags = rflags;
-        snapshot.rsp = rsp;
-        snapshot.ss = ss;
-
-        snapshot
+        Self {
+            inner: Snapshot::default(),
+            rip,
+            cs,
+            rflags,
+            rsp,
+            ss,
+        }
     }
 }
