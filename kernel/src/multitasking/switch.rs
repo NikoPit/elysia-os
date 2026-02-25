@@ -24,9 +24,11 @@ impl ProcessSnapshot {
             source.save_msr();
         }
 
+        s_println!("update gs");
         self.update_gs();
         self.load_page_table();
         self.load_msr();
+        s_println!("final jump");
         self.switch_user();
     }
 
@@ -49,20 +51,20 @@ impl ProcessSnapshot {
 
     #[unsafe(naked)]
     extern "C" fn load_page_table(&mut self) {
-        naked_asm!("mov rax, [rdi + 160]", "mov cr3, rax", "ret")
+        naked_asm!("mov rax, [rdi + 168]", "mov cr3, rax", "ret")
     }
 
     #[unsafe(naked)]
     extern "C" fn switch_user(&mut self) {
         naked_asm!(
             // Loads the kernel stack so it wont messup the user stack
-            "mov rsp, [rdi + 168]",
+            "mov rsp, [rdi + 176]",
             // Pushes the things required for iretq
-            "push [rdi + 152]", // SS
-            "push [rdi + 144]", // RSP
-            "push [rdi + 136]", // RFlags
-            "push [rdi + 128]", // CS
-            "push [rdi + 120]", // RIP
+            "push [rdi + 160]", // SS
+            "push [rdi + 152]", // RSP
+            "push [rdi + 144]", // RFlags
+            "push [rdi + 136]", // CS
+            "push [rdi + 128]", // RIP
             // load registers
             "mov r15, [rdi + 0]",
             "mov r14, [rdi + 8]",
