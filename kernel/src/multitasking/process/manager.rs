@@ -80,6 +80,13 @@ impl Manager {
         }
     }
 
+    pub fn load_process(&mut self, process: ProcessRef) {
+        let mut process_locked = process.lock();
+
+        process_locked.page_table.load();
+        self.current = Some(process.clone());
+    }
+
     pub fn block_current_unwrappped(&mut self, block_type: BlockType) {
         let current = self.current.clone().unwrap();
 

@@ -16,47 +16,36 @@ use crate::{
 impl ThreadManager {
     fn run_next_unwrapped(&mut self) -> (*mut ThreadSnapshot, *mut ThreadSnapshot) {
         let (current_ptr, current_pid) = {
-            let mut curr = self.current.as_ref().unwrap().lock();
-            let pid = curr.parent.lock().pid; // 锁完立刻释放
-            if curr.state == State::Running {
-                curr.state = State::Ready;
+            let mut current_thread = self.current.as_ref().unwrap().lock();
+            let pid = current_thread.parent.lock().pid;
+
+            if current_thread.state == State::Running {
+                current_thread.state = State::Ready;
                 self.queue.push_back(self.current.clone().unwrap());
             }
-            (curr.snapshot.as_ptr(), pid)
-        }; // curr 锁在这里释放
+
+            (current_thread.snapshot.as_ptr(), pid)
+        }; // Lock released.
 
         let next_thread_arc = self.queue.pop_front().unwrap();
         let mut next_thread = next_thread_arc.lock();
-
         let next_pid = {
             let p = next_thread.parent.lock();
             p.pid
         };
-
-        let next_task_snapshot_ptr = next_thread.snapshot.as_ptr();
-
-        next_thread.state = State::Running;
-
-        s_println!("current thread parent: {:?}", current_pid);
-        s_println!("parent: {:?}", next_thread.parent.lock().pid);
-
-        let pagetable = &mut next_thread.parent.lock().page_table;
+        let next_thread_ptr = next_thread.snapshot.as_ptr();
 
         if current_pid != next_pid {
-            // DO NOT FORGET TO SWITCH PROCESS WHEN SWITCHING THREAD U IDIOT
-            pagetable.load();
-            MANAGER.lock().current = Some(next_thread.parent.clone());
+            MANAGER.lock().load_process(next_thread.parent.clone());
         }
 
-        s_println!("The loaded pagetable: {:?}", pagetable.frame);
-
+        next_thread.state = State::Running;
         self.current = Some(next_thread_arc.clone());
-
         unsafe {
             TSS.privilege_stack_table[0] = VirtAddr::new(next_thread.kernel_stack_top);
         }
 
-        (current_ptr, next_task_snapshot_ptr)
+        (current_ptr, next_thread_ptr)
     }
 
     /// picks the next process. called from a zombie process
