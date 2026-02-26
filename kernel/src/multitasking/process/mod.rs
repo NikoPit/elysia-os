@@ -1,4 +1,9 @@
-pub mod context;
+use alloc::sync::Arc;
+use spin::Mutex;
+
+use crate::multitasking::process::process::Process;
+
 pub mod manager;
 pub mod process;
-pub mod switch;
+
+pub type ProcessRef = Arc<Mutex<Process>>;

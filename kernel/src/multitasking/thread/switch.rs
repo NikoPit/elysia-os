@@ -7,14 +7,15 @@ use x86_64::{
 
 use crate::{
     misc::{CPU_CORE_CONTEXT, others::CpuCoreContext, snapshot::Snapshot},
-    multitasking::process::context::ProcessSnapshot, s_println,
+    multitasking::thread::snapshot::ThreadSnapshot,
+    s_println,
 };
 
-impl ProcessSnapshot {
+impl ThreadSnapshot {
     /// Switches from [`source`] to [`self`]
     pub fn switch_from(
         &mut self,
-        source: Option<&mut ProcessSnapshot>,
+        source: Option<&mut ThreadSnapshot>,
         snapshot: Option<&mut Snapshot>,
     ) {
         if let Some(source) = source {
@@ -25,9 +26,12 @@ impl ProcessSnapshot {
 
         s_println!("update gs");
         self.update_gs();
-        self.load_page_table();
+        //self.load_page_table();
+        s_println!("load pagetable end");
         self.load_msr();
         s_println!("final jump");
+        s_println!("self: {:?}", self);
+        s_println!("kernel rsp {:?}", VirtAddr::new(self.kernel_rsp));
         self.switch_user();
     }
 
@@ -50,14 +54,14 @@ impl ProcessSnapshot {
 
     #[unsafe(naked)]
     extern "C" fn load_page_table(&mut self) {
-        naked_asm!("mov rax, [rdi + 168]", "mov cr3, rax", "ret")
+        naked_asm!("mov rax, [rdi + 176]", "mov cr3, rax", "ret")
     }
 
     #[unsafe(naked)]
     extern "C" fn switch_user(&mut self) {
         naked_asm!(
             // Loads the kernel stack so it wont messup the user stack
-            "mov rsp, [rdi + 176]",
+            "mov rsp, [rdi + 168]",
             // Pushes the things required for iretq
             "push [rdi + 160]", // SS
             "push [rdi + 152]", // RSP

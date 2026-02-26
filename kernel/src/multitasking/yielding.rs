@@ -1,6 +1,7 @@
 use alloc::collections::vec_deque::VecDeque;
 
 use crate::multitasking::process::{
+    ProcessRef,
     manager::Manager,
     process::{ProcessID, State},
 };
@@ -22,10 +23,10 @@ pub enum WakeType {
     IO,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct BlockedQueues {
-    pub keyboard: VecDeque<ProcessID>,
-    pub io: VecDeque<ProcessID>,
+    pub keyboard: VecDeque<ProcessRef>,
+    pub io: VecDeque<ProcessRef>,
 }
 
 #[macro_export]
@@ -42,12 +43,10 @@ macro_rules! register_wake_func {
 }
 
 impl Manager {
-    pub fn wake(&mut self, process: ProcessID) {
-        if let Some(process) = self.processes.get_mut(&process) {
-            if matches!(process.state, State::Blocked(_)) {
-                process.state = State::Ready;
-                self.queue.push_back(process.pid);
-            }
+    pub fn wake(&mut self, process: ProcessRef) {
+        if matches!(process.lock().state, State::Blocked(_)) {
+            process.lock().state = State::Ready;
+            self.queue.push_back(process);
         }
     }
 

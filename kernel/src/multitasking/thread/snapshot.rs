@@ -1,4 +1,3 @@
-
 use x86_64::registers::control::Cr3Flags;
 
 use crate::{
@@ -13,15 +12,14 @@ use crate::{
 // and also, ptr.sub(1) 6 times (rbp-r15) and then write the rflags
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
-pub struct ProcessSnapshot {
+pub struct ThreadSnapshot {
     pub inner: Snapshot,
-    cr3: u64,
     // RSP used on context switching in kernel space to not messup the userstack
     pub kernel_rsp: u64,
     pub fs_base: u64,
 }
 
-impl ProcessSnapshot {
+impl ThreadSnapshot {
     pub fn new(entry_point: u64, table: &mut PageTableWrapped, virt_stack_addr: u64) -> Self {
         Self {
             inner: Snapshot::default_regs(
@@ -31,7 +29,6 @@ impl ProcessSnapshot {
                 virt_stack_addr,
                 GDT.1.user_data.0,
             ),
-            cr3: calc_cr3_value(table.frame.start_address(), Cr3Flags::empty()),
             kernel_rsp: allocate_kernel_stack(16, &mut table.inner)
                 .finish()
                 .as_u64(),

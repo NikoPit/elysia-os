@@ -3,7 +3,8 @@ use spin::Mutex;
 
 use crate::{
     multitasking::{
-        MANAGER, process::process::ProcessID,
+        MANAGER,
+        process::{ProcessRef, process::ProcessID},
     },
     systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
@@ -14,7 +15,7 @@ pub enum FutexResultType {
     Invalid,
 }
 
-static FUTEX_QUEUE: Mutex<BTreeMap<u64, VecDeque<ProcessID>>> = Mutex::new(BTreeMap::new());
+static FUTEX_QUEUE: Mutex<BTreeMap<u64, VecDeque<ProcessRef>>> = Mutex::new(BTreeMap::new());
 
 pub struct FutexWakeImpl;
 pub struct FutexWaitImpl;
@@ -44,7 +45,7 @@ impl SyscallImpl for FutexWaitImpl {
         queue
             .get_mut(&arg1)
             .unwrap()
-            .push_back(MANAGER.lock().current.unwrap());
+            .push_back(MANAGER.lock().current.clone().unwrap());
 
         drop(queue);
 

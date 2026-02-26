@@ -24,10 +24,17 @@ impl SyscallImpl for AllocMemImpl {
         let mut manager = MANAGER.lock();
         let flags =
             PageTableFlags::USER_ACCESSIBLE | PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
-        Ok(
-            allocate_user_mem(arg1, &mut manager.get_current().page_table.inner, flags)
-                .0
-                .as_u64() as usize,
-        )
+        let mut current = manager.current.as_ref().unwrap().lock();
+        s_println!("process is {:?}", current.pid);
+        s_println!("Allocating mem for {:?}", current.page_table.frame);
+        let mem_start = allocate_user_mem(arg1, &mut current.page_table.inner, flags)
+            .0
+            .as_u64();
+        unsafe {
+            use x86_64::registers::control::Cr3;
+            let (frame, flags) = Cr3::read();
+            Cr3::write(frame, flags); // 重新加载 CR3 会强制清空当前 CPU 的所有 TLB 缓存
+        }
+        Ok(mem_start as usize)
     }
 }

@@ -19,8 +19,8 @@ impl SyscallImpl for ExitImpl {
         // TODO: release the memory when exitting
         // TODO: it seemed to also be broken, ill fix it later
         let mut manager = MANAGER.lock();
-        if let Some(pid) = manager.current {
-            manager.zombies.push(pid);
+        if let Some(process) = manager.current.clone() {
+            manager.zombies.push(process);
         }
 
         drop(manager);

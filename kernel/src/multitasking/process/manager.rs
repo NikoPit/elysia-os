@@ -5,24 +5,27 @@ use alloc::{
 use x86_64::instructions::interrupts::without_interrupts;
 
 use crate::{
-    misc::hlt_loop,
+    misc::{self, hlt_loop},
     multitasking::{
         MANAGER,
-        process::process::{self, Process, ProcessID},
+        process::{
+            ProcessRef,
+            process::{self, Process, ProcessID},
+        },
         yielding::{BlockType, BlockedQueues, WakeType},
     },
-    print, println,
+    print, println, s_println,
 };
 
 #[derive(Debug, Default)]
 pub struct Manager {
-    pub processes: BTreeMap<ProcessID, Process>,
-    pub current: Option<ProcessID>,
-    pub queue: VecDeque<ProcessID>,
-    pub zombies: Vec<ProcessID>,
+    pub processes: BTreeMap<ProcessID, ProcessRef>,
+    pub current: Option<ProcessRef>,
+    pub queue: VecDeque<ProcessRef>,
+    pub zombies: Vec<ProcessRef>,
     pub blocked_queues: BlockedQueues,
 
-    pub idle_process: Option<ProcessID>,
+    pub idle_process: Option<ProcessRef>,
 }
 
 #[repr(align(8))]
@@ -37,14 +40,17 @@ static ELF_HOLDER: AlignedElf = AlignedElf {
 impl Manager {
     pub fn init(&mut self) {
         without_interrupts(|| {
-            let kernel_process = Process::default();
-            let idle_process = Process::new(&ELF_HOLDER.data);
+            let kernel_process = Process::empty();
+            // TODO: delete the idle proecss or let it fucking work with all that shit
+            let idle_process = Process::empty();
 
-            self.current = Some(kernel_process.pid);
-            self.processes.insert(kernel_process.pid, kernel_process);
+            self.current = Some(kernel_process.clone());
+            self.processes
+                .insert(kernel_process.lock().pid, kernel_process.clone());
 
-            self.idle_process = Some(idle_process.pid);
-            self.processes.insert(idle_process.pid, idle_process);
+            self.idle_process = Some(idle_process.clone());
+            self.processes
+                .insert(idle_process.lock().pid, idle_process.clone());
 
             // TODO: remove these test processes
             self.spawn(&ELF_HOLDER.data);
@@ -53,39 +59,42 @@ impl Manager {
 
     pub fn spawn(&mut self, program: &[u8]) {
         let process = Process::new(program);
-        let pid = process.pid;
-        self.processes.insert(pid, process);
-        self.queue.push_back(pid);
+        let pid = process.lock().pid;
+        s_println!(
+            "process pagetable frame at spawn() {:?}",
+            process.lock().page_table.frame
+        );
+        self.processes.insert(process.lock().pid, process.clone());
+        self.queue.push_back(process.clone());
+        s_println!(
+            "process pagetable got from self.processes {:?}",
+            self.processes.get(&pid).unwrap().lock().page_table.frame
+        );
+        s_println!("queue: {:?}", self.queue);
     }
 
     pub fn clean_zombies(&mut self) {
         for zombie in self.zombies.drain(..) {
-            self.processes.remove(&zombie);
-            self.current.take_if(|p| *p == zombie);
+            self.processes.remove(&zombie.lock().pid);
+            self.current.take_if(|p| p.lock().pid == zombie.lock().pid);
         }
     }
 
     pub fn block_current_unwrappped(&mut self, block_type: BlockType) {
-        let current = self.processes.get_mut(&self.current.unwrap()).unwrap();
+        let current = self.current.clone().unwrap();
 
-        current.state = process::State::Blocked(block_type);
+        current.lock().state = process::State::Blocked(block_type);
         //self.queue.into_iter().filter(|p| *p != current.pid.clone());
 
         match block_type {
             BlockType::WakeRequired(wake_type) => match wake_type {
-                WakeType::Keyboard => self.blocked_queues.keyboard.push_back(current.pid.clone()),
-                WakeType::IO => self.blocked_queues.io.push_back(current.pid.clone()),
+                WakeType::Keyboard => self.blocked_queues.keyboard.push_back(current),
+                WakeType::IO => self.blocked_queues.io.push_back(current),
             },
             _ => {}
         }
 
         //run_next();
-    }
-
-    pub fn get_current(&mut self) -> &mut Process {
-        self.processes
-            .get_mut(&self.current.unwrap())
-            .expect("The current process doesnt exist on process list WTF")
     }
 }
 
@@ -93,30 +102,4 @@ pub fn block_current(block_type: BlockType) {
     MANAGER.lock().block_current_unwrappped(block_type);
     // TODO
     //run_next(InterruptStackFrame::new(fwefwefas, code_segment, cpu_flags, stack_pointer, stack_segment));
-}
-
-pub extern "C" fn test3() -> ! {
-    loop {
-        let x = 1;
-        print!("{x}");
-    }
-}
-
-pub extern "C" fn test2() -> ! {
-    loop {
-        let x = 2;
-        print!("{x}");
-    }
-}
-
-pub extern "C" fn testz() -> ! {
-    loop {
-        let x = 3;
-        print!("{}", x);
-    }
-}
-
-pub extern "C" fn idle() -> ! {
-    println!("idle");
-    hlt_loop()
 }
