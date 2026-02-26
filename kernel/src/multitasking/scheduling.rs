@@ -15,52 +15,48 @@ use crate::{
 
 impl ThreadManager {
     fn run_next_unwrapped(&mut self) -> (*mut ThreadSnapshot, *mut ThreadSnapshot) {
-        let current_task_arc = self.current.as_mut().unwrap().clone();
-        let mut current_task = current_task_arc.lock();
+        let (current_ptr, current_pid) = {
+            let mut curr = self.current.as_ref().unwrap().lock();
+            let pid = curr.parent.lock().pid; // 锁完立刻释放
+            if curr.state == State::Running {
+                curr.state = State::Ready;
+                self.queue.push_back(self.current.clone().unwrap());
+            }
+            (curr.snapshot.as_ptr(), pid)
+        }; // curr 锁在这里释放
 
-        if current_task.state == State::Running {
-            current_task.state = State::Ready;
-            self.queue.push_back(current_task_arc.clone());
-        }
+        let next_thread_arc = self.queue.pop_front().unwrap();
+        let mut next_thread = next_thread_arc.lock();
 
-        let next_task = if let Some(next) = self.queue.pop_front() {
-            next.clone()
-        } else {
-            unimplemented!();
+        let next_pid = {
+            let p = next_thread.parent.lock();
+            p.pid
         };
 
-        let mut next_task_mutex = next_task.lock();
-        let binding = &mut next_task_mutex.parent.clone();
-        let mut locked_binding_pid_shit = {
-            let locked = binding.lock();
-            locked.pid.clone()
-        };
+        let next_task_snapshot_ptr = next_thread.snapshot.as_ptr();
 
-        s_println!("parent: {:?}", binding.lock().pid);
+        next_thread.state = State::Running;
 
-        let pagetable = &mut binding.lock().page_table;
+        s_println!("current thread parent: {:?}", current_pid);
+        s_println!("parent: {:?}", next_thread.parent.lock().pid);
 
-        if current_task.parent.lock().pid != locked_binding_pid_shit {
+        let pagetable = &mut next_thread.parent.lock().page_table;
+
+        if current_pid != next_pid {
             // DO NOT FORGET TO SWITCH PROCESS WHEN SWITCHING THREAD U IDIOT
             pagetable.load();
-            MANAGER.lock().current = Some(next_task_mutex.parent.clone());
+            MANAGER.lock().current = Some(next_thread.parent.clone());
         }
-        pagetable.load();
-        next_task_mutex.state = State::Running;
 
-        s_println!("process is {:?}", next_task_mutex.id.0);
         s_println!("The loaded pagetable: {:?}", pagetable.frame);
 
-        self.current = Some(next_task.clone());
+        self.current = Some(next_thread_arc.clone());
 
         unsafe {
-            TSS.privilege_stack_table[0] = VirtAddr::new(next_task_mutex.kernel_stack_top);
+            TSS.privilege_stack_table[0] = VirtAddr::new(next_thread.kernel_stack_top);
         }
 
-        (
-            current_task.snapshot.as_ptr(),
-            next_task_mutex.snapshot.as_ptr(),
-        )
+        (current_ptr, next_task_snapshot_ptr)
     }
 
     /// picks the next process. called from a zombie process
