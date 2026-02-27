@@ -15,7 +15,12 @@ use crate::{
         MANAGER,
         memory::{allocate_kernel_stack, allocate_stack},
         process::ProcessRef,
-        thread::{self, THREAD_MANAGER, misc::ThreadID, snapshot::ThreadSnapshot, thread::Thread},
+        thread::{
+            self, THREAD_MANAGER,
+            misc::ThreadID,
+            snapshot::{ThreadSnapshot, ThreadSnapshotType},
+            thread::Thread,
+        },
         yielding::BlockType,
     },
     s_println,
@@ -70,6 +75,7 @@ impl Process {
             program.entry_point() as u64,
             &mut process.page_table,
             stack_builder.finish().as_u64(),
+            ThreadSnapshotType::Thread,
         );
 
         // Initilizes the main thread

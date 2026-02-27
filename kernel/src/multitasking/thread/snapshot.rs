@@ -17,10 +17,26 @@ pub struct ThreadSnapshot {
     // RSP used on context switching in kernel space to not messup the userstack
     pub kernel_rsp: u64,
     pub fs_base: u64,
+    pub snapshot_type: ThreadSnapshotType,
+}
+
+#[derive(Default, Clone, Copy, Debug)]
+pub enum ThreadSnapshotType {
+    // Snapshot of the thread it self
+    #[default]
+    Thread,
+    // Snapshot for the poll()
+    // function of the thread
+    Executor,
 }
 
 impl ThreadSnapshot {
-    pub fn new(entry_point: u64, table: &mut PageTableWrapped, virt_stack_addr: u64) -> Self {
+    pub fn new(
+        entry_point: u64,
+        table: &mut PageTableWrapped,
+        virt_stack_addr: u64,
+        snapshot_type: ThreadSnapshotType,
+    ) -> Self {
         Self {
             inner: Snapshot::default_regs(
                 entry_point,
@@ -32,7 +48,8 @@ impl ThreadSnapshot {
             kernel_rsp: allocate_kernel_stack(16, &mut table.inner)
                 .finish()
                 .as_u64(),
-            fs_base: 0,
+            snapshot_type,
+            ..Default::default()
         }
     }
 

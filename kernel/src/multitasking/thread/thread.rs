@@ -11,7 +11,11 @@ use crate::{
             ProcessRef,
             process::{Process, ProcessID, State},
         },
-        thread::{ThreadRef, misc::ThreadID, snapshot::ThreadSnapshot},
+        thread::{
+            ThreadRef,
+            misc::ThreadID,
+            snapshot::{ThreadSnapshot, ThreadSnapshotType},
+        },
     },
     s_println,
 };
@@ -48,6 +52,7 @@ impl Thread {
                 entry_point,
                 &mut parent.clone().lock().page_table,
                 stack.finish().as_u64(),
+                ThreadSnapshotType::Thread,
             ),
             parent,
             kernel_stack_top,
