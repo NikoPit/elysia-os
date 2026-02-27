@@ -25,6 +25,7 @@ pub struct Thread {
     pub parent: ProcessRef,
     pub id: ThreadID,
     pub snapshot: ThreadSnapshot,
+    pub executor_snapshot: ThreadSnapshot,
     pub state: State,
     pub kernel_stack_top: u64,
 }
@@ -35,6 +36,7 @@ impl Thread {
             parent: Process::empty(),
             id: ThreadID::default(),
             snapshot: ThreadSnapshot::default(),
+            executor_snapshot: ThreadSnapshot::default(),
             state: State::Ready,
             kernel_stack_top: 0,
         }))
@@ -54,6 +56,7 @@ impl Thread {
                 stack.finish().as_u64(),
                 ThreadSnapshotType::Thread,
             ),
+            executor_snapshot: ThreadSnapshot::default(),
             parent,
             kernel_stack_top,
             state: State::Ready,
@@ -68,6 +71,7 @@ impl Thread {
     ) -> Self {
         Self {
             snapshot,
+            executor_snapshot: ThreadSnapshot::default(),
             parent,
             state: State::Ready,
             id: ThreadID::default(),

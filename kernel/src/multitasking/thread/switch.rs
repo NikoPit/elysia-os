@@ -7,7 +7,7 @@ use x86_64::{
 
 use crate::{
     misc::{CPU_CORE_CONTEXT, others::CpuCoreContext, snapshot::Snapshot},
-    multitasking::thread::snapshot::ThreadSnapshot,
+    multitasking::thread::snapshot::{ThreadSnapshot, ThreadSnapshotType},
     s_println,
 };
 
@@ -19,6 +19,14 @@ impl ThreadSnapshot {
         snapshot: Option<&mut Snapshot>,
     ) {
         if let Some(source) = source {
+            // Saves the current RSP, which have the RIP saved
+            // on the stacktop when we called switch_from()
+            // So when we use jump_to_executor(), it will load
+            // the RSP, get the RIP, and when RET back
+            if matches!(source.snapshot_type, ThreadSnapshotType::Executor) {
+                self.save_executor_rsp();
+            }
+
             // Saves the current state of the system (snapshot)
             source.inner = *snapshot.unwrap();
             source.save_msr();
@@ -26,10 +34,11 @@ impl ThreadSnapshot {
 
         self.update_gs();
         self.load_msr();
-        s_println!("final jump");
-        s_println!("self: {:?}", self);
-        s_println!("kernel rsp {:?}", VirtAddr::new(self.kernel_rsp));
-        self.switch_user();
+
+        match self.snapshot_type {
+            ThreadSnapshotType::Thread => self.switch_user(),
+            ThreadSnapshotType::Executor => self.jump_to_executor(),
+        }
     }
 
     fn update_gs(&mut self) {
@@ -47,6 +56,35 @@ impl ThreadSnapshot {
 
     fn load_msr(&mut self) {
         FsBase::write(VirtAddr::new(self.fs_base));
+    }
+
+    #[unsafe(naked)]
+    extern "C" fn save_executor_rsp(&mut self) {
+        naked_asm!("mov [rdi + 8], rsp", "ret")
+    }
+
+    #[unsafe(naked)]
+    extern "C" fn jump_to_executor(&mut self) {
+        naked_asm!(
+            // Loads the kernel stack so it wont messup the user stack
+            "mov rsp, [rdi + 168]",
+            "mov r15, [rdi + 0]",
+            "mov r14, [rdi + 8]",
+            "mov r13, [rdi + 16]",
+            "mov r12, [rdi + 24]",
+            "mov r11, [rdi + 32]",
+            "mov r10, [rdi + 40]",
+            "mov r9,  [rdi + 48]",
+            "mov r8,  [rdi + 56]",
+            "mov rsi, [rdi + 72]",
+            "mov rbp, [rdi + 80]",
+            "mov rbx, [rdi + 88]",
+            "mov rdx, [rdi + 96]",
+            "mov rcx, [rdi + 104]",
+            "mov rax, [rdi + 112]",
+            "mov rdi, [rdi + 64]",
+            "ret"
+        )
     }
 
     #[unsafe(naked)]

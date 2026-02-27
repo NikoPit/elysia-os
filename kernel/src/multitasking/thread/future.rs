@@ -3,6 +3,7 @@ use core::task::Poll;
 use x86_64::VirtAddr;
 
 use crate::{
+    misc::snapshot::Snapshot,
     multitasking::{
         MANAGER,
         process::process::State,
@@ -49,6 +50,9 @@ impl Future for ThreadFuture {
             p.pid
         };
 
+        let mut executor_snapshot = thread.executor_snapshot;
+        let mut snapshot = thread.snapshot;
+
         thread.state = State::Running;
         manager.current = Some(self.0.clone());
         unsafe {
@@ -64,7 +68,10 @@ impl Future for ThreadFuture {
         drop(previous_thread);
         drop(previous_thread_ref);
 
-        // CONTEXT SWITCH!
+        snapshot.switch_from(
+            Some(&mut executor_snapshot),
+            Some(&mut Snapshot::from_current()),
+        );
 
         match self.0.lock().state {
             State::Zombie => Poll::Ready(()),
