@@ -66,13 +66,14 @@ impl Future for ThreadFuture {
 
         // CONTEXT SWITCH!
 
-        if self.0.lock().state == State::Zombie {
-            // Thread have exitted
-            return Poll::Ready(());
+        match self.0.lock().state {
+            State::Zombie => Poll::Ready(()),
+            State::Running => {
+                cx.waker().wake_by_ref();
+                Poll::Pending
+            }
+            State::Blocked(_) => unimplemented!(),
+            State::Ready => panic!("wat"),
         }
-
-        // Thread is still running, wake it to push it back into the queue
-        cx.waker().wake_by_ref();
-        Poll::Pending
     }
 }
