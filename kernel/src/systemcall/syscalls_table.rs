@@ -9,6 +9,7 @@ use crate::{
             get_fs::GetFSImpl,
             get_process_id::GetPIDImpl,
             get_thread_id::GetTIDImpl,
+            object::{ReadObjectImpl, WriteObjectImpl},
             print::PrintImpl,
             set_fs::SetFSImpl,
             set_gs::SetGSImpl,
@@ -34,6 +35,8 @@ pub static SYSCALL_TABLE: [Option<SyscallHandler>; 512] = {
     register_syscall!(table, SyscallNo::FutexWait, FutexWaitImpl);
     register_syscall!(table, SyscallNo::FutexWake, FutexWakeImpl);
     register_syscall!(table, SyscallNo::Exit, ExitImpl);
+    register_syscall!(table, SyscallNo::ReadObject, ReadObjectImpl);
+    register_syscall!(table, SyscallNo::WriteObject, WriteObjectImpl);
 
     table
 };

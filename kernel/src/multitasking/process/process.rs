@@ -26,7 +26,7 @@ use crate::{
         },
         yielding::BlockType,
     },
-    object::Writable,
+    object::Object,
     s_println,
     userspace::elf_loader::load_elf,
 };
@@ -38,7 +38,7 @@ pub struct Process {
     pub page_table: PageTableWrapped,
     pub kernel_stack_top: VirtAddr,
     pub threads: Vec<Weak<Mutex<Thread>>>,
-    pub objects: Vec<Arc<dyn Writable>>,
+    pub objects: Vec<Arc<dyn Object>>,
 }
 
 impl Process {

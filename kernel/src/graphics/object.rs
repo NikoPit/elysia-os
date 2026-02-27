@@ -8,7 +8,11 @@ use crate::{
 #[derive(Debug)]
 pub struct TtyObject;
 
-impl Object for TtyObject {}
+impl Object for TtyObject {
+    fn as_writable(self: alloc::sync::Arc<Self>) -> Option<alloc::sync::Arc<dyn Writable>> {
+        Some(self)
+    }
+}
 impl Writable for TtyObject {
     fn write(&self, buffer: &[u8]) -> crate::object::ObjectResult<usize> {
         let mut tty = TTY.get().unwrap().lock();

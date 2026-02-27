@@ -2,7 +2,7 @@ use core::sync::atomic::AtomicU64;
 
 use alloc::{sync::Arc, vec::Vec};
 
-use crate::{graphics::object::TtyObject, multitasking::yielding::BlockType, object::Writable};
+use crate::{graphics::object::TtyObject, multitasking::yielding::BlockType, object::Object};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct ProcessID(pub u64);
@@ -24,6 +24,8 @@ pub enum State {
     Zombie,             // Exited process
 }
 
-pub fn init_objects(objects: &mut Vec<Arc<dyn Writable>>) {
-    objects[1] = Arc::new(TtyObject {});
+pub fn init_objects(objects: &mut Vec<Arc<dyn Object>>) {
+    objects.push(Arc::new(TtyObject {})); // stdin (unimpllemented)
+    objects.push(Arc::new(TtyObject {})); // stdout
+    objects.push(Arc::new(TtyObject {})); // stderr
 }
