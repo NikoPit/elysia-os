@@ -28,13 +28,6 @@ fn k_main(bootinfo: &'static mut BootInfo) -> ! {
     s_println!("Welcome  Elysia-OS v0.1.0");
 
     init(bootinfo);
-
-    let mut executor = Executor::default();
-
-    //executor.spawn(Task::new(init_processes()));
-    //executor.spawn(Task::new(taskz()));
-    executor.spawn(Task::new(process_keypresses()));
-    executor.run();
 }
 
 #[cfg(test)]

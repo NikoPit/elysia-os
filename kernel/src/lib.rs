@@ -36,6 +36,7 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
 };
 
 use crate::misc::others::enable_sse;
+use crate::multitasking::kernel_task;
 use bootloader_api::BootInfo;
 use bootloader_api::{BootloaderConfig, config::Mapping};
 #[cfg(test)]
@@ -55,7 +56,7 @@ fn test_k_main(_boot_info: &'static mut BootInfo) -> ! {
     hlt_loop();
 }
 
-pub fn init(bootinfo: &'static mut BootInfo) {
+pub fn init(bootinfo: &'static mut BootInfo) -> ! {
     enable_sse();
     tss::init();
     memory::init(
@@ -68,7 +69,10 @@ pub fn init(bootinfo: &'static mut BootInfo) {
     systemcall::init();
     acpi::init();
     multitasking::init();
+    let mut executor = kernel_task::init();
     interrupts::init();
+
+    executor.run();
 }
 
 #[cfg(test)]

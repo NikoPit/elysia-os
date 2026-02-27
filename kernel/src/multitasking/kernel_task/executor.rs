@@ -5,7 +5,11 @@ use crossbeam_queue::ArrayQueue;
 use spin::Mutex;
 use x86_64::instructions::interrupts::{self, enable_and_hlt};
 
-use crate::multitasking::kernel_task::task::{Task, TaskID, TaskWaker};
+use crate::multitasking::kernel_task::{
+    TASK_SPAWNER,
+    spawner::TaskSpawner,
+    task::{Task, TaskID, TaskWaker},
+};
 
 // When a task was awoken, the taskid will be pushed to the
 // task queue to be executed.
@@ -17,23 +21,21 @@ pub struct Executor {
 
 impl Default for Executor {
     fn default() -> Self {
+        let tasks = Arc::new(Mutex::new(BTreeMap::new()));
+        let task_queue = Arc::new(ArrayQueue::new(128));
+
+        TASK_SPAWNER
+            .get_or_init(|| Mutex::new(TaskSpawner::new(tasks.clone(), task_queue.clone())));
+
         Self {
-            tasks: Arc::new(Mutex::new(BTreeMap::new())),
-            task_queue: Arc::new(ArrayQueue::new(128)),
+            tasks,
+            task_queue,
             wakers: BTreeMap::new(),
         }
     }
 }
 
 impl Executor {
-    pub fn spawn(&mut self, task: Task) {
-        let task_id = task.id;
-        if self.tasks.lock().insert(task.id, task).is_some() {
-            panic!("task with same ID already in tasks");
-        }
-        self.task_queue.push(task_id).expect("queue full");
-    }
-
     pub fn run_queued_tasks(&mut self) {
         let Self {
             tasks,

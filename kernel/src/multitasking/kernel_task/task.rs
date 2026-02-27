@@ -23,11 +23,11 @@ impl TaskID {
 // for the effect of polling, not the return value
 pub struct Task {
     pub id: TaskID,
-    future: Pin<Box<dyn Future<Output = ()>>>,
+    future: Pin<Box<dyn Future<Output = ()> + Send>>,
 }
 
 impl Task {
-    pub fn new(future: impl Future<Output = ()> + 'static) -> Self {
+    pub fn new(future: impl Future<Output = ()> + 'static + Send) -> Self {
         Self {
             id: TaskID::new(),
             future: Box::pin(future),
