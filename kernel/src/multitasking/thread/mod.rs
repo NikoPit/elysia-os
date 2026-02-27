@@ -4,6 +4,7 @@ use spin::Mutex;
 
 use crate::multitasking::thread::{manager::ThreadManager, thread::Thread};
 
+pub mod future;
 pub mod manager;
 pub mod misc;
 pub mod snapshot;
