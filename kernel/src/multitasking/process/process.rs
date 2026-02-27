@@ -119,16 +119,11 @@ impl Default for ProcessID {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum State {
+    #[default]
     Ready, // ready to run (in a queue)
     Running,
     Blocked(BlockType), // stuck, waiting for something (like keyboard input)
     Zombie,             // Exited process
-}
-
-impl Default for State {
-    fn default() -> Self {
-        Self::Ready
-    }
 }
