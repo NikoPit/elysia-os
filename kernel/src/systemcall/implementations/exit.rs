@@ -1,5 +1,5 @@
 use crate::{
-    multitasking::{MANAGER, scheduling::run_next_zombie},
+    multitasking::{MANAGER, scheduling::run_next_zombie, thread::THREAD_MANAGER},
     systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 
@@ -18,10 +18,9 @@ impl SyscallImpl for ExitImpl {
     ) -> Result<usize, crate::systemcall::error::SyscallError> {
         // TODO: release the memory when exitting
         // TODO: it seemed to also be broken, ill fix it later
-        let mut manager = MANAGER.lock();
-        if let Some(process) = manager.current.clone() {
-            manager.zombies.push(process);
-        }
+        let mut manager = THREAD_MANAGER.get().unwrap().lock();
+
+        manager.mark_current_as_zombie();
 
         drop(manager);
 

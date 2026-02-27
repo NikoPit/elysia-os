@@ -48,6 +48,10 @@ impl ThreadManager {
         thread.clone()
     }
 
+    pub fn mark_current_as_zombie(&mut self) {
+        self.mark_as_zombie(self.current.clone().unwrap());
+    }
+
     pub fn mark_as_zombie(&mut self, thread: ThreadRef) {
         thread.lock().state = State::Zombie;
         self.zombies.push(thread);
