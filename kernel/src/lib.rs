@@ -18,6 +18,7 @@ pub mod interrupts;
 pub mod memory;
 pub mod misc;
 pub mod multitasking;
+pub mod object;
 pub mod os;
 pub mod panic_handler;
 pub mod serial_print;
