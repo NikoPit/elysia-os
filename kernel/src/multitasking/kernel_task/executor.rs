@@ -2,6 +2,7 @@ use core::task::{Context, Poll, Waker};
 
 use alloc::{collections::btree_map::BTreeMap, sync::Arc};
 use crossbeam_queue::ArrayQueue;
+use spin::Mutex;
 use x86_64::instructions::interrupts::{self, enable_and_hlt};
 
 use crate::multitasking::kernel_task::task::{Task, TaskID, TaskWaker};
@@ -9,7 +10,7 @@ use crate::multitasking::kernel_task::task::{Task, TaskID, TaskWaker};
 // When a task was awoken, the taskid will be pushed to the
 // task queue to be executed.
 pub struct Executor {
-    tasks: BTreeMap<TaskID, Task>,
+    tasks: Arc<Mutex<BTreeMap<TaskID, Task>>>,
     task_queue: Arc<ArrayQueue<TaskID>>,
     wakers: BTreeMap<TaskID, Waker>,
 }
@@ -17,7 +18,7 @@ pub struct Executor {
 impl Default for Executor {
     fn default() -> Self {
         Self {
-            tasks: BTreeMap::new(),
+            tasks: Arc::new(Mutex::new(BTreeMap::new())),
             task_queue: Arc::new(ArrayQueue::new(128)),
             wakers: BTreeMap::new(),
         }
@@ -27,7 +28,7 @@ impl Default for Executor {
 impl Executor {
     pub fn spawn(&mut self, task: Task) {
         let task_id = task.id;
-        if self.tasks.insert(task.id, task).is_some() {
+        if self.tasks.lock().insert(task.id, task).is_some() {
             panic!("task with same ID already in tasks");
         }
         self.task_queue.push(task_id).expect("queue full");
@@ -39,6 +40,8 @@ impl Executor {
             task_queue,
             wakers,
         } = self;
+
+        let mut tasks = tasks.lock();
 
         while let Some(taskid) = task_queue.pop() {
             let task = match tasks.get_mut(&taskid) {
