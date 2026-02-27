@@ -5,10 +5,13 @@ use crossbeam_queue::ArrayQueue;
 use spin::Mutex;
 use x86_64::instructions::interrupts::{self, enable_and_hlt};
 
-use crate::multitasking::kernel_task::{
-    TASK_SPAWNER,
-    spawner::TaskSpawner,
-    task::{Task, TaskID, TaskWaker},
+use crate::{
+    multitasking::kernel_task::{
+        TASK_SPAWNER,
+        spawner::TaskSpawner,
+        task::{Task, TaskID, TaskWaker},
+    },
+    println, s_println,
 };
 
 // When a task was awoken, the taskid will be pushed to the
@@ -46,6 +49,7 @@ impl Executor {
         let mut tasks = tasks.lock();
 
         while let Some(taskid) = task_queue.pop() {
+            s_println!("b");
             let task = match tasks.get_mut(&taskid) {
                 Some(task) => task,
                 None => continue,
@@ -55,6 +59,7 @@ impl Executor {
                 // inserts a new waker if there is no waker assigned to the task
                 .or_insert_with(|| TaskWaker::new(taskid, task_queue.clone()));
             let mut context = Context::from_waker(waker);
+            s_println!("c");
 
             match task.poll(&mut context) {
                 Poll::Ready(()) => {
@@ -64,12 +69,15 @@ impl Executor {
                 }
                 Poll::Pending => {}
             }
+            s_println!("a");
         }
     }
 
     pub fn run(&mut self) -> ! {
         loop {
+            s_println!("started running queued tasks");
             self.run_queued_tasks();
+            s_println!("finished running queued tasks");
             self.sleep_on_idle();
         }
     }

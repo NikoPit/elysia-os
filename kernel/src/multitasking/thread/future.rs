@@ -1,5 +1,6 @@
 use core::task::Poll;
 
+use alloc::sync::Arc;
 use x86_64::VirtAddr;
 
 use crate::{
@@ -37,31 +38,36 @@ impl Future for ThreadFuture {
         self: core::pin::Pin<&mut Self>,
         cx: &mut core::task::Context<'_>,
     ) -> core::task::Poll<Self::Output> {
+        s_println!("i got polled ");
         let (thread_snapshot, executor_snapshot) = {
             let mut manager = THREAD_MANAGER.get().unwrap().lock();
+            s_println!("locked thread mamager");
             let mut thread = self.0.lock();
             let previous_thread_ref = manager.current.clone().unwrap();
-            let previous_thread = previous_thread_ref.lock();
+            s_println!("d");
+            if Arc::ptr_eq(&self.0, &previous_thread_ref) {
+                thread.state = State::Running;
+            } else {
+                let previous_thread = previous_thread_ref.lock();
+                let thread_pid = {
+                    let p = thread.parent.lock();
+                    p.pid
+                };
+                let previous_thread_pid = {
+                    let p = previous_thread.parent.lock();
+                    p.pid
+                };
 
-            let thread_pid = {
-                let p = thread.parent.lock();
-                p.pid
+                thread.state = State::Running;
+                manager.current = Some(self.0.clone());
+                unsafe {
+                    TSS.privilege_stack_table[0] = VirtAddr::new(thread.kernel_stack_top);
+                }
+
+                if previous_thread_pid != thread_pid {
+                    MANAGER.lock().load_process(thread.parent.clone());
+                }
             };
-            let previous_thread_pid = {
-                let p = previous_thread.parent.lock();
-                p.pid
-            };
-
-            thread.state = State::Running;
-            manager.current = Some(self.0.clone());
-            unsafe {
-                TSS.privilege_stack_table[0] = VirtAddr::new(thread.kernel_stack_top);
-            }
-
-            if previous_thread_pid != thread_pid {
-                MANAGER.lock().load_process(thread.parent.clone());
-            }
-
             (
                 &mut thread.snapshot as *mut ThreadSnapshot,
                 &mut thread.executor_snapshot as *mut ThreadSnapshot,
@@ -85,7 +91,9 @@ impl Future for ThreadFuture {
         match self.0.lock().state {
             State::Zombie => Poll::Ready(()),
             State::Running => {
+                s_println!("re-queueing");
                 cx.waker().wake_by_ref();
+                s_println!("returned");
                 Poll::Pending
             }
             State::Blocked(_) => unimplemented!(),
