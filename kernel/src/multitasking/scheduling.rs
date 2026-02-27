@@ -27,10 +27,7 @@ impl ThreadManager {
             (current_thread.snapshot.as_ptr(), pid)
         }; // Lock released.
 
-        let next_thread_arc = self
-            .queue
-            .pop_front()
-            .unwrap_or(self.idle_thread.clone().unwrap());
+        let next_thread_arc = self.queue.pop_front().unwrap();
         let mut next_thread = next_thread_arc.lock();
         let next_pid = {
             let p = next_thread.parent.lock();

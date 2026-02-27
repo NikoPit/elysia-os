@@ -28,15 +28,9 @@ pub struct ThreadManager {
 impl ThreadManager {
     pub fn init(&mut self) {
         self.current = Some(Thread::empty());
-
-        let idle_thread = Thread::empty();
-        self.threads
-            .insert(idle_thread.lock().id, idle_thread.clone());
-        self.idle_thread = Some(idle_thread.clone());
     }
 
     pub fn spawn(&mut self, thread: Thread) -> ThreadRef {
-        s_println!("someone called spawn thread or smth");
         let id = thread.id;
         let thread = Arc::new(Mutex::new(thread));
 
