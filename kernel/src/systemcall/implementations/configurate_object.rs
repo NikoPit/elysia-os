@@ -1,6 +1,7 @@
 use crate::{
     object::{config::ConfigurateRequest, get_object},
-    systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo},
+    println,
+    systemcall::{error::SyscallError, implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 
 pub struct ConfigurateObjectImpl;
@@ -16,11 +17,18 @@ impl SyscallImpl for ConfigurateObjectImpl {
         arg5: u64,
         arg6: u64,
     ) -> Result<usize, crate::systemcall::error::SyscallError> {
-        Ok(get_object(arg1)
-            .unwrap()
+        let res = get_object(arg1)
+            .ok_or(SyscallError::InvalidFileDescriptor)?
             .as_configuratable()
-            .unwrap()
-            .configure(ConfigurateRequest::new(arg2, arg3))
-            .unwrap() as usize)
+            .ok_or(SyscallError::UnconfiguratableObject)?
+            .configure(ConfigurateRequest::new(arg2, arg3));
+
+        match res {
+            Ok(val) => Ok(val as usize),
+            Err(_) => {
+                println!("Failed when trying to configurate object. returnning Ok(0)");
+                Ok(0)
+            }
+        }
     }
 }
