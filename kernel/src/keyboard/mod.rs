@@ -21,19 +21,11 @@ pub mod ps2;
 pub mod scancode_stream;
 
 pub(crate) fn push_scancode(scancode: u8) {
-    if let Ok(queue) = SCANCODE_QUEUE.try_get() {
-        if let Err(_) = queue.push(scancode) {
-            panic!("Scancode queue full");
-        } else {
-            // wake up the registered waker
-            WAKER.wake();
-            // Wakeup all the blocked process (it should be threads now lol)
-            match MANAGER.try_lock() {
-                Some(mut manager) => manager.wake_keyboard(),
-                None => {}
-            }
-        }
-    } else {
-        println!("Scancode queue have not been initilized");
-    }
+    let queue = SCANCODE_QUEUE.get().unwrap();
+    queue.push(scancode).unwrap();
+
+    // wake up the registered waker
+    WAKER.wake();
+    // Wakeup all the blocked process (it should be threads now lol)
+    MANAGER.lock().wake_keyboard();
 }
