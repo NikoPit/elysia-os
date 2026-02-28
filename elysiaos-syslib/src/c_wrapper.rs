@@ -8,6 +8,7 @@ macro_rules! wrap_c {
                 match $function($($arg),*) {
                     // Just returns the return value if success
                     Ok(val) => val as isize,
+                    // Translate the error to error code and return
                     Err(val) => val.as_isize(),
                 }
             }
