@@ -21,21 +21,14 @@ pub async fn process_keypresses() {
 
     // loop through scancodes infinitely
     while let Some(scancode) = scancodes.next().await {
-        let test_key_event = keyboard.add_byte(scancode);
-
-        if let Ok(Some(key_event)) = test_key_event {
-            let thing = keyboard.process_keyevent(key_event);
-            if let Some(key) = thing {
-                match key {
-                    pc_keyboard::DecodedKey::Unicode(character) => {
-                        KEYBOARD_QUEUE
-                            .get_or_init(|| Mutex::new(VecDeque::new()))
-                            .lock()
-                            .push_back(character as u8);
-                    }
-                    DecodedKey::RawKey(key) => {}
-                }
-            }
+        if let Ok(Some(key_event)) = keyboard.add_byte(scancode)
+            && let Some(key) = keyboard.process_keyevent(key_event)
+            && let DecodedKey::Unicode(character) = key
+        {
+            KEYBOARD_QUEUE
+                .get_or_init(|| Mutex::new(VecDeque::new()))
+                .lock()
+                .push_back(character as u8);
         }
     }
 }
