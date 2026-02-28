@@ -260,7 +260,7 @@ dependencies = [
 
 [[package]]
 name = "elysia-os-lib"
-version = "0.1.4"
+version = "0.1.5"
 
 [[package]]
 name = "elysia-os-runner"

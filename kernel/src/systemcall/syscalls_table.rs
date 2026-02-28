@@ -23,8 +23,8 @@ use crate::{
 
 type SyscallHandler = fn(u64, u64, u64, u64, u64, u64) -> Result<usize, SyscallError>;
 
-pub static SYSCALL_TABLE: [Option<SyscallHandler>; 512] = {
-    let mut table = [None; 512];
+pub static SYSCALL_TABLE: [Option<SyscallHandler>; 1500] = {
+    let mut table = [None; 1500];
 
     // 编译时初始化表
     register_syscall!(table, SyscallNo::Print, PrintImpl);
