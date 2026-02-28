@@ -8,7 +8,7 @@ int main() {
         ssize_t n = read(0, buf, sizeof(buf) - 1);
         if (n > 0) {
             buf[n] = '\0';
-            printf("%s", buf);
+            printf("userspace key: %s\n", buf);
         }
     }
     return 0;

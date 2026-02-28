@@ -4,9 +4,11 @@ use alloc::sync::Arc;
 
 use crate::{
     graphics::object_config::{TerminalInfo, WindowSizeInfo},
-    object::error::ObjectError,
+    multitasking::MANAGER,
+    object::{config::Configuratable, error::ObjectError},
 };
 
+pub mod config;
 pub mod error;
 
 pub trait Object: Send + Sync + Debug {
@@ -15,6 +17,10 @@ pub trait Object: Send + Sync + Debug {
     }
 
     fn as_readable(self: Arc<Self>) -> Option<Arc<dyn Readable>> {
+        None
+    }
+
+    fn as_configuratable(self: Arc<Self>) -> Option<Arc<dyn Configuratable>> {
         None
     }
 }
@@ -31,11 +37,9 @@ pub trait Readable: Object {
     fn read(&self, buffer: &mut [u8]) -> ObjectResult<usize>;
 }
 
-pub enum ConfigurateRequest {
-    GetWindowSize(*mut WindowSizeInfo),
-    GetTerminalInfo(*mut TerminalInfo),
-}
+pub fn get_object(id: u64) -> Option<Arc<dyn Object>> {
+    let current = MANAGER.lock().current.clone().unwrap();
+    let current = current.lock();
 
-pub trait Configuratable: Object {
-    fn configure(&self, request: ConfigurateRequest) -> ObjectResult<isize>;
+    current.objects.get(id as usize).cloned()
 }

@@ -2,7 +2,7 @@ use core::ptr::write_volatile;
 
 use crate::{
     graphics::{object::TtyObject, tty::TTY},
-    object::{Configuratable, ConfigurateRequest},
+    object::config::{Configuratable, ConfigurateRequest},
 };
 
 #[repr(C)]
@@ -51,7 +51,7 @@ impl TerminalInfo {
 impl Configuratable for TtyObject {
     fn configure(
         &self,
-        request: crate::object::ConfigurateRequest,
+        request: crate::object::config::ConfigurateRequest,
     ) -> crate::object::ObjectResult<isize> {
         let tty = TTY.get().unwrap().lock();
 
