@@ -10,6 +10,7 @@ use crate::{
 
 pub mod config;
 pub mod error;
+pub mod tty_device;
 
 pub trait Object: Send + Sync + Debug {
     fn as_writable(self: Arc<Self>) -> Option<Arc<dyn Writable>> {
