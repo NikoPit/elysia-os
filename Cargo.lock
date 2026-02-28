@@ -270,6 +270,9 @@ dependencies = [
 [[package]]
 name = "elysiaos-syslib"
 version = "0.1.5"
+dependencies = [
+ "paste",
+]
 
 [[package]]
 name = "equivalent"

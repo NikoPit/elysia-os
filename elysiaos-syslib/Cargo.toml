@@ -4,3 +4,4 @@ version = "0.1.5"
 edition = "2024"
 
 [dependencies]
+paste = "1.0.15"
