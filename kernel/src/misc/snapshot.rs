@@ -20,7 +20,6 @@ pub struct Snapshot {
     pub rcx: u64,
     pub rax: u64,
 
-    pub error_code: u64,
     pub rip: u64,
     pub cs: u64,
     pub rflags: u64,
@@ -63,18 +62,18 @@ impl Snapshot {
 
                 // 2. 特殊寄存器处理
                 "lea rax, [rip + 2f]",    // 捕获“跳出汇编”后的 RIP
-                "mov [rdi + 0x80], rax",   // rip 偏移是 0x80 (16*8)
+                "mov [rdi + 0x78], rax",   // rip 偏移是 0x80 (16*8)
 
                 "mov rax, cs",
-                "mov [rdi + 0x88], rax",   // cs
+                "mov [rdi + 0x80], rax",   // cs
 
                 "pushfq",                 // 捕获 RFLAGS
-                "pop qword ptr [rdi + 0x90]",
+                "pop qword ptr [rdi + 0x88]",
 
-                "mov [rdi + 0x98], rsp",   // rsp
+                "mov [rdi + 0x90], rsp",   // rsp
 
                 "mov rax, ss",
-                "mov [rdi + 0xA0], rax",   // ss
+                "mov [rdi + 0x98], rax",   // ss
                 "2:",
                 in("rdi") &mut snp,        // 将结构体地址传入 rdi
                 options(nostack)

@@ -1,6 +1,7 @@
 use core::arch::naked_asm;
 
 use crate::{
+    gdt::GDT,
     hardware_interrupt::{HardwareInterrupt, notify_end_of_interrupt},
     misc::snapshot::Snapshot,
     multitasking::scheduling::return_to_executor,
@@ -11,7 +12,6 @@ use crate::{
 #[unsafe(no_mangle)]
 pub extern "C" fn timer_interrupt_handler_wrapper() {
     naked_asm!(
-        "push 0",
         "push rax",
             "push rcx",
             "push rdx",
@@ -34,12 +34,10 @@ pub extern "C" fn timer_interrupt_handler_wrapper() {
 }
 
 pub extern "C" fn timer_interrupt_handler(snapshot: &mut Snapshot) {
-    if snapshot.cs != 0x1B {
-        s_println!("FORCE FIXING CS/SS");
-        s_println!("[TODO] Find out what the hell made CS/SS went wrong");
-        snapshot.cs = 0x1B;
-        snapshot.ss = 0x23;
-    }
+    s_println!("FORCE FIXING CS/SS");
+    s_println!("[TODO] Find out what the hell made CS/SS went wrong");
+    snapshot.cs = GDT.1.user_code.0 as u64;
+    snapshot.ss = GDT.1.user_data.0 as u64;
     notify_end_of_interrupt(HardwareInterrupt::Timer);
     return_to_executor(snapshot);
 

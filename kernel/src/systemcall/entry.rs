@@ -1,4 +1,3 @@
-
 // entry point for all system calls
 #[unsafe(no_mangle)]
 #[unsafe(naked)]
@@ -36,9 +35,15 @@ pub extern "C" fn syscall_entry() {
         "pop r11",
         "pop rcx",
         // Loads the userspace rsp from gs
-        "mov rsp, gs:[0x8]",
+        "mov rdx, gs:[0x8]", // 先把用户态 RSP 拿出来，暂存到 rdx
+        // 按照 iretq 的要求在内核栈上压入 5 个值
+        "push 0x1b", // SS (User Data)
+        "push rdx",  // RSP (User RSP)
+        "push r11",  // RFLAGS
+        "push 0x23", // CS (User Code)
+        "push rcx",  // RIP
         "swapgs",
         // resume the state
-        "sysretq"
+        "iretq"
     )
 }

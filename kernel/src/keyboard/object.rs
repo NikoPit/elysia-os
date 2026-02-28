@@ -1,3 +1,5 @@
+use alloc::collections::vec_deque::VecDeque;
+use spin::mutex::Mutex;
 use x86_64::registers::mxcsr::read;
 
 use crate::{
@@ -18,15 +20,17 @@ impl Object for KeyboardObject {
 
 impl Readable for KeyboardObject {
     fn read(&self, buffer: &mut [u8]) -> crate::object::ObjectResult<usize> {
-        let queue = KEYBOARD_QUEUE.get().unwrap().lock();
+        let mut queue = KEYBOARD_QUEUE
+            .get_or_init(|| Mutex::new(VecDeque::new()))
+            .lock();
 
         if queue.is_empty() {
-            return Err(ObjectError::Other);
+            return Ok(0);
         }
 
         let mut read_chars = 0;
-        for char in queue.iter() {
-            buffer[read_chars] = char.clone();
+        while let Some(result) = queue.pop_front() {
+            buffer[read_chars] = result;
             read_chars += 1;
         }
 

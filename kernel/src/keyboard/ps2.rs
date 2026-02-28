@@ -14,9 +14,16 @@ lazy_static! {
         ));
 }
 
-use crate::{keyboard::push_scancode, print, register_hardware_interrupt};
+use crate::{
+    hardware_interrupt::{HardwareInterrupt, notify_end_of_interrupt},
+    keyboard::push_scancode,
+    print, register_hardware_interrupt, s_println,
+};
 
 pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    notify_end_of_interrupt(HardwareInterrupt::Keyboard);
+    s_println!("got keyboard interrupt");
+    s_println!("real cs {:?}", _stack_frame.code_segment);
     let mut keyboard_port = Port::new(0x60);
     let scancode = unsafe { keyboard_port.read() };
 

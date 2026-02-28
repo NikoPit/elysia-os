@@ -3,7 +3,10 @@ use x86_64::{
     structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
 };
 
-use crate::interrupts::{PICS, timer::timer_interrupt_handler_wrapper};
+use crate::{
+    interrupts::{PICS, timer::timer_interrupt_handler_wrapper},
+    keyboard::ps2::keyboard_interrupt_handler,
+};
 
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
@@ -55,6 +58,7 @@ pub fn init_hardware_interrupts(idt: &mut InterruptDescriptorTable) {
     unsafe {
         idt[HardwareInterrupt::Timer.as_u8()].set_handler_addr(VirtAddr::new(
             timer_interrupt_handler_wrapper as *const () as u64,
-        ))
+        ));
+        idt[HardwareInterrupt::Keyboard.as_u8()].set_handler_fn(keyboard_interrupt_handler);
     };
 }

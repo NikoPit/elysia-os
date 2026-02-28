@@ -2,7 +2,7 @@ use x86_64::registers::control::Cr3Flags;
 
 use crate::{
     gdt::GDT,
-    memory::page_table_wrapper::PageTableWrapped,
+    memory::{page_table_wrapper::PageTableWrapped, paging::MAPPER},
     misc::{others::calc_cr3_value, snapshot::Snapshot},
     multitasking::memory::allocate_kernel_stack,
 };
@@ -53,6 +53,9 @@ impl ThreadSnapshot {
     pub fn new_executor() -> Self {
         Self {
             snapshot_type: ThreadSnapshotType::Executor,
+            kernel_rsp: allocate_kernel_stack(16, &mut *MAPPER.get().unwrap().lock())
+                .finish()
+                .as_u64(),
             ..Default::default()
         }
     }
