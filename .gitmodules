@@ -4,3 +4,6 @@
 [submodule "mlibc"]
 	path = mlibc
 	url = https://github.com/managarm/mlibc
+[submodule "dash"]
+	path = dash
+	url = https://git.kernel.org/pub/scm/utils/dash/dash.git
