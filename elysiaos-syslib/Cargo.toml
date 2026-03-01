@@ -3,6 +3,10 @@ name = "elysiaos-syslib"
 version = "0.1.5"
 edition = "2024"
 
+[lib]
+name = "elysiaos_syslib"  
+crate-type = ["staticlib"]
+
 [dependencies]
 paste = "1.0.15"
 
