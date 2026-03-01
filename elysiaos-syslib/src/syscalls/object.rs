@@ -1,6 +1,6 @@
-use crate::{syscall, utils::SyscallResult, wrap_c};
+use crate::{syscall, utils::SyscallResult, wrap_c, wrap_c_fat_pointer};
 
-wrap_c!(read_object(index: u64, buffer: &mut [u8]));
+wrap_c_fat_pointer!(read_object(index: u64; buffer: &mut [u8]));
 pub fn read_object(index: u64, buffer: &mut [u8]) -> SyscallResult {
     syscall!(
         ReadObject,
@@ -10,7 +10,7 @@ pub fn read_object(index: u64, buffer: &mut [u8]) -> SyscallResult {
     )
 }
 
-wrap_c!(write_object(index: u64, buffer: &[u8]));
+wrap_c_fat_pointer!(write_object(index: u64; buffer: &[u8]));
 pub fn write_object(index: u64, buffer: &[u8]) -> SyscallResult {
     syscall!(
         WriteObject,
