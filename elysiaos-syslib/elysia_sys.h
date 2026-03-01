@@ -1,3 +1,6 @@
+#ifndef elysiaos_syslib_h
+#define elysiaos_syslib_h
+
 #include <cstdarg>
 #include <cstdint>
 #include <cstdlib>
@@ -31,3 +34,5 @@ intptr_t c_sys_write_object(uint64_t index, const uint8_t *ptr, uintptr_t len);
 intptr_t c_sys_configurate_object(uint64_t index, uint64_t request_num, uint8_t *ptr);
 
 }  // extern "C"
+
+#endif  // elysiaos_syslib_h
