@@ -1,4 +1,5 @@
 /target
+/toolchain
 /sysroot
 /libc-test
 /dev_toolchain

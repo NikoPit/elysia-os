@@ -32,6 +32,14 @@
               lld
               rustc
               rustfmt
+              gmp
+              mpfr
+              libmpc
+              flex
+              bison
+              autoconf
+              automake
+              texinfo
               pre-commit
               meson
               rustPackages.clippy
