@@ -9,7 +9,7 @@ use alloc::{
 };
 use spin::Mutex;
 
-use crate::filesystem::{errors::FSError, impls::ramfs::RamDirectory, path::Path};
+use crate::filesystem::{errors::FSError, path::Path};
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -32,8 +32,8 @@ pub struct FileData {
 
 pub trait File: Send + Sync + Debug {
     fn name(&self) -> FSResult<String>;
-    fn read(&self) -> FSResult<FileData>;
-    fn write(&mut self, data: FileData) -> FSResult<()>;
+    fn read(&self, buffer: &mut [u8]) -> FSResult<usize>;
+    fn write(&mut self, buffer: &[u8]) -> FSResult<usize>;
 }
 
 pub trait Directory: Send + Sync + Debug {
@@ -75,14 +75,14 @@ pub enum FileLike {
 }
 
 pub struct VFS {
-    pub root: Arc<Mutex<dyn Directory>>,
+    pub root: Option<Arc<Mutex<dyn Directory>>>,
     pub filesystems: Vec<Box<Mutex<dyn FileSystem>>>,
 }
 
 impl VFS {
     pub fn new() -> Self {
         Self {
-            root: Arc::new(Mutex::new(RamDirectory::new("root".to_string()))),
+            root: None,
             filesystems: Vec::new(),
         }
     }
@@ -111,24 +111,24 @@ impl VFS {
         dir.clone().0.lock().mkdir(dir.1.clone())
     }
 
-    pub fn read_file(&mut self, path: Path) -> FSResult<FileData> {
+    pub fn read_file(&mut self, path: Path, buffer: &mut [u8]) -> FSResult<usize> {
         let cur_dir = path.navigate(self)?;
         let dir = cur_dir.0.lock();
         let dir_name = cur_dir.1.clone();
 
         let file_like = dir.get(dir_name)?;
         if let FileLike::File(file) = file_like {
-            file.lock().read()
+            file.lock().read(buffer)
         } else {
             Err(FSError::NotFound)
         }
     }
 
-    pub fn write_file(&mut self, path: Path, data: FileData) -> FSResult<()> {
+    pub fn write_file(&mut self, path: Path, buffer: &[u8]) -> FSResult<usize> {
         let dir = path.navigate(self)?;
 
         if let Ok(FileLike::File(file)) = dir.0.lock().get(dir.1.clone()) {
-            file.lock().write(data)
+            file.lock().write(buffer)
         } else {
             Err(FSError::NotFound)
         }
