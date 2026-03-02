@@ -2,6 +2,8 @@ use core::cmp;
 
 use fatfs::IoError;
 
+pub mod initrd;
+
 #[derive(Debug)]
 pub enum BlockDeviceError {
     Readonly,
