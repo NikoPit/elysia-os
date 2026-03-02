@@ -8,10 +8,14 @@ use crate::{
 
 pub mod aux;
 pub mod debug_exit;
+pub mod gdt;
 pub mod others;
 pub mod panic;
+pub mod serial_print;
 pub mod snapshot;
 pub mod stack_builder;
+pub mod testing;
+pub mod tss;
 
 pub static mut CPU_CORE_CONTEXT: &mut CpuCoreContext = &mut CpuCoreContext {
     gs_kernel_stack_top: 0,

@@ -2,14 +2,13 @@
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks, abi_x86_interrupt)]
 #![reexport_test_harness_main = "test_main"]
-#![test_runner(crate::testing::run_tests)]
+#![test_runner(crate::misc::testing::run_tests)]
 
 extern crate alloc;
 
 pub mod acpi;
 pub mod exception_interrupt;
 pub mod filesystem;
-pub mod gdt;
 pub mod graphics;
 pub mod hardware_interrupt;
 pub mod interrupts;
@@ -19,10 +18,7 @@ pub mod misc;
 pub mod multitasking;
 pub mod object;
 pub mod os;
-pub mod serial_print;
 pub mod systemcall;
-pub mod testing;
-pub mod tss;
 pub mod userspace;
 
 pub static BOOTLOADER_CONFIG: BootloaderConfig = {
@@ -39,7 +35,9 @@ use crate::filesystem::block_device::initrd::{self, RAMDISK};
 use crate::filesystem::path::Path;
 use crate::filesystem::vfs::VirtualFS;
 use crate::misc::others::enable_sse;
+use crate::misc::{gdt, tss};
 use crate::multitasking::kernel_task;
+use crate::object::config;
 use bootloader_api::BootInfo;
 use bootloader_api::{BootloaderConfig, config::Mapping};
 #[cfg(test)]

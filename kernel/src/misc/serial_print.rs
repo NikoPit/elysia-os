@@ -4,7 +4,7 @@ use crate::os::get_os_no_interrupt;
 
 #[macro_export]
 macro_rules! s_print {
-    ($($arg:tt)*) => ($crate::serial_print::_print(format_args!($($arg)*)));
+    ($($arg:tt)*) => ($crate::misc::serial_print::_print(format_args!($($arg)*)));
 }
 
 #[macro_export]
