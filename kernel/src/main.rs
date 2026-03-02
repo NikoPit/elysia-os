@@ -30,14 +30,15 @@ fn k_main(bootinfo: &'static mut BootInfo) -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
+    use kernel::misc::panic::test_handle_panic;
+
     test_handle_panic(_info);
-    use kernel::panic_handler::test_handle_panic;
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    use kernel::panic_handler::handle_panic;
+    use kernel::misc::panic::handle_panic;
 
     handle_panic(_info);
 }

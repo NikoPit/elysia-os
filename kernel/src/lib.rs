@@ -19,7 +19,6 @@ pub mod misc;
 pub mod multitasking;
 pub mod object;
 pub mod os;
-pub mod panic_handler;
 pub mod serial_print;
 pub mod systemcall;
 pub mod testing;
@@ -103,7 +102,7 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    use crate::panic_handler::test_handle_panic;
+    use crate::misc::panic::test_handle_panic;
 
     test_handle_panic(_info);
 }
