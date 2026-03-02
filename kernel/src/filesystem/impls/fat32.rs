@@ -5,14 +5,14 @@ use spin::mutex::Mutex;
 use crate::filesystem::{
     block_device::BlockDeviceError,
     errors::FSError,
-    storage_operator::{SeekFrom, StorageOperator, initrd::RamDiskReader},
+    storage_operator::{SeekFrom, StorageOperator, initrd::RamDiskOperator},
     vfs_traits::{
         Directory, DirectoryContentInfo, DirectoryContentType, File, FileLike, FileSystem,
     },
 };
 
 pub struct FAT32(fatfs::FileSystem<Fat32RamDiskReader>);
-pub struct Fat32RamDiskReader(RamDiskReader);
+pub struct Fat32RamDiskReader(RamDiskOperator);
 
 impl IoBase for Fat32RamDiskReader {
     type Error = BlockDeviceError;

@@ -4,11 +4,11 @@ use crate::filesystem::{
 };
 
 #[derive(Debug)]
-pub struct RamDiskReader {
+pub struct RamDiskOperator {
     pos: u64,
 }
 
-impl StorageOperator for RamDiskReader {
+impl StorageOperator for RamDiskOperator {
     type Error = BlockDeviceError;
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         let ramdisk = RAMDISK.get().unwrap();
