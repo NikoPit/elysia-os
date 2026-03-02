@@ -38,30 +38,20 @@ pub trait File: Send + Sync + Debug {
 
 pub trait Directory: Send + Sync + Debug {
     fn name(&self) -> FSResult<String>;
-    fn contents(&self) -> FSResult<&BTreeMap<String, FileLike>>;
-    fn new_file(&mut self, name: String) -> FSResult<()>;
-    fn mkdir(&mut self, name: String) -> FSResult<()>;
+    fn contents(&self) -> FSResult<Vec<DirectoryContentInfo>>;
+    fn create(&self, info: DirectoryContentInfo) -> FSResult<()>;
+    fn delete(&self, name: &str) -> FSResult<()>;
+    fn get(&self, name: &str) -> FSResult<FileLike>;
+}
 
-    fn get(&self, name: String) -> FSResult<&FileLike> {
-        if self.exists(name.clone()) {
-            Ok(self.contents().unwrap().get(&name).unwrap())
-        } else {
-            Err(FSError::NotFound)
-        }
-    }
-    fn exists(&self, name: String) -> bool {
-        self.contents().unwrap().contains_key(&name)
-    }
+pub struct DirectoryContentInfo {
+    pub name: String,
+}
 
-    fn list_contents(&self) -> FSResult<Vec<String>> {
-        let mut contents = Vec::new();
-
-        for ele in self.contents()? {
-            contents.push(ele.0.clone());
-        }
-
-        Ok(contents)
-    }
+pub enum DirectoryContentType {
+    File,
+    Directory,
+    Symlink,
 }
 
 pub trait FileSystem: Send + Sync {
