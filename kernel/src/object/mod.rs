@@ -3,7 +3,6 @@ use core::fmt::Debug;
 use alloc::sync::Arc;
 
 use crate::{
-    graphics::object_config::{TerminalInfo, WindowSizeInfo},
     multitasking::MANAGER,
     object::{config::Configuratable, error::ObjectError},
 };

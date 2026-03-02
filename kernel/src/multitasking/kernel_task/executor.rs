@@ -10,8 +10,7 @@ use crate::{
         TASK_SPAWNER,
         spawner::TaskSpawner,
         task::{Task, TaskID, TaskWaker},
-    },
-    println, s_println,
+    }, s_println,
 };
 
 // When a task was awoken, the taskid will be pushed to the

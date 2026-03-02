@@ -1,6 +1,5 @@
 use core::task::Poll;
 
-use alloc::collections::vec_deque::VecDeque;
 use conquer_once::spin::OnceCell;
 use crossbeam_queue::ArrayQueue;
 use futures_util::{Stream, StreamExt, task::AtomicWaker};

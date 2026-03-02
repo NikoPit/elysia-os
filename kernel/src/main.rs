@@ -15,8 +15,6 @@ use bootloader_api::{BootInfo, entry_point};
 use kernel::BOOTLOADER_CONFIG;
 #[cfg(test)]
 use kernel::debug_exit::debug_exit;
-use kernel::multitasking::kernel_task::executor::Executor;
-use kernel::multitasking::kernel_task::task::Task;
 use kernel::{init, s_println};
 
 entry_point!(k_main, config = &BOOTLOADER_CONFIG);

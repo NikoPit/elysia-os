@@ -1,4 +1,3 @@
-use core::panic;
 
 use x86_64::{VirtAddr, instructions::interrupts::without_interrupts};
 
@@ -6,7 +5,6 @@ use crate::{
     misc::snapshot::Snapshot,
     multitasking::{
         MANAGER,
-        process::manager::Manager,
         thread::{THREAD_MANAGER, manager::ThreadManager, misc::State, snapshot::ThreadSnapshot},
     },
     s_println,
@@ -55,7 +53,7 @@ impl ThreadManager {
             .pop_front()
             .unwrap_or(self.idle_thread.clone().unwrap());
         let mut next_thread = next_thread_arc.lock();
-        let next_pid = {
+        let _next_pid = {
             let p = next_thread.parent.lock();
             p.pid
         };

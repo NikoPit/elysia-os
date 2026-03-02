@@ -1,18 +1,8 @@
-use core::task::Poll;
 
-use alloc::collections::vec_deque::VecDeque;
-use conquer_once::spin::OnceCell;
-use crossbeam_queue::ArrayQueue;
-use futures_util::{Stream, StreamExt, task::AtomicWaker};
-use pc_keyboard::DecodedKey;
 
 use crate::{
-    keyboard::{
-        ps2::_PS2_KEYBOARD,
-        scancode_stream::{SCANCODE_QUEUE, WAKER},
-    },
-    multitasking::{MANAGER, thread::THREAD_MANAGER},
-    println,
+    keyboard::scancode_stream::{SCANCODE_QUEUE, WAKER},
+    multitasking::thread::THREAD_MANAGER,
 };
 
 pub mod decoding_task;

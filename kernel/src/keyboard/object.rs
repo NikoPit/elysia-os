@@ -1,10 +1,9 @@
 use alloc::collections::vec_deque::VecDeque;
 use spin::mutex::Mutex;
-use x86_64::registers::mxcsr::read;
 
 use crate::{
     keyboard::decoding_task::KEYBOARD_QUEUE,
-    object::{Object, Readable, error::ObjectError},
+    object::{Object, Readable},
 };
 
 #[derive(Debug)]

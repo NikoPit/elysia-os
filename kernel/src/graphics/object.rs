@@ -1,7 +1,7 @@
 use core::str::from_utf8;
 
 use crate::{
-    graphics::tty::{TTY, Tty},
+    graphics::tty::TTY,
     object::{Object, Writable},
 };
 

@@ -1,11 +1,7 @@
 use alloc::sync::Arc;
 use spin::Mutex;
-use x86_64::{VirtAddr, structures::paging::OffsetPageTable};
 
-use crate::{
-    misc::snapshot::Snapshot,
-    multitasking::{
-        MANAGER,
+use crate::multitasking::{
         memory::{allocate_kernel_stack, allocate_stack},
         process::{ProcessRef, process::Process},
         thread::{
@@ -13,9 +9,7 @@ use crate::{
             misc::{State, ThreadID},
             snapshot::{ThreadSnapshot, ThreadSnapshotType},
         },
-    },
-    s_println,
-};
+    };
 
 #[derive(Debug)]
 pub struct Thread {

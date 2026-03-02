@@ -1,5 +1,4 @@
-use alloc::{string::String, sync::Arc, vec::Vec};
-use spin::Mutex;
+use alloc::{string::String, vec::Vec};
 
 use crate::filesystem::{
     vfs::{FSResult, VFS, WrappedDirectory},
@@ -57,7 +56,7 @@ impl Path {
                 PathPart::Normal(name) => {
                     let next_dir = {
                         let guard = current_dir.lock();
-                        if let Ok(FileLike::Directory(dir)) = guard.get(name.as_str().clone()) {
+                        if let Ok(FileLike::Directory(dir)) = guard.get(name.as_str()) {
                             Some(dir.clone())
                         } else {
                             None
@@ -77,7 +76,7 @@ impl Path {
 
                         let dir = {
                             let guard = current_dir.lock();
-                            if let Ok(FileLike::Directory(dir)) = guard.get(name.as_str().clone()) {
+                            if let Ok(FileLike::Directory(dir)) = guard.get(name.as_str()) {
                                 Some(dir.clone())
                             } else {
                                 None

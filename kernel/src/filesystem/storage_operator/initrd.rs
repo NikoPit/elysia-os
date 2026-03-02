@@ -1,11 +1,7 @@
-use crate::{
-    filesystem::{
+use crate::filesystem::{
         block_device::{BlockDevice, BlockDeviceError, initrd::RAMDISK},
         storage_operator::{SeekFrom, StorageOperator},
-        vfs_traits::FileSystem,
-    },
-    s_println,
-};
+    };
 
 #[derive(Debug)]
 pub struct RamDiskReader {
@@ -23,7 +19,7 @@ impl StorageOperator for RamDiskReader {
 
         Ok(n)
     }
-    fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
+    fn write(&mut self, _buf: &[u8]) -> Result<usize, Self::Error> {
         Err(BlockDeviceError::Readonly)
     }
 

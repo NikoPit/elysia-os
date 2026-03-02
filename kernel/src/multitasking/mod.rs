@@ -8,7 +8,7 @@ use lazy_static::lazy_static;
 use spin::Mutex;
 use x86_64::instructions::interrupts::without_interrupts;
 
-use crate::multitasking::{process::manager::Manager, thread::THREAD_MANAGER};
+use crate::multitasking::process::manager::Manager;
 
 lazy_static! {
     pub static ref MANAGER: Mutex<Manager> = Mutex::new(Manager::default());

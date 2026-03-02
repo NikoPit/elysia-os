@@ -21,7 +21,7 @@ impl SyscallImpl for AllocMemImpl {
         _arg6: u64,
     ) -> Result<usize, crate::systemcall::error::SyscallError> {
         s_println!("Allocating {} pages, requested by user via arg1", arg1);
-        let mut manager = MANAGER.lock();
+        let manager = MANAGER.lock();
         let flags =
             PageTableFlags::USER_ACCESSIBLE | PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
         let mut current = manager.current.as_ref().unwrap().lock();

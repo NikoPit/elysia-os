@@ -14,7 +14,7 @@ pub mod waker;
 pub static TASK_SPAWNER: OnceCell<Mutex<TaskSpawner>> = OnceCell::uninit();
 
 pub fn init() -> Executor {
-    let mut executor = Executor::default();
+    let executor = Executor::default();
 
     TASK_SPAWNER
         .get()

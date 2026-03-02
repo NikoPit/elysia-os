@@ -13,9 +13,9 @@ impl SyscallImpl for ConfigurateObjectImpl {
         arg1: u64,
         arg2: u64,
         arg3: u64,
-        arg4: u64,
-        arg5: u64,
-        arg6: u64,
+        _arg4: u64,
+        _arg5: u64,
+        _arg6: u64,
     ) -> Result<usize, crate::systemcall::error::SyscallError> {
         let res = get_object(arg1)
             .ok_or(SyscallError::InvalidFileDescriptor)?

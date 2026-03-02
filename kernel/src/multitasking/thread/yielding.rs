@@ -1,10 +1,6 @@
 use alloc::collections::vec_deque::VecDeque;
-use futures_util::lock;
 
-use crate::multitasking::{
-    process::{ProcessRef, manager::Manager, misc::ProcessID},
-    thread::{ThreadRef, manager::ThreadManager, misc::State},
-};
+use crate::multitasking::thread::{ThreadRef, manager::ThreadManager, misc::State};
 
 use paste::paste;
 // [TODO] make the blocked process wont be pushed onto the queue.

@@ -1,7 +1,6 @@
 use core::arch::naked_asm;
 
 use crate::{
-    gdt::GDT,
     hardware_interrupt::{HardwareInterrupt, notify_end_of_interrupt},
     misc::snapshot::Snapshot,
     multitasking::scheduling::return_to_executor,

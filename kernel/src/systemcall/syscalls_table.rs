@@ -1,5 +1,4 @@
 use crate::{
-    object::config::ConfigurateRequest,
     register_syscall,
     systemcall::{
         error::SyscallError,

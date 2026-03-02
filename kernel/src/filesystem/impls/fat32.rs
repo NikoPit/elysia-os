@@ -1,5 +1,5 @@
 use alloc::{string::String, sync::Arc, vec::Vec};
-use fatfs::{IoBase, Read, ReadWriteSeek, Seek, Write};
+use fatfs::{IoBase, Read, Seek, Write};
 use spin::mutex::Mutex;
 
 use crate::filesystem::{

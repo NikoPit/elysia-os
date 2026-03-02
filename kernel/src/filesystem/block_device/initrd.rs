@@ -1,6 +1,5 @@
 use alloc::slice;
 use conquer_once::spin::OnceCell;
-use x86_64::VirtAddr;
 
 use crate::filesystem::block_device::{BlockDevice, BlockDeviceError};
 
@@ -43,8 +42,8 @@ impl BlockDevice for RamDisk {
 
     fn write_block(
         &self,
-        id: usize,
-        buffer: &[u8],
+        _id: usize,
+        _buffer: &[u8],
     ) -> crate::filesystem::block_device::BlockDeviceResult {
         Err(BlockDeviceError::Readonly)
     }

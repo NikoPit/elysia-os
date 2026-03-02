@@ -1,17 +1,11 @@
-use core::task::Poll;
 
 use alloc::collections::vec_deque::VecDeque;
 use conquer_once::spin::OnceCell;
-use crossbeam_queue::ArrayQueue;
-use futures_util::{Stream, StreamExt, task::AtomicWaker};
+use futures_util::StreamExt;
 use pc_keyboard::DecodedKey;
 use spin::Mutex;
 
-use crate::{
-    keyboard::{ps2::_PS2_KEYBOARD, scancode_stream::ScancodeStream},
-    multitasking::MANAGER,
-    print, println,
-};
+use crate::keyboard::{ps2::_PS2_KEYBOARD, scancode_stream::ScancodeStream};
 
 pub static KEYBOARD_QUEUE: OnceCell<Mutex<VecDeque<u8>>> = OnceCell::uninit();
 

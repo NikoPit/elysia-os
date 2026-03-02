@@ -1,11 +1,8 @@
-use core::fmt::Debug;
 
-use alloc::sync::Arc;
 
 use crate::{
     graphics::object_config::{TerminalInfo, WindowSizeInfo},
-    multitasking::MANAGER,
-    object::{Object, ObjectResult, error::ObjectError},
+    object::{Object, ObjectResult},
 };
 
 pub enum ConfigurateRequest {

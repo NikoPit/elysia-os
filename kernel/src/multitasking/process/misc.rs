@@ -2,12 +2,7 @@ use core::sync::atomic::AtomicU64;
 
 use alloc::{sync::Arc, vec::Vec};
 
-use crate::{
-    graphics::object::TtyObject,
-    keyboard::object::KeyboardObject,
-    multitasking::thread::yielding::BlockType,
-    object::{Object, tty_device::TtyDevice},
-};
+use crate::object::{Object, tty_device::TtyDevice};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct ProcessID(pub u64);

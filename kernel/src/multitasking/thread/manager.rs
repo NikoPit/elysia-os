@@ -1,4 +1,3 @@
-use core::arch::naked_asm;
 
 use alloc::{
     collections::{btree_map::BTreeMap, vec_deque::VecDeque},
@@ -7,20 +6,17 @@ use alloc::{
 };
 use spin::Mutex;
 
-use crate::{
-    multitasking::{
+use crate::multitasking::{
         MANAGER,
         kernel_task::{TASK_SPAWNER, task::Task},
         thread::{
-            self, ThreadRef,
+            ThreadRef,
             future::ThreadFuture,
             misc::{State, ThreadID},
             thread::Thread,
             yielding::BlockedQueues,
         },
-    },
-    s_println,
-};
+    };
 
 #[derive(Default, Debug)]
 pub struct ThreadManager {

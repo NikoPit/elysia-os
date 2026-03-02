@@ -1,9 +1,8 @@
-use x86_64::registers::control::Cr3Flags;
 
 use crate::{
     gdt::GDT,
     memory::{page_table_wrapper::PageTableWrapped, paging::MAPPER},
-    misc::{others::calc_cr3_value, snapshot::Snapshot},
+    misc::snapshot::Snapshot,
     multitasking::memory::allocate_kernel_stack,
 };
 

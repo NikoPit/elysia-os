@@ -1,4 +1,3 @@
-use core::sync::atomic::AtomicU64;
 
 use alloc::{
     sync::{Arc, Weak},
@@ -12,21 +11,18 @@ use crate::{
     memory::page_table_wrapper::PageTableWrapped,
     misc::stack_builder::StackBuilder,
     multitasking::{
-        MANAGER,
         memory::{allocate_kernel_stack, allocate_stack},
         process::{
             ProcessRef,
             misc::{ProcessID, init_objects},
         },
         thread::{
-            self, THREAD_MANAGER,
-            misc::{State, ThreadID},
+            THREAD_MANAGER,
             snapshot::{ThreadSnapshot, ThreadSnapshotType},
             thread::Thread,
         },
     },
     object::Object,
-    s_println,
     userspace::elf_loader::load_elf,
 };
 

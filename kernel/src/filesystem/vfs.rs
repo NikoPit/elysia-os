@@ -1,9 +1,6 @@
-use core::fmt::Debug;
 
 use alloc::{
     boxed::Box,
-    collections::btree_map::BTreeMap,
-    string::{String, ToString},
     sync::Arc,
     vec::Vec,
 };
@@ -92,7 +89,7 @@ impl VFS {
     pub fn write_file(&mut self, path: Path, buffer: &[u8]) -> FSResult<usize> {
         let dir = path.navigate(self)?;
 
-        if let Ok(FileLike::File(file)) = dir.0.lock().get(dir.1.as_str().clone()) {
+        if let Ok(FileLike::File(file)) = dir.0.lock().get(dir.1.as_str()) {
             file.lock().write(buffer)
         } else {
             Err(FSError::NotFound)
@@ -106,7 +103,7 @@ impl VFS {
     pub fn list_contents(&self, path: Path) -> FSResult<Vec<DirectoryContentInfo>> {
         let dir = path.navigate(self)?;
         let bindind = dir.0.lock();
-        let dir = bindind.get(dir.1.as_str().clone());
+        let dir = bindind.get(dir.1.as_str());
 
         if let Ok(FileLike::Directory(dir)) = dir {
             Ok(dir.lock().contents()?)

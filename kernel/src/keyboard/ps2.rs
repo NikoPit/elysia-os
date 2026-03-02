@@ -1,8 +1,6 @@
-use alloc::collections::vec_deque::VecDeque;
-use crossbeam_queue::ArrayQueue;
 use lazy_static::lazy_static;
-use pc_keyboard::{DecodedKey, KeyCode, Keyboard, ScancodeSet1, layouts};
-use spin::{Mutex, MutexGuard};
+use pc_keyboard::{Keyboard, ScancodeSet1, layouts};
+use spin::Mutex;
 use x86_64::{instructions::port::Port, structures::idt::InterruptStackFrame};
 
 lazy_static! {
@@ -17,7 +15,6 @@ lazy_static! {
 use crate::{
     hardware_interrupt::{HardwareInterrupt, notify_end_of_interrupt},
     keyboard::push_scancode,
-    print, register_hardware_interrupt, s_println,
 };
 
 pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {

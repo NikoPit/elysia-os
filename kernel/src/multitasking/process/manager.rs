@@ -4,18 +4,11 @@ use alloc::{
 };
 use x86_64::instructions::interrupts::without_interrupts;
 
-use crate::{
-    misc::{self, hlt_loop},
-    multitasking::{
-        MANAGER,
-        process::{
+use crate::multitasking::process::{
             ProcessRef,
             misc::ProcessID,
-            process::{self, Process},
-        },
-    },
-    print, println, s_println,
-};
+            process::Process,
+        };
 
 #[derive(Debug, Default)]
 pub struct Manager {
