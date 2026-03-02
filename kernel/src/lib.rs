@@ -7,10 +7,8 @@
 extern crate alloc;
 
 pub mod acpi;
-pub mod exception_interrupt;
 pub mod filesystem;
 pub mod graphics;
-pub mod hardware_interrupt;
 pub mod interrupts;
 pub mod keyboard;
 pub mod memory;

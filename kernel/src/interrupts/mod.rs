@@ -7,10 +7,12 @@ use x86_64::{
 };
 
 use crate::{
-    exception_interrupt::init_exception_interrupts,
-    hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET, init_hardware_interrupts},
+    interrupts::exception_interrupt::init_exception_interrupts,
+    interrupts::hardware_interrupt::{PIC_1_OFFSET, PIC_2_OFFSET, init_hardware_interrupts},
     print, s_println, test,
 };
+pub mod exception_interrupt;
+pub mod hardware_interrupt;
 pub mod timer;
 use lazy_static::lazy_static;
 pub static PICS: OnceCell<Mutex<ChainedPics>> = OnceCell::uninit();

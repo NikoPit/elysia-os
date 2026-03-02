@@ -1,7 +1,7 @@
 use core::arch::naked_asm;
 
 use crate::{
-    hardware_interrupt::{HardwareInterrupt, notify_end_of_interrupt},
+    interrupts::hardware_interrupt::{HardwareInterrupt, notify_end_of_interrupt},
     misc::snapshot::Snapshot,
     multitasking::scheduling::return_to_executor,
     s_println,

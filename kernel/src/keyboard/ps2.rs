@@ -13,7 +13,7 @@ lazy_static! {
 }
 
 use crate::{
-    hardware_interrupt::{HardwareInterrupt, notify_end_of_interrupt},
+    interrupts::hardware_interrupt::{HardwareInterrupt, notify_end_of_interrupt},
     keyboard::push_scancode,
 };
 
