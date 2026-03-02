@@ -48,4 +48,12 @@ impl BlockDevice for RamDisk {
     ) -> crate::filesystem::block_device::BlockDeviceResult {
         Err(BlockDeviceError::Readonly)
     }
+
+    fn total_blocks(&self) -> usize {
+        self.0.len() * self.block_size()
+    }
+
+    fn total_bytes(&self) -> usize {
+        self.0.len()
+    }
 }
