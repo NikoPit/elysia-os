@@ -1,0 +1,23 @@
+use crate::{println, s_println};
+
+static LOGGER: Logger = Logger;
+
+struct Logger;
+
+impl log::Log for Logger {
+    fn enabled(&self, metadata: &log::Metadata) -> bool {
+        true
+    }
+
+    fn log(&self, record: &log::Record) {
+        if self.enabled(record.metadata()) {
+            s_println!("[{}] {}", record.level(), record.args());
+        }
+    }
+
+    fn flush(&self) {}
+}
+
+pub fn init() {
+    log::set_logger(&LOGGER).unwrap();
+}

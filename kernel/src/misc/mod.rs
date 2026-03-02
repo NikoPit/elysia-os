@@ -9,6 +9,7 @@ use crate::{
 pub mod aux;
 pub mod debug_exit;
 pub mod gdt;
+pub mod logging;
 pub mod others;
 pub mod panic;
 pub mod serial_print;
@@ -31,6 +32,8 @@ pub fn init() {
             gs_user_stack_top: 0,
         }))
     };
+
+    logging::init();
 }
 
 pub fn hlt_loop() -> ! {
