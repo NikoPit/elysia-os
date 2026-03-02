@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 fn main() {
     // set by cargo, build scripts should use this directory for output files
@@ -16,6 +16,7 @@ fn main() {
     // create a BIOS disk image
     let bios_path = out_dir.join("bios.img");
     bootloader::BiosBoot::new(&kernel)
+        .set_ramdisk(Path::new("./disk.img"))
         .create_disk_image(&bios_path)
         .unwrap();
 

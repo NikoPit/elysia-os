@@ -1,4 +1,5 @@
 /target
+/disk.img
 /toolchain
 /sysroot
 /libc-test

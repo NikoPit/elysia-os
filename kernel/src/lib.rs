@@ -36,7 +36,10 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
     config
 };
 
-use crate::filesystem::block_device::initrd;
+use crate::filesystem::block_device::BlockDevice;
+use crate::filesystem::block_device::initrd::{self, RAMDISK};
+use crate::filesystem::path::Path;
+use crate::filesystem::vfs::VirtualFS;
 use crate::misc::others::enable_sse;
 use crate::multitasking::kernel_task;
 use bootloader_api::BootInfo;
@@ -78,6 +81,22 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
         bootinfo.ramdisk_addr.into_option().expect("No ramdisk."),
         bootinfo.ramdisk_len,
     );
+
+    {
+        let ramdisk = RAMDISK.get().unwrap();
+        let mut buf = [0u8; 3];
+
+        ramdisk.read_by_bytes(509, &mut buf).unwrap();
+
+        println!("{:?}", buf);
+    }
+
+    let mut vfs = VirtualFS.lock();
+
+    vfs.init().unwrap();
+    let mut buf = [0u8; 16];
+    vfs.read_file(Path::new("/test.txt"), &mut buf).unwrap();
+    println!("{:?}", buf);
 
     executor.run();
 }
