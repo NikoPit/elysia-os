@@ -48,7 +48,6 @@ impl VFS {
     }
 
     pub fn init(&mut self) -> FSResult<()> {
-        trace!("vfs::init");
         let fs = fatfs::FileSystem::new(
             Fat32RamDiskReader(RamDiskOperator::default()),
             FsOptions::new(),
@@ -84,15 +83,9 @@ impl VFS {
     }
 
     pub fn read_file(&mut self, path: Path, buffer: &mut [u8]) -> FSResult<usize> {
-        s_println!("Inside read_file: calling self.root.get!");
-        let text = self.root.clone().unwrap().lock().get("test.txt").unwrap();
-        s_println!("{:?}", text.type_id());
-        s_println!("a");
-        let file = path.navigate(self.root.clone().unwrap().clone())?;
-        s_println!("b");
+        let file = path.navigate(self.root.clone().unwrap())?;
 
         if let FileLike::File(file) = file {
-            s_println!("c");
             file.lock().read(buffer)
         } else {
             Err(FSError::NotAFile)

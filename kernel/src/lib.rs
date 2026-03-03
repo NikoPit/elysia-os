@@ -80,8 +80,7 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
     let mut vfs = VirtualFS.lock();
     vfs.init().unwrap();
 
-    let mut buf = [0u8; 16];
-    s_println!("calling readfile()");
+    let mut buf = [0u8; 32];
     vfs.read_file(Path::new("/test.txt"), &mut buf).unwrap();
     println!("{:?}", from_utf8(&buf));
     interrupts::init();

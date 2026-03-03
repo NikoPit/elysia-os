@@ -80,9 +80,7 @@ impl Directory for FAT32Directory {
         let name = name.to_ascii_uppercase();
 
         for dir_entry in self.inner.iter() {
-            s_println!("afwfa");
             let dir_entry = dir_entry.unwrap();
-            s_println!("dir entry: {:?}", dir_entry.file_name());
 
             if dir_entry.file_name() == name {
                 if dir_entry.is_file() {
