@@ -37,6 +37,7 @@ use crate::multitasking::kernel_task;
 use crate::object::config;
 use bootloader_api::BootInfo;
 use bootloader_api::{BootloaderConfig, config::Mapping};
+use core::any::Any;
 #[cfg(test)]
 use core::panic::PanicInfo;
 
@@ -79,8 +80,11 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
     s_println!("b");
 
     vfs.init().unwrap();
+    let test_file = vfs.root.clone().unwrap().lock().get("test.txt").unwrap();
+    s_println!("{:?}", test_file.type_id());
     s_println!("c");
     let mut buf = [0u8; 16];
+    s_println!("calling readfile()");
     vfs.read_file(Path::new("/test.txt"), &mut buf).unwrap();
     println!("{:?}", buf);
     interrupts::init();

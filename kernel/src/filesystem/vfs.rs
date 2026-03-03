@@ -1,4 +1,4 @@
-use core::str::from_utf8;
+use core::{any::Any, str::from_utf8};
 
 use alloc::{boxed::Box, sync::Arc, vec::Vec};
 use fatfs::FsOptions;
@@ -57,7 +57,7 @@ impl VFS {
 
         self.root = Some(fat32_fs.root_dir().unwrap());
 
-        let a = fat32_fs.root_dir().unwrap().lock().get("test.txt").unwrap();
+        let a = self.root.clone().unwrap().lock().get("test.txt").unwrap();
         if let FileLike::File(aaa) = a {
             let mut buf = [0u8; 32];
             aaa.lock().read(&mut buf).unwrap();
@@ -78,7 +78,7 @@ impl VFS {
     }
 
     pub fn create_file(&mut self, path: Path) -> FSResult<()> {
-        let (parent_dir, name) = path.navigate_to_parent(self)?;
+        let (parent_dir, name) = path.navigate_to_parent(self.root.clone().unwrap())?;
 
         parent_dir
             .clone()
@@ -87,7 +87,7 @@ impl VFS {
     }
 
     pub fn create_dir(&mut self, path: Path) -> FSResult<()> {
-        let (parent_dir, name) = path.navigate_to_parent(self)?;
+        let (parent_dir, name) = path.navigate_to_parent(self.root.clone().unwrap())?;
 
         parent_dir.clone().lock().create(DirectoryContentInfo::new(
             name,
@@ -96,8 +96,11 @@ impl VFS {
     }
 
     pub fn read_file(&mut self, path: Path, buffer: &mut [u8]) -> FSResult<usize> {
+        s_println!("Inside read_file: calling self.root.get!");
+        let text = self.root.clone().unwrap().lock().get("test.txt").unwrap();
+        s_println!("{:?}", text.type_id());
         s_println!("a");
-        let file = path.navigate(self)?;
+        let file = path.navigate(self.root.clone().unwrap().clone())?;
         s_println!("b");
 
         if let FileLike::File(file) = file {
@@ -109,7 +112,7 @@ impl VFS {
     }
 
     pub fn write_file(&mut self, path: Path, buffer: &[u8]) -> FSResult<usize> {
-        let file = path.navigate(self)?;
+        let file = path.navigate(self.root.clone().unwrap())?;
 
         if let FileLike::File(file) = file {
             file.lock().write(buffer)
@@ -123,7 +126,7 @@ impl VFS {
     }
 
     pub fn list_contents(&self, path: Path) -> FSResult<Vec<DirectoryContentInfo>> {
-        let dir = path.navigate(self)?;
+        let dir = path.navigate(self.root.clone().unwrap())?;
 
         if let FileLike::Directory(dir) = dir {
             Ok(dir.lock().contents()?)

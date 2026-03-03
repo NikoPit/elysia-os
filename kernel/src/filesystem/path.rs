@@ -1,9 +1,14 @@
+use core::str::from_utf8;
+
 use alloc::{string::String, vec::Vec};
 
-use crate::filesystem::{
-    errors::FSError,
-    vfs::{FSResult, VFS, WrappedDirectory},
-    vfs_traits::{DirectoryContentInfo, DirectoryContentType, FileLike},
+use crate::{
+    filesystem::{
+        errors::FSError,
+        vfs::{FSResult, VFS, WrappedDirectory},
+        vfs_traits::{DirectoryContentInfo, DirectoryContentType, FileLike},
+    },
+    println, s_println,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -51,9 +56,25 @@ impl Path {
     /// NOTE:
     /// If you do navigate_with_depth with a depth of 1 and a
     /// path len of 6, the actrual depth that will be 5 (6 - 1)
-    fn navigate_with_depth(&self, vfs: &VFS, depth: usize) -> FSResult<FileLike> {
-        let mut current = FileLike::Directory(vfs.root.clone().unwrap());
+    fn navigate_with_depth(&self, root: WrappedDirectory, depth: usize) -> FSResult<FileLike> {
+        s_println!("woaz");
+        let a = root.lock().get("test.txt").unwrap();
+        s_println!("woaz end");
+        if let FileLike::File(aaa) = a {
+            let mut buf = [0u8; 32];
+            aaa.lock().read(&mut buf).unwrap();
+
+            let str = from_utf8(&buf).unwrap();
+            println!("{str}");
+        }
+
+        let mut current = FileLike::Directory(root.clone());
         let end = self.0.len().saturating_sub(depth);
+        s_println!("woaa");
+        if let FileLike::Directory(dir) = current {
+            s_println!("got!");
+            return Ok(dir.lock().get("test.txt")?);
+        }
 
         for i in 0..end {
             let part = &self.0[i];
@@ -75,13 +96,16 @@ impl Path {
         Ok(current)
     }
 
-    pub fn navigate(&self, vfs: &VFS) -> FSResult<FileLike> {
-        self.navigate_with_depth(vfs, 0)
+    pub fn navigate(&self, root: WrappedDirectory) -> FSResult<FileLike> {
+        self.navigate_with_depth(root, 0)
     }
 
-    pub fn navigate_to_parent(&self, vfs: &VFS) -> FSResult<(WrappedDirectory, String)> {
+    pub fn navigate_to_parent(
+        &self,
+        root: WrappedDirectory,
+    ) -> FSResult<(WrappedDirectory, String)> {
         let name = self.0.last().ok_or(FSError::NotFound)?;
-        let nav = self.navigate_with_depth(vfs, 1)?;
+        let nav = self.navigate_with_depth(root, 1)?;
 
         match nav {
             FileLike::File(_) => Err(FSError::NotADirectory),
