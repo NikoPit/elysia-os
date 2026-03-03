@@ -70,7 +70,6 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
     systemcall::init();
     acpi::init();
     let mut executor = kernel_task::init();
-    multitasking::init();
 
     initrd::init(
         bootinfo.ramdisk_addr.into_option().expect("No ramdisk."),
@@ -83,6 +82,9 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
     let mut buf = [0u8; 32];
     vfs.read_file(Path::new("/test.txt"), &mut buf).unwrap();
     println!("{:?}", from_utf8(&buf));
+    drop(vfs);
+    multitasking::init();
+
     interrupts::init();
 
     executor.run();
