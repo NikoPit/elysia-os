@@ -87,6 +87,7 @@ impl Directory for FAT32Directory {
                     return Ok(FileLike::File(Arc::new(Mutex::new(FAT32File::new(
                         dir_entry.file_name(),
                         dir_entry.to_file(),
+                        dir_entry.len(),
                     )))));
                 } else if dir_entry.is_dir() {
                     return Ok(FileLike::Directory(Arc::new(Mutex::new(

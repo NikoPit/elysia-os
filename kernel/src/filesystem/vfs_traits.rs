@@ -5,7 +5,8 @@ use alloc::{boxed::Box, string::String, vec::Vec};
 use crate::filesystem::vfs::{FSResult, WrappedDirectory, WrappedFile};
 
 pub trait File: Send + Sync {
-    fn name(&mut self) -> FSResult<String>;
+    fn info(&mut self) -> FSResult<FileInfo>;
+
     fn read(&mut self, buffer: &mut [u8]) -> FSResult<usize>;
     fn write(&mut self, buffer: &[u8]) -> FSResult<usize>;
 }
@@ -22,6 +23,18 @@ pub trait Directory: Send + Sync {
 pub struct DirectoryContentInfo {
     pub name: String,
     pub content_type: DirectoryContentType,
+}
+
+#[derive(Debug)]
+pub struct FileInfo {
+    pub name: String,
+    pub size: u64,
+}
+
+impl FileInfo {
+    pub fn new(name: String, size: u64) -> Self {
+        Self { name, size }
+    }
 }
 
 impl DirectoryContentInfo {

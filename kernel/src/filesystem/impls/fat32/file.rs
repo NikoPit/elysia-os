@@ -8,7 +8,7 @@ use crate::filesystem::{
     impls::fat32::operator::Fat32RamDiskReader,
     storage_operator::{SeekFrom, StorageOperator, initrd::RamDiskOperator},
     vfs_traits::{
-        Directory, DirectoryContentInfo, DirectoryContentType, File, FileLike, FileSystem,
+        Directory, DirectoryContentInfo, DirectoryContentType, File, FileInfo, FileLike, FileSystem,
     },
 };
 
@@ -22,11 +22,12 @@ type RawFAT32File = fatfs::File<
 pub struct FAT32File {
     name: String,
     inner: RawFAT32File,
+    size: u64,
 }
 
 impl FAT32File {
-    pub fn new(name: String, inner: RawFAT32File) -> Self {
-        Self { name, inner }
+    pub fn new(name: String, inner: RawFAT32File, size: u64) -> Self {
+        Self { name, inner, size }
     }
 }
 
@@ -39,7 +40,7 @@ impl File for FAT32File {
         self.inner.write(buffer).map_err(|_| FSError::NotFound)
     }
 
-    fn name(&mut self) -> crate::filesystem::vfs::FSResult<String> {
-        Ok(self.name.clone())
+    fn info(&mut self) -> crate::filesystem::vfs::FSResult<FileInfo> {
+        Ok(FileInfo::new(self.name.clone(), self.size))
     }
 }
