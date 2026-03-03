@@ -12,7 +12,8 @@ use crate::{
         path::Path,
         storage_operator::initrd::RamDiskOperator,
         vfs_traits::{
-            Directory, DirectoryContentInfo, DirectoryContentType, File, FileLike, FileSystem,
+            Directory, DirectoryContentInfo, DirectoryContentType, File, FileInfo, FileLike,
+            FileSystem,
         },
     },
     println, s_println,
@@ -89,6 +90,15 @@ impl VFS {
             file.lock().read(buffer)
         } else {
             Err(FSError::NotAFile)
+        }
+    }
+
+    pub fn file_info(&mut self, path: Path) -> FSResult<FileInfo> {
+        let file = path.navigate(self.root.clone().unwrap())?;
+
+        match file {
+            FileLike::File(file) => file.lock().info(),
+            FileLike::Directory(_) => Err(FSError::NotAFile),
         }
     }
 
