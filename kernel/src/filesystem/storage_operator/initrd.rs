@@ -1,6 +1,9 @@
-use crate::filesystem::{
-    block_device::{BlockDevice, BlockDeviceError, initrd::RAMDISK},
-    storage_operator::{SeekFrom, StorageOperator},
+use crate::{
+    filesystem::{
+        block_device::{BlockDevice, BlockDeviceError, initrd::RAMDISK},
+        storage_operator::{SeekFrom, StorageOperator},
+    },
+    s_print, s_println,
 };
 
 #[derive(Default, Debug)]
@@ -14,6 +17,13 @@ impl StorageOperator for RamDiskOperator {
         let ramdisk = RAMDISK.get().unwrap();
         let n = ramdisk.read_by_bytes(self.pos as usize, buf)?;
 
+        if buf.iter().all(|&x| x == 0) && buf.len() > 0 {
+            s_println!(
+                "[Disk Warning] Read ALL ZEROS at pos: {}, len: {}",
+                self.pos,
+                buf.len()
+            );
+        }
         self.pos += n as u64;
 
         Ok(n)
@@ -36,6 +46,12 @@ impl StorageOperator for RamDiskOperator {
         };
 
         if new_pos < 0 || new_pos > ramdisk.total_bytes() as i64 {
+            s_println!(
+                "[Disk Error] Out of bounds! Pos: {}, Total: {}, Op: {:?}",
+                new_pos,
+                ramdisk.total_bytes(),
+                pos
+            );
             return Err(BlockDeviceError::Other);
         }
 

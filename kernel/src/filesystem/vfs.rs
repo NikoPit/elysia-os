@@ -53,22 +53,10 @@ impl VFS {
             Fat32RamDiskReader(RamDiskOperator::default()),
             FsOptions::new(),
         );
-        let mut fat32_fs = FAT32(fs.unwrap());
 
-        self.root = Some(fat32_fs.root_dir().unwrap());
+        self.register_fs(FAT32(fs.unwrap()));
 
-        let a = self.root.clone().unwrap().lock().get("test.txt").unwrap();
-        if let FileLike::File(aaa) = a {
-            let mut buf = [0u8; 32];
-            aaa.lock().read(&mut buf).unwrap();
-
-            let str = from_utf8(&buf).unwrap();
-            println!("{str}");
-        }
-
-        // 纯净测试：直接在这里跑迭代
-        s_println!("Test Start");
-        s_println!("Test End");
+        self.root = Some(self.filesystems[0].lock().root_dir().unwrap());
 
         Ok(())
     }

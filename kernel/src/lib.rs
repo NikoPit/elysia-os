@@ -31,6 +31,7 @@ use crate::filesystem::block_device::BlockDevice;
 use crate::filesystem::block_device::initrd::{self, RAMDISK};
 use crate::filesystem::path::Path;
 use crate::filesystem::vfs::VirtualFS;
+use crate::filesystem::vfs_traits::FileLike;
 use crate::misc::others::enable_sse;
 use crate::misc::{gdt, tss};
 use crate::multitasking::kernel_task;
@@ -40,6 +41,7 @@ use bootloader_api::{BootloaderConfig, config::Mapping};
 use core::any::Any;
 #[cfg(test)]
 use core::panic::PanicInfo;
+use core::str::from_utf8;
 
 #[cfg(test)]
 entry_point!(test_k_main, config = &BOOTLOADER_CONFIG);
@@ -75,18 +77,13 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
         bootinfo.ramdisk_len,
     );
 
-    s_println!("a");
     let mut vfs = VirtualFS.lock();
-    s_println!("b");
-
     vfs.init().unwrap();
-    let test_file = vfs.root.clone().unwrap().lock().get("test.txt").unwrap();
-    s_println!("{:?}", test_file.type_id());
-    s_println!("c");
+
     let mut buf = [0u8; 16];
     s_println!("calling readfile()");
     vfs.read_file(Path::new("/test.txt"), &mut buf).unwrap();
-    println!("{:?}", buf);
+    println!("{:?}", from_utf8(&buf));
     interrupts::init();
 
     executor.run();
