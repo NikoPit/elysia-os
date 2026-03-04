@@ -35,6 +35,7 @@
               mpfr
               libmpc
               flex
+              pkgsCross.x86_64-embedded.buildPackages.gcc
               bison
               autoconf
               automake
