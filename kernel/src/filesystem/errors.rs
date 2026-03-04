@@ -8,5 +8,5 @@ pub enum FSError {
     NotADirectory,
     NotAFile,
     Other,
-    StorageDeviceError(String),
+    StorageDeviceError(BlockDeviceError),
 }
