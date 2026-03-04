@@ -1,14 +1,17 @@
+use core::ops::Deref;
+
 use alloc::{
+    boxed::Box,
     collections::{btree_map::BTreeMap, vec_deque::VecDeque},
-    vec::Vec,
+    vec::{self, Vec},
 };
 use x86_64::instructions::interrupts::without_interrupts;
 
-use crate::multitasking::process::{
-            ProcessRef,
-            misc::ProcessID,
-            process::Process,
-        };
+use crate::{
+    filesystem::{path::Path, vfs::VirtualFS},
+    multitasking::process::{ProcessRef, misc::ProcessID, process::Process},
+    s_print, s_println,
+};
 
 #[derive(Debug, Default)]
 pub struct Manager {
@@ -36,12 +39,28 @@ impl Manager {
             self.processes
                 .insert(kernel_process.lock().pid, kernel_process.clone());
 
-            self.spawn(&ELF_HOLDER.data);
+            self.spawn(Path::new("/test.elf"));
         });
     }
 
-    pub fn spawn(&mut self, program: &[u8]) {
-        let process = Process::new(program);
+    pub fn spawn(&mut self, program: Path) {
+        let mut vfs = VirtualFS.lock();
+        let size = vfs.file_info(program.clone()).unwrap().size;
+        let layout = core::alloc::Layout::from_size_align(size as usize, 4096).unwrap();
+        let ptr = unsafe { alloc::alloc::alloc(layout) };
+
+        // 构造 Vec
+        let mut buf = unsafe { alloc::vec::Vec::from_raw_parts(ptr, size as usize, size as usize) };
+        s_println!("{:?}", buf.as_ptr());
+
+        vfs.read_file(program, &mut buf).unwrap();
+
+        for i in 1010..1050 {
+            s_print!("{}\n", buf[i as usize]);
+            s_print!("{}\n", ELF_HOLDER.data[i as usize]);
+        }
+
+        let process = Process::new(&buf);
         self.processes.insert(process.lock().pid, process.clone());
         self.queue.push_back(process.clone());
     }
