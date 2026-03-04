@@ -38,15 +38,25 @@ pub trait BlockDevice: Send + Sync {
     fn write_single_block(&self, id: usize, buffer: &[u8]) -> BlockDeviceResult;
 
     fn read_blocks(&self, start: usize, buffer: &mut [u8]) -> BlockDeviceResult {
-        let read_len = buffer.len() / self.block_size();
+        // 向上取整：(len + size - 1) / size
+        let read_len = (buffer.len() + self.block_size() - 1) / self.block_size();
 
         for i in 0..read_len {
             let block = start + i;
-            let byte = i * self.block_size();
+            let byte_start = i * self.block_size();
+            let byte_end = (i + 1) * self.block_size();
 
-            self.read_single_block(block, &mut buffer[byte..byte + self.block_size()])?;
+            if byte_end <= buffer.len() {
+                // 全块读取
+                self.read_single_block(block, &mut buffer[byte_start..byte_end])?;
+            } else {
+                // 处理最后一个不满一整块的尾巴
+                let mut temp = alloc::vec![0u8; self.block_size()];
+                self.read_single_block(block, &mut temp)?;
+                let buf_len = buffer.len();
+                buffer[byte_start..].copy_from_slice(&temp[..buf_len - byte_start]);
+            }
         }
-
         Ok(buffer.len())
     }
 

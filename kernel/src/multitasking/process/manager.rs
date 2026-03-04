@@ -10,7 +10,16 @@ use x86_64::instructions::interrupts::without_interrupts;
 use crate::{
     filesystem::{path::Path, vfs::VirtualFS},
     multitasking::process::{Process, ProcessRef, misc::ProcessID},
-    s_print, s_println,
+    println, s_print, s_println,
+};
+
+#[repr(align(8))]
+struct Elffy {
+    data: [u8; include_bytes!("../../../../sysroot/programs/mash.elf").len()],
+}
+
+static ELFFIE: Elffy = Elffy {
+    data: *include_bytes!("../../../../sysroot/programs/mash.elf"),
 };
 
 #[derive(Debug, Default)]
@@ -30,7 +39,7 @@ impl Manager {
             self.processes
                 .insert(kernel_process.lock().pid, kernel_process.clone());
 
-            self.spawn(Path::new("/test.elf"));
+            self.spawn(Path::new("/programs/mash.elf"));
         });
     }
 
