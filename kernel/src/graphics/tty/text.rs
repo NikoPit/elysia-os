@@ -4,21 +4,11 @@ use alloc::fmt;
 
 use crate::graphics::tty::{TTY, Tty};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct TextCell {
     char: char,
     color: u64,
     previous_char: char,
-}
-
-impl Default for TextCell {
-    fn default() -> Self {
-        Self {
-            char: '\0',
-            color: 0,
-            previous_char: '\0',
-        }
-    }
 }
 
 pub const PADDING: u32 = 50;
