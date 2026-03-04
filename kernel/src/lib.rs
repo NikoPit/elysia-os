@@ -70,13 +70,16 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
     systemcall::init();
     acpi::init();
     let mut executor = kernel_task::init();
-
     initrd::init(
         bootinfo.ramdisk_addr.into_option().expect("No ramdisk."),
         bootinfo.ramdisk_len,
     );
 
-    VirtualFS.lock().init().unwrap();
+    {
+        let mut vfs = VirtualFS.lock();
+
+        vfs.init().unwrap();
+    }
 
     multitasking::init();
 
