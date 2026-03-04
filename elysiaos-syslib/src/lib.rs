@@ -9,9 +9,3 @@ pub mod errors;
 pub mod numbers;
 pub mod syscalls;
 pub mod utils;
-
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    print("elyisaos-syslib panic").unwrap();
-    loop {}
-}

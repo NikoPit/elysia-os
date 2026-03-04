@@ -1,4 +1,4 @@
-use core::{ptr::from_raw_parts, str::from_utf8};
+use core::str::from_utf8;
 
 use alloc::slice;
 

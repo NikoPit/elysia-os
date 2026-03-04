@@ -1,5 +1,6 @@
 use crate::{errors::SyscallError, numbers::SyscallNumber, syscall, utils::SyscallResult, wrap_c};
 
+pub mod filesystem;
 pub mod futex;
 pub mod object;
 
