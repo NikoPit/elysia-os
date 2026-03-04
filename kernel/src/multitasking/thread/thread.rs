@@ -2,14 +2,14 @@ use alloc::sync::Arc;
 use spin::Mutex;
 
 use crate::multitasking::{
-        memory::{allocate_kernel_stack, allocate_stack},
-        process::{ProcessRef, process::Process},
-        thread::{
-            ThreadRef,
-            misc::{State, ThreadID},
-            snapshot::{ThreadSnapshot, ThreadSnapshotType},
-        },
-    };
+    memory::{allocate_kernel_stack, allocate_stack},
+    process::{Process, ProcessRef},
+    thread::{
+        ThreadRef,
+        misc::{State, ThreadID},
+        snapshot::{ThreadSnapshot, ThreadSnapshotType},
+    },
+};
 
 #[derive(Debug)]
 pub struct Thread {

@@ -12,7 +12,7 @@ use crate::{
     multitasking::{
         memory::{allocate_kernel_stack, allocate_stack},
         process::{
-            ProcessRef,
+            Process, ProcessRef,
             misc::{ProcessID, init_objects, init_stack_layout},
         },
         thread::{
@@ -24,27 +24,6 @@ use crate::{
     object::Object,
     userspace::elf_loader::load_elf,
 };
-
-#[derive(Debug)]
-pub struct Process {
-    pub pid: ProcessID,
-    pub page_table: PageTableWrapped,
-    pub kernel_stack_top: VirtAddr,
-    pub threads: Vec<Weak<Mutex<Thread>>>,
-    pub objects: Vec<Arc<dyn Object>>,
-}
-
-impl Process {
-    pub fn empty() -> ProcessRef {
-        Arc::new(Mutex::new(Process {
-            pid: ProcessID::default(),
-            page_table: PageTableWrapped::default(),
-            kernel_stack_top: VirtAddr::zero(),
-            threads: Vec::new(),
-            objects: Vec::new(),
-        }))
-    }
-}
 
 impl Process {
     pub fn new(program: &[u8]) -> ProcessRef {

@@ -9,7 +9,7 @@ use x86_64::instructions::interrupts::without_interrupts;
 
 use crate::{
     filesystem::{path::Path, vfs::VirtualFS},
-    multitasking::process::{ProcessRef, misc::ProcessID, process::Process},
+    multitasking::process::{Process, ProcessRef, misc::ProcessID},
     s_print, s_println,
 };
 
