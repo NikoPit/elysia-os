@@ -21,15 +21,6 @@ pub struct Manager {
     pub zombies: Vec<ProcessRef>,
 }
 
-#[repr(align(8))]
-struct AlignedElf {
-    data: [u8; include_bytes!("../../../../libc-test/test.elf").len()],
-}
-
-static ELF_HOLDER: AlignedElf = AlignedElf {
-    data: *include_bytes!("../../../../libc-test/test.elf"),
-};
-
 impl Manager {
     pub fn init(&mut self) {
         without_interrupts(|| {
@@ -46,8 +37,8 @@ impl Manager {
     pub fn spawn(&mut self, program: Path) {
         let mut vfs = VirtualFS.lock();
         let size = vfs.file_info(program.clone()).unwrap().size;
-        let mut buf = alloc::vec![0u8; size as usize];
 
+        let mut buf = alloc::vec![0u8; size as usize];
         vfs.read_file(program, &mut buf).unwrap();
 
         let process = Process::new(&buf);

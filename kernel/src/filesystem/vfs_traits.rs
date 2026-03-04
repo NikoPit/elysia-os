@@ -28,11 +28,11 @@ pub struct DirectoryContentInfo {
 #[derive(Debug)]
 pub struct FileInfo {
     pub name: String,
-    pub size: u64,
+    pub size: usize,
 }
 
 impl FileInfo {
-    pub fn new(name: String, size: u64) -> Self {
+    pub fn new(name: String, size: usize) -> Self {
         Self { name, size }
     }
 }

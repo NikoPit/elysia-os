@@ -26,11 +26,11 @@ type RawFAT32File = fatfs::File<
 pub struct FAT32File {
     name: String,
     inner: RawFAT32File,
-    size: u64,
+    size: usize,
 }
 
 impl FAT32File {
-    pub fn new(name: String, inner: RawFAT32File, size: u64) -> Self {
+    pub fn new(name: String, inner: RawFAT32File, size: usize) -> Self {
         Self { name, inner, size }
     }
 }
