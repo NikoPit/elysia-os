@@ -1,4 +1,5 @@
 pub mod allocate_mem;
+pub mod change_dir;
 pub mod configurate_object;
 pub mod exit;
 pub mod futex;

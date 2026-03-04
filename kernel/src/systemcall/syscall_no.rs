@@ -16,4 +16,5 @@ pub enum SyscallNo {
     ReadObject,
     WriteObject,
     ConfigurateObject,
+    ChangeDirectory,
 }

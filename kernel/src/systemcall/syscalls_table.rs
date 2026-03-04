@@ -4,6 +4,7 @@ use crate::{
         error::SyscallError,
         implementations::{
             allocate_mem::AllocMemImpl,
+            change_dir::ChangeDirImpl,
             configurate_object::ConfigurateObjectImpl,
             exit::ExitImpl,
             futex::{FutexWaitImpl, FutexWakeImpl},
@@ -39,6 +40,7 @@ pub static SYSCALL_TABLE: [Option<SyscallHandler>; 1500] = {
     register_syscall!(table, SyscallNo::ReadObject, ReadObjectImpl);
     register_syscall!(table, SyscallNo::WriteObject, WriteObjectImpl);
     register_syscall!(table, SyscallNo::ConfigurateObject, ConfigurateObjectImpl);
+    register_syscall!(table, SyscallNo::ChangeDirectory, ChangeDirImpl);
 
     table
 };
