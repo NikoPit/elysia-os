@@ -2,13 +2,27 @@ use core::fmt::Write;
 
 use alloc::fmt;
 
-use crate::graphics::tty::{TTY, Tty};
+use crate::graphics::tty::{
+    Color, DEFAULT_FOREGROUND, EMPTY_BACKGROUND, TTY, Tty, misc::calc_shadow_color,
+};
 
-#[derive(Clone, Copy, Default, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct TextCell {
     char: char,
-    color: u64,
+    foreground_color: Color,
+    background_color: Color,
     previous_char: char,
+}
+
+impl Default for TextCell {
+    fn default() -> Self {
+        Self {
+            foreground_color: DEFAULT_FOREGROUND,
+            background_color: EMPTY_BACKGROUND,
+            char: '\0',
+            previous_char: '\0',
+        }
+    }
 }
 
 pub const PADDING: u32 = 50;
@@ -35,6 +49,8 @@ impl<'a> Tty<'a> {
         let index = self.get_text_cell_index(self.cursor_y, self.cursor_x);
         let text_cell = &mut self.text_buf[index];
 
+        text_cell.foreground_color = self.current_foreground;
+        text_cell.background_color = self.current_background;
         text_cell.char = char;
         self.cursor_x += 1;
     }
@@ -49,7 +65,13 @@ impl<'a> Tty<'a> {
                 let cell = self.text_buf[index];
 
                 if cell.char != cell.previous_char {
-                    self.render_char(col as u32, row as u32, cell.char);
+                    self.render_char(
+                        col as u32,
+                        row as u32,
+                        cell.char,
+                        cell.foreground_color,
+                        cell.background_color,
+                    );
                     self.text_buf[index].previous_char = cell.char;
                 }
             }
@@ -58,7 +80,14 @@ impl<'a> Tty<'a> {
         self.canvas.lock().flush();
     }
 
-    fn render_char(&mut self, col: u32, row: u32, char: char) {
+    fn render_char(
+        &mut self,
+        col: u32,
+        row: u32,
+        char: char,
+        foreground: Color,
+        background: Color,
+    ) {
         let mut buf = [0u8; 4];
         let character = char.encode_utf8(&mut buf).as_bytes();
 
@@ -75,11 +104,18 @@ impl<'a> Tty<'a> {
         for (y, row) in glyph.enumerate() {
             for (x, visible) in row.enumerate() {
                 if visible && char != '\0' {
-                    canvas.write_pixel(base_x + x, base_y + y, 255, 255, 255);
-                    // Shadow
-                    canvas.write_pixel(base_x + x + 1, base_y + y + 1, 0, 0, 0);
+                    canvas.write_pixel(base_x + x, base_y + y, foreground);
+                    canvas.write_pixel(
+                        base_x + x + 1,
+                        base_y + y + 1,
+                        calc_shadow_color(foreground),
+                    );
                 } else {
-                    self.draw_wallpaper_pixel(base_x + x, base_y + y, &mut canvas);
+                    if background == EMPTY_BACKGROUND {
+                        self.draw_wallpaper_pixel(base_x + x, base_y + y, &mut canvas);
+                    } else {
+                        canvas.write_pixel(base_x + x, base_y + y, background);
+                    }
                 }
             }
         }

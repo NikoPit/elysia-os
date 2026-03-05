@@ -2,6 +2,7 @@ use bootloader_api::info::PixelFormat;
 use conquer_once::spin::OnceCell;
 use spin::Mutex;
 
+use crate::graphics::tty::Color;
 
 pub static FRAME_BUFFER: OnceCell<Mutex<Canvas>> = OnceCell::uninit();
 
@@ -33,12 +34,14 @@ impl Canvas {
     }
 
     #[inline(always)]
-    pub fn write_pixel(&mut self, x: usize, y: usize, r: u8, g: u8, b: u8) {
+    pub fn write_pixel(&mut self, x: usize, y: usize, color: Color) {
         // Offset of the pixel from the start
         // of the framebuffer (in pixels)
         let pixels_offset = (y * self.info.stride) + x;
         // Offset in bytes
         let bytes_offset = pixels_offset * self.info.bytes_per_pixel;
+
+        let (r, g, b) = color;
 
         match self.info.pixel_format {
             PixelFormat::Rgb => {

@@ -32,6 +32,6 @@ impl<'a> Tty<'a> {
         // 第 4 位是 Alpha(i+3)，我们通常跳过它，或者用来做透明度计算
 
         // 调用你引以为傲的 write_pixel
-        canvas.write_pixel(x, y, r as u8, g as u8, b as u8);
+        canvas.write_pixel(x, y, (r as u8, g as u8, b as u8));
     }
 }
