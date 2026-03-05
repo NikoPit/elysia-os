@@ -46,7 +46,4 @@ pub fn init() {
         // load the tss from the gdt entry
         load_tss(GDT.1.tss_selector);
     }
-
-    println!("User Code Selector: {:?}", GDT.1.user_code); // 应该是 index 3, RPL 3
-    println!("User Data Selector: {:?}", GDT.1.user_data); // 应该是 index 4, RPL 3
 }
