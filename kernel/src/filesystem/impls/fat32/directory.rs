@@ -2,12 +2,11 @@ use alloc::{string::String, sync::Arc, vec::Vec};
 use spin::mutex::Mutex;
 
 use crate::filesystem::{
-        errors::FSError,
-        impls::fat32::{file::FAT32File, operator::Fat32RamDiskReader},
-        vfs_traits::{
-            Directory, DirectoryContentInfo, DirectoryContentType, FileLike,
-        },
-    };
+    errors::FSError,
+    impls::fat32::{file::FAT32File, operator::Fat32RamDiskReader},
+    info::DirectoryContentInfo,
+    vfs_traits::{Directory, DirectoryContentType, FileLike},
+};
 
 type RawFAT32Directory<'a> =
     fatfs::Dir<'a, Fat32RamDiskReader, fatfs::DefaultTimeProvider, fatfs::LossyOemCpConverter>;
@@ -28,11 +27,7 @@ impl Directory for FAT32Directory {
         Ok(self.name.clone())
     }
 
-    fn contents(
-        &self,
-    ) -> crate::filesystem::vfs::FSResult<
-        alloc::vec::Vec<crate::filesystem::vfs_traits::DirectoryContentInfo>,
-    > {
+    fn contents(&self) -> crate::filesystem::vfs::FSResult<alloc::vec::Vec<DirectoryContentInfo>> {
         let mut contents = Vec::new();
 
         for dir_entry in self.inner.iter() {

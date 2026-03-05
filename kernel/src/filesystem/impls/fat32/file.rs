@@ -4,7 +4,8 @@ use fatfs::{Read, Write};
 use crate::filesystem::{
     errors::FSError,
     impls::fat32::operator::Fat32RamDiskReader,
-    vfs_traits::{Directory, File, FileLikeInfo},
+    info::FileLikeInfo,
+    vfs_traits::{Directory, File, FileLikeType},
 };
 
 type RawFAT32File = fatfs::File<
@@ -36,6 +37,10 @@ impl File for FAT32File {
     }
 
     fn info(&mut self) -> crate::filesystem::vfs::FSResult<FileLikeInfo> {
-        Ok(FileLikeInfo::new(self.name.clone(), self.size))
+        Ok(FileLikeInfo::new(
+            self.name.clone(),
+            self.size,
+            FileLikeType::File,
+        ))
     }
 }

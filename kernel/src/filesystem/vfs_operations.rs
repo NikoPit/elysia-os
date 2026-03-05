@@ -1,13 +1,14 @@
-use crate::filesystem::vfs::{FSResult, VFS};
+use crate::filesystem::{
+    info::{DirectoryContentInfo, FileLikeInfo},
+    vfs::{FSResult, VFS},
+};
 
 use alloc::vec::Vec;
 
 use crate::filesystem::{
     errors::FSError,
     path::Path,
-    vfs_traits::{
-        Directory, DirectoryContentInfo, DirectoryContentType, File, FileLike, FileLikeInfo,
-    },
+    vfs_traits::{Directory, DirectoryContentType, File, FileLike},
 };
 
 impl VFS {
