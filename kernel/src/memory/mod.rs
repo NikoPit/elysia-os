@@ -8,6 +8,7 @@ use crate::memory::{
     paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR, MAPPER, init_mapper},
 };
 
+pub mod addrspace;
 pub mod clone;
 pub mod fixed_block_size;
 pub mod heap;

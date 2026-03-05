@@ -1,4 +1,3 @@
-
 use alloc::{
     collections::{btree_map::BTreeMap, vec_deque::VecDeque},
     vec::Vec,
@@ -57,9 +56,9 @@ impl Manager {
     }
 
     pub fn load_process(&mut self, process: ProcessRef) {
-        let mut process_locked = process.lock();
+        let process_locked = process.lock();
 
-        process_locked.page_table.load();
+        process_locked.addrspace.load();
         self.current = Some(process.clone());
     }
 }
