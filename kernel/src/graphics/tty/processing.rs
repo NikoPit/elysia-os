@@ -42,11 +42,11 @@ impl<'a> Perform for Tty<'a> {
                         0 => self.reset_color(),
                         1 => self.bold = true,
                         30..=37 | 90..=97 => {
-                            self.current_background =
+                            self.current_foreground =
                                 AnsiColor::from_ansi_code(param[0]).unwrap().as_rgb()
                         }
                         40..=47 | 100..=107 => {
-                            self.current_foreground =
+                            self.current_background =
                                 AnsiColor::from_ansi_code(param[0]).unwrap().as_rgb()
                         }
                         _ => s_println!("unimplemented color thing: {}", param[0]),
