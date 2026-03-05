@@ -24,4 +24,16 @@ impl<'a> Perform for Tty<'a> {
             ),
         }
     }
+
+    fn csi_dispatch(
+        &mut self,
+        _params: &vte::Params,
+        _intermediates: &[u8],
+        _ignore: bool,
+        action: char,
+    ) {
+        match action {
+            _ => s_println!("Unimplemented csi dispatch asni escape code {}", action),
+        }
+    }
 }
