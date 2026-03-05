@@ -55,6 +55,6 @@ impl SyscallImpl for GetDirImpl {
                 .as_bytes(),
         );
 
-        Ok(0)
+        Ok(arg1 as usize)
     }
 }
