@@ -1,24 +1,16 @@
 use alloc::sync::{Arc, Weak};
 use alloc::vec::Vec;
-use elfloader::ElfBinary;
 use spin::Mutex;
 use x86_64::VirtAddr;
 
 use crate::filesystem::path::Path;
 use crate::{
     memory::page_table_wrapper::PageTableWrapped,
-    misc::stack_builder::StackBuilder,
     multitasking::{
-        memory::{allocate_kernel_stack, allocate_stack},
-        process::misc::{ProcessID, init_objects, init_stack_layout},
-        thread::{
-            THREAD_MANAGER,
-            snapshot::{ThreadSnapshot, ThreadSnapshotType},
-            thread::Thread,
-        },
+        process::misc::ProcessID,
+        thread::thread::Thread,
     },
     object::Object,
-    userspace::elf_loader::load_elf,
 };
 
 pub mod manager;

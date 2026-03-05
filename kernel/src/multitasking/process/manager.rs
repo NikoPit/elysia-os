@@ -1,16 +1,13 @@
-use core::ops::Deref;
 
 use alloc::{
-    boxed::Box,
     collections::{btree_map::BTreeMap, vec_deque::VecDeque},
-    vec::{self, Vec},
+    vec::Vec,
 };
 use x86_64::instructions::interrupts::without_interrupts;
 
 use crate::{
     filesystem::{path::Path, vfs::VirtualFS},
     multitasking::process::{Process, ProcessRef, misc::ProcessID},
-    println, s_print, s_println,
 };
 
 #[repr(align(8))]

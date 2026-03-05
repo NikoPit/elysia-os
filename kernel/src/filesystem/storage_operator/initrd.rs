@@ -1,10 +1,7 @@
-use crate::{
-    filesystem::{
+use crate::filesystem::{
         block_device::{BlockDevice, BlockDeviceError, initrd::RAMDISK},
         storage_operator::{SeekFrom, StorageOperator},
-    },
-    s_print, s_println,
-};
+    };
 
 #[derive(Default, Debug)]
 pub struct RamDiskOperator {

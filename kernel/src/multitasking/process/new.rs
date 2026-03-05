@@ -1,15 +1,12 @@
 use alloc::{
-    sync::{Arc, Weak},
+    sync::Arc,
     vec::Vec,
 };
-use elfloader::ElfBinary;
 use spin::Mutex;
-use x86_64::VirtAddr;
 
 use crate::{
     filesystem::path::Path,
     memory::page_table_wrapper::PageTableWrapped,
-    misc::stack_builder::StackBuilder,
     multitasking::{
         memory::{allocate_kernel_stack, allocate_stack},
         process::{
@@ -22,7 +19,6 @@ use crate::{
             thread::Thread,
         },
     },
-    object::Object,
     userspace::elf_loader::load_elf,
 };
 

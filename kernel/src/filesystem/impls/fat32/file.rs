@@ -1,20 +1,13 @@
-use alloc::{string::String, sync::Arc, vec::Vec};
-use fatfs::{IoBase, Read, Seek, Write};
-use spin::mutex::Mutex;
+use alloc::string::String;
+use fatfs::{Read, Write};
 
-use crate::{
-    filesystem::{
-        block_device::BlockDeviceError,
+use crate::filesystem::{
         errors::FSError,
         impls::fat32::operator::Fat32RamDiskReader,
-        storage_operator::{SeekFrom, StorageOperator, initrd::RamDiskOperator},
         vfs_traits::{
-            Directory, DirectoryContentInfo, DirectoryContentType, File, FileInfo, FileLike,
-            FileSystem,
+            Directory, File, FileInfo,
         },
-    },
-    s_print,
-};
+    };
 
 type RawFAT32File = fatfs::File<
     'static,

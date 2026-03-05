@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use alloc::{boxed::Box, string::String, vec::Vec};
+use alloc::{string::String, vec::Vec};
 
 use crate::filesystem::vfs::{FSResult, WrappedDirectory, WrappedFile};
 

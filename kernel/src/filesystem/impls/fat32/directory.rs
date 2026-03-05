@@ -1,19 +1,13 @@
 use alloc::{string::String, sync::Arc, vec::Vec};
-use fatfs::{IoBase, Read, Seek, Write};
 use spin::mutex::Mutex;
 
-use crate::{
-    filesystem::{
-        block_device::BlockDeviceError,
+use crate::filesystem::{
         errors::FSError,
         impls::fat32::{file::FAT32File, operator::Fat32RamDiskReader},
-        storage_operator::{SeekFrom, StorageOperator, initrd::RamDiskOperator},
         vfs_traits::{
-            Directory, DirectoryContentInfo, DirectoryContentType, File, FileLike, FileSystem,
+            Directory, DirectoryContentInfo, DirectoryContentType, FileLike,
         },
-    },
-    s_println,
-};
+    };
 
 type RawFAT32Directory<'a> =
     fatfs::Dir<'a, Fat32RamDiskReader, fatfs::DefaultTimeProvider, fatfs::LossyOemCpConverter>;

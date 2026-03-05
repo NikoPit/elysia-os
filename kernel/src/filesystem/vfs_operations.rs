@@ -1,24 +1,14 @@
 use crate::filesystem::vfs::{FSResult, VFS};
-use core::{any::Any, str::from_utf8};
 
-use alloc::{boxed::Box, sync::Arc, vec::Vec};
-use fatfs::FsOptions;
-use log::trace;
-use spin::Mutex;
+use alloc::vec::Vec;
 
-use crate::{
-    filesystem::{
+use crate::filesystem::{
         errors::FSError,
-        impls::fat32::{FAT32, operator::Fat32RamDiskReader},
         path::Path,
-        storage_operator::initrd::RamDiskOperator,
         vfs_traits::{
             Directory, DirectoryContentInfo, DirectoryContentType, File, FileInfo, FileLike,
-            FileSystem,
         },
-    },
-    println, s_println,
-};
+    };
 
 impl VFS {
     pub fn create_file(&mut self, path: Path) -> FSResult<()> {

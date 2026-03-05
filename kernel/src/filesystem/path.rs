@@ -1,15 +1,11 @@
-use core::str::from_utf8;
 
 use alloc::{string::String, vec::Vec};
 
-use crate::{
-    filesystem::{
+use crate::filesystem::{
         errors::FSError,
-        vfs::{FSResult, VFS, WrappedDirectory},
-        vfs_traits::{DirectoryContentInfo, DirectoryContentType, FileLike},
-    },
-    println, s_println,
-};
+        vfs::{FSResult, WrappedDirectory},
+        vfs_traits::FileLike,
+    };
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PathPart {

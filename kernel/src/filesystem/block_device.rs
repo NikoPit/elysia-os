@@ -1,9 +1,6 @@
-use core::cmp;
 
-use alloc::vec;
 use fatfs::IoError;
 
-use crate::s_print;
 
 pub mod initrd;
 

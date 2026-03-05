@@ -27,21 +27,16 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
     config
 };
 
-use crate::filesystem::block_device::BlockDevice;
-use crate::filesystem::block_device::initrd::{self, RAMDISK};
+use crate::filesystem::block_device::initrd::{self};
 use crate::filesystem::path::Path;
 use crate::filesystem::vfs::VirtualFS;
-use crate::filesystem::vfs_traits::FileLike;
 use crate::misc::others::enable_sse;
 use crate::misc::{gdt, tss};
 use crate::multitasking::kernel_task;
-use crate::object::config;
 use bootloader_api::BootInfo;
 use bootloader_api::{BootloaderConfig, config::Mapping};
-use core::any::Any;
 #[cfg(test)]
 use core::panic::PanicInfo;
-use core::str::from_utf8;
 
 #[cfg(test)]
 entry_point!(test_k_main, config = &BOOTLOADER_CONFIG);

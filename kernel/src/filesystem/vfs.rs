@@ -1,23 +1,17 @@
-use core::{any::Any, str::from_utf8};
 
 use alloc::{boxed::Box, sync::Arc, vec::Vec};
 use fatfs::FsOptions;
-use log::trace;
 use spin::Mutex;
 
-use crate::{
-    filesystem::{
+use crate::filesystem::{
         errors::FSError,
         impls::fat32::{FAT32, operator::Fat32RamDiskReader},
-        path::Path,
         storage_operator::initrd::RamDiskOperator,
         vfs_traits::{
-            Directory, DirectoryContentInfo, DirectoryContentType, File, FileInfo, FileLike,
+            Directory, File,
             FileSystem,
         },
-    },
-    println, s_println,
-};
+    };
 use lazy_static::lazy_static;
 
 lazy_static! {

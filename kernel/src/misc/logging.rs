@@ -1,11 +1,11 @@
-use crate::{println, s_println};
+use crate::s_println;
 
 static LOGGER: Logger = Logger;
 
 struct Logger;
 
 impl log::Log for Logger {
-    fn enabled(&self, metadata: &log::Metadata) -> bool {
+    fn enabled(&self, _metadata: &log::Metadata) -> bool {
         true
     }
 

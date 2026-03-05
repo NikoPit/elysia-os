@@ -1,14 +1,9 @@
-use alloc::{string::String, sync::Arc, vec::Vec};
 use fatfs::{IoBase, Read, Seek, Write};
-use spin::mutex::Mutex;
 
 use crate::filesystem::{
     block_device::BlockDeviceError,
-    errors::FSError,
     storage_operator::{SeekFrom, StorageOperator, initrd::RamDiskOperator},
-    vfs_traits::{
-        Directory, DirectoryContentInfo, DirectoryContentType, File, FileLike, FileSystem,
-    },
+    vfs_traits::File,
 };
 
 pub struct Fat32RamDiskReader(pub RamDiskOperator);

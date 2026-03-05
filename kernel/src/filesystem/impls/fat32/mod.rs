@@ -1,4 +1,4 @@
-use alloc::{boxed::Box, string::ToString, sync::Arc};
+use alloc::{string::ToString, sync::Arc};
 use fatfs::{DefaultTimeProvider, LossyOemCpConverter};
 use spin::mutex::Mutex;
 
