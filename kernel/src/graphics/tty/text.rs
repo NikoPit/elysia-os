@@ -15,22 +15,10 @@ pub const PADDING: u32 = 50;
 
 impl<'a> Tty<'a> {
     pub fn print_string(&mut self, string: &str) {
-        for c in string.chars() {
-            if c == '\n' {
-                self.new_line();
-                continue;
-            }
+        let mut parser = core::mem::replace(&mut self.parser, vte::Parser::new());
 
-            if self.cursor_x >= self.screen_width_char() as u32 {
-                self.new_line();
-            }
-
-            if self.cursor_y >= self.screen_height_chars() as u32 {
-                self.scroll_up();
-            }
-
-            self.push_char(c);
-        }
+        parser.advance(self, string.as_bytes());
+        self.parser = parser;
 
         self.render();
     }

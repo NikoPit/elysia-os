@@ -2,6 +2,7 @@ use alloc::vec::Vec;
 use conquer_once::spin::OnceCell;
 use spin::Mutex;
 use spleen_font::PSF2Font;
+use vte::Parser;
 
 use crate::graphics::{
     framebuffer::{Canvas, FRAME_BUFFER},
@@ -24,6 +25,8 @@ pub struct Tty<'a> {
 
     pub max_rows: u16,
     pub max_cols: u16,
+
+    parser: Parser,
 }
 
 impl<'a> Tty<'a> {
@@ -45,6 +48,8 @@ impl<'a> Tty<'a> {
 
             max_rows: height as u16,
             max_cols: width as u16,
+
+            parser: Parser::new(),
         }
     }
 }

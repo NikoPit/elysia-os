@@ -13,6 +13,5 @@ impl<'a> Perform for Tty<'a> {
         }
 
         self.push_char(c);
-        self.render();
     }
 }
