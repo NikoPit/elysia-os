@@ -111,8 +111,10 @@ impl Path {
             match part {
                 PathPart::Root => string.push('/'),
                 PathPart::Normal(part) => {
-                    string.push_str(&part);
-                    string.push('/');
+                    if !part.is_empty() {
+                        string.push_str(&part);
+                        string.push('/');
+                    }
                 }
             }
         }

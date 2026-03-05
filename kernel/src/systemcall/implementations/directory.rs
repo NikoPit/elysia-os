@@ -5,6 +5,7 @@ use alloc::slice;
 use crate::{
     filesystem::path::Path,
     multitasking::MANAGER,
+    s_print,
     systemcall::{error::SyscallError, implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 
