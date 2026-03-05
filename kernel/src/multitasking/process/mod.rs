@@ -1,5 +1,6 @@
 use alloc::sync::{Arc, Weak};
 use alloc::vec::Vec;
+use bootloader_api::info::MemoryRegion;
 use spin::Mutex;
 use x86_64::VirtAddr;
 
@@ -24,6 +25,7 @@ pub struct Process {
     pub kernel_stack_top: VirtAddr,
     pub threads: Vec<Weak<Mutex<Thread>>>,
     pub objects: Vec<Arc<dyn Object>>,
+    pub used_memories: Vec<MemoryRegion>,
     pub current_directory: Path,
 }
 
@@ -31,6 +33,7 @@ impl Process {
     pub fn empty() -> ProcessRef {
         Arc::new(Mutex::new(Process {
             pid: ProcessID::default(),
+            used_memories: Vec::new(),
             current_directory: Path::default(),
             page_table: PageTableWrapped::default(),
             kernel_stack_top: VirtAddr::zero(),
