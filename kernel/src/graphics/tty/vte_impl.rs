@@ -1,6 +1,6 @@
 use vte::Perform;
 
-use crate::graphics::tty::Tty;
+use crate::{graphics::tty::Tty, s_println};
 
 impl<'a> Perform for Tty<'a> {
     fn print(&mut self, c: char) {
@@ -13,5 +13,15 @@ impl<'a> Perform for Tty<'a> {
         }
 
         self.push_char(c);
+    }
+
+    fn execute(&mut self, byte: u8) {
+        match byte {
+            b'\n' => self.new_line(),
+            _ => s_println!(
+                "Unimplemented ansi escape code or something: {}",
+                byte as char
+            ),
+        }
     }
 }
