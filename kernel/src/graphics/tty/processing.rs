@@ -37,6 +37,11 @@ impl<'a> Perform for Tty<'a> {
     ) {
         match action {
             'm' => {
+                if _params.is_empty() {
+                    self.reset_color();
+                    return;
+                }
+
                 for param in _params {
                     match param[0] {
                         0 => self.reset_color(),
