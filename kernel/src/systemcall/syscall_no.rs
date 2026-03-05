@@ -18,4 +18,5 @@ pub enum SyscallNo {
     ConfigurateObject,
     ChangeDirectory,
     GetCurrentDirectory,
+    FileInfo,
 }
