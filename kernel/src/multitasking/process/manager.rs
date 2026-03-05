@@ -56,7 +56,7 @@ impl Manager {
     }
 
     pub fn load_process(&mut self, process: ProcessRef) {
-        let process_locked = process.lock();
+        let mut process_locked = process.lock();
 
         process_locked.addrspace.load();
         self.current = Some(process.clone());
