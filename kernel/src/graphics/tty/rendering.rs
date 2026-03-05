@@ -108,7 +108,7 @@ impl<'a> Write for Tty<'a> {
 
 #[macro_export]
 macro_rules! print {
-    ($($arg:tt)*) => ($crate::graphics::tty::text::_print(format_args!($($arg)*)));
+    ($($arg:tt)*) => ($crate::graphics::tty::rendering::_print(format_args!($($arg)*)));
 }
 
 #[macro_export]

@@ -6,11 +6,11 @@ use vte::Parser;
 
 use crate::graphics::{
     framebuffer::{Canvas, FRAME_BUFFER},
-    tty::text::{PADDING, TextCell},
+    tty::rendering::{PADDING, TextCell},
 };
 
-pub mod text;
-pub mod vte_impl;
+pub mod processing;
+pub mod rendering;
 pub mod wallpaper;
 
 pub static TTY: OnceCell<Mutex<Tty>> = OnceCell::uninit();
