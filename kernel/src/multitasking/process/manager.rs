@@ -9,15 +9,6 @@ use crate::{
     multitasking::process::{Process, ProcessRef, misc::ProcessID},
 };
 
-#[repr(align(8))]
-struct Elffy {
-    data: [u8; include_bytes!("../../../../sysroot/programs/mash.elf").len()],
-}
-
-static ELFFIE: Elffy = Elffy {
-    data: *include_bytes!("../../../../sysroot/programs/mash.elf"),
-};
-
 #[derive(Debug, Default)]
 pub struct Manager {
     pub processes: BTreeMap<ProcessID, ProcessRef>,
