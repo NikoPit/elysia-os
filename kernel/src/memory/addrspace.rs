@@ -12,7 +12,6 @@ use crate::{
         utils::{MemoryRegion, apply_offset},
     },
     misc::stack_builder::StackBuilder,
-    s_print, s_println,
 };
 
 const USER_MEM_START: u64 = 0x30_0000_0000;
@@ -73,7 +72,6 @@ impl AddrSpace {
 
     pub fn map(&mut self, start: VirtAddr, pages: u64, flags: PageTableFlags) -> AllocResult {
         let region = MemoryRegion::new(start, pages, flags);
-        s_println!("Mapping VAddr: {:?} to {:?} pages", start, pages);
 
         self.used_memories.push(region);
 

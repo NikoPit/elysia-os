@@ -44,14 +44,7 @@ impl<'a> elfloader::ElfLoader for ElfLoader<'a> {
             let flags = PageTableFlags::USER_ACCESSIBLE
                 | PageTableFlags::PRESENT
                 | PageTableFlags::WRITABLE;
-            let pages = (header.mem_size() + 4095) / 4096;
-
-            s_println!(
-                "size {:?}",
-                page_range_from_size(header.virtual_addr(), header.mem_size())
-            );
-
-            s_println!("Pages {:?}", pages);
+            let pages = header.mem_size().div_ceil(4096);
 
             self.addrspace
                 .map_no_guard_page(VirtAddr::new(header.virtual_addr()), pages, flags);
