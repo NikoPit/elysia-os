@@ -1,3 +1,5 @@
+use acpi::registers;
+
 use crate::{
     register_syscall,
     systemcall::{
@@ -8,6 +10,7 @@ use crate::{
             directory::{ChangeDirImpl, GetDirImpl},
             exit::ExitImpl,
             file_info::FileInfoImpl,
+            fork::ForkImpl,
             futex::{FutexWaitImpl, FutexWakeImpl},
             get_fs::GetFSImpl,
             get_process_id::GetPIDImpl,
@@ -44,6 +47,7 @@ pub static SYSCALL_TABLE: [Option<SyscallHandler>; 1500] = {
     register_syscall!(table, SyscallNo::ChangeDirectory, ChangeDirImpl);
     register_syscall!(table, SyscallNo::GetCurrentDirectory, GetDirImpl);
     register_syscall!(table, SyscallNo::FileInfo, FileInfoImpl);
+    register_syscall!(table, SyscallNo::Fork, ForkImpl);
 
     table
 };

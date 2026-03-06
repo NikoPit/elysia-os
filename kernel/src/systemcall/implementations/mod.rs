@@ -3,6 +3,7 @@ pub mod configurate_object;
 pub mod directory;
 pub mod exit;
 pub mod file_info;
+pub mod fork;
 pub mod futex;
 pub mod get_fs;
 pub mod get_process_id;

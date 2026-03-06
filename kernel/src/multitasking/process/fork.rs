@@ -13,7 +13,7 @@ use crate::{
 };
 
 impl Process {
-    fn fork(&self) {
+    pub fn fork(&self) {
         let mut new_threads = Vec::new();
         let pid = ProcessID::default();
 

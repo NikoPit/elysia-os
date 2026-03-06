@@ -19,4 +19,5 @@ pub enum SyscallNo {
     ChangeDirectory,
     GetCurrentDirectory,
     FileInfo,
+    Fork,
 }
