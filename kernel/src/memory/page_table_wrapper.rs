@@ -1,5 +1,5 @@
 use x86_64::{
-    VirtAddr,
+    PhysAddr, VirtAddr,
     registers::control::{Cr3, Cr3Flags},
     structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB},
 };
@@ -43,6 +43,15 @@ impl Default for PageTableWrapped {
                     VirtAddr::new(*PHYSICAL_MEMORY_OFFSET.get().unwrap()),
                 )
             },
+        }
+    }
+}
+
+impl From<OffsetPageTable<'static>> for PageTableWrapped {
+    fn from(value: OffsetPageTable<'static>) -> Self {
+        Self {
+            frame: PhysFrame::containing_address(PhysAddr::new(0x114514)),
+            inner: value,
         }
     }
 }

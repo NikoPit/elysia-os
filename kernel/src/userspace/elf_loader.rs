@@ -3,17 +3,15 @@ use core::{cmp::min, ptr::copy_nonoverlapping};
 use elfloader::ElfBinary;
 use x86_64::{
     VirtAddr,
-    structures::paging::{
-        FrameAllocator, Mapper, OffsetPageTable, PageTableFlags,
-        Translate,
-    },
+    structures::paging::{FrameAllocator, Mapper, OffsetPageTable, PageTableFlags, Translate},
 };
 
 use crate::memory::{
-        page_table_wrapper::PageTableWrapped,
-        paging::FRAME_ALLOCATOR,
-        utils::{apply_offset, page_range_from_size},
-    };
+    addrspace::AddrSpace,
+    page_table_wrapper::PageTableWrapped,
+    paging::FRAME_ALLOCATOR,
+    utils::{apply_offset, page_range_from_size},
+};
 
 pub type Function = *const extern "C" fn() -> !;
 
@@ -22,11 +20,11 @@ pub type Function = *const extern "C" fn() -> !;
 // which parts are memory, and which parts of the memory are read-only.
 #[derive(Debug)]
 pub struct ElfLoader<'a> {
-    page_table: &'a mut OffsetPageTable<'static>,
+    page_table: &'a mut AddrSpace,
 }
 
 impl<'a> ElfLoader<'a> {
-    pub fn new(page_table: &'a mut OffsetPageTable<'static>) -> Self {
+    pub fn new(page_table: &'a mut AddrSpace) -> Self {
         Self { page_table }
     }
 }
@@ -38,38 +36,13 @@ impl<'a> elfloader::ElfLoader for ElfLoader<'a> {
     ) -> Result<(), elfloader::ElfLoaderErr> {
         for header in load_headers {
             // TODO: use the proper flags
-            let page_range = page_range_from_size(header.virtual_addr(), header.mem_size());
             let flags = PageTableFlags::USER_ACCESSIBLE
                 | PageTableFlags::PRESENT
                 | PageTableFlags::WRITABLE;
+            let pages = (header.mem_size() + 4095) / 4096;
 
-            for page in page_range {
-                if let Ok(_frame) = self.page_table.translate_page(page) {
-                    unsafe {
-                        self.page_table.update_flags(page, flags).unwrap().flush();
-                    }
-                    continue;
-                }
-
-                let frame = FRAME_ALLOCATOR
-                    .get()
-                    .unwrap()
-                    .lock()
-                    .allocate_frame()
-                    .unwrap();
-
-                unsafe {
-                    self.page_table
-                        .map_to(
-                            page,
-                            frame,
-                            flags,
-                            &mut *FRAME_ALLOCATOR.get().unwrap().lock(),
-                        )
-                        .unwrap()
-                        .flush();
-                };
-            }
+            self.page_table
+                .map(VirtAddr::new(header.virtual_addr()), pages, flags);
         }
         Ok(())
     }
@@ -116,11 +89,11 @@ impl<'a> elfloader::ElfLoader for ElfLoader<'a> {
 }
 
 /// Returns the entry point
-pub fn load_elf<'a>(page_table: &mut PageTableWrapped, program: &'a [u8]) -> ElfBinary<'a> {
+pub fn load_elf<'a>(addrspace: &mut AddrSpace, program: &'a [u8]) -> ElfBinary<'a> {
     let binary = ElfBinary::new(program).expect("Failed to parse elf binary");
 
     binary
-        .load(&mut ElfLoader::new(&mut page_table.inner))
+        .load(&mut ElfLoader::new(addrspace))
         .expect("Failed to load ELF");
 
     binary

@@ -1,14 +1,14 @@
 use alloc::vec::Vec;
 use futures_util::stream::All;
 use x86_64::{
-    VirtAddr,
-    structures::paging::{FrameAllocator, Mapper, Page, PageTableFlags},
+    PhysAddr, VirtAddr,
+    structures::paging::{FrameAllocator, Mapper, Page, PageTableFlags, Translate},
 };
 
 use crate::{
     memory::{
         page_table_wrapper::PageTableWrapped,
-        paging::FRAME_ALLOCATOR,
+        paging::{FRAME_ALLOCATOR, MAPPER},
         utils::{MemoryRegion, apply_offset},
     },
     misc::stack_builder::StackBuilder,
@@ -21,8 +21,8 @@ pub type AllocResult = (VirtAddr, StackBuilder);
 
 #[derive(Debug)]
 pub struct AddrSpace {
-    pub used_memories: Vec<MemoryRegion>,
-    pub page_table: PageTableWrapped,
+    used_memories: Vec<MemoryRegion>,
+    page_table: PageTableWrapped,
 
     user_mem: VirtAddr,
     kernel_mem: VirtAddr,
@@ -42,6 +42,10 @@ impl Default for AddrSpace {
 impl AddrSpace {
     pub fn load(&mut self) {
         self.page_table.load();
+    }
+
+    pub fn translate_addr(&self, addr: VirtAddr) -> Option<PhysAddr> {
+        self.page_table.inner.translate_addr(addr)
     }
 
     pub fn allocate_user(&mut self, pages: u64) -> AllocResult {
@@ -64,7 +68,7 @@ impl AddrSpace {
         )
     }
 
-    fn map(&mut self, start: VirtAddr, pages: u64, flags: PageTableFlags) -> AllocResult {
+    pub fn map(&mut self, start: VirtAddr, pages: u64, flags: PageTableFlags) -> AllocResult {
         let region = MemoryRegion::new(start, pages, flags);
 
         self.used_memories.push(region);
@@ -111,15 +115,4 @@ impl AddrSpace {
             StackBuilder::new(end_addr.as_u64(), write_addr as *mut u64),
         )
     }
-}
-
-fn allocate_user_page(count: u64) -> Page<Size4KiB> {
-    Page::containing_address(VirtAddr::new(
-        USER_MEM.fetch_add((count + 1) * 4096, Ordering::Relaxed),
-    ))
-}
-fn allocate_kernel_page(count: u64) -> Page<Size4KiB> {
-    Page::containing_address(VirtAddr::new(
-        KERNEL_MEM.fetch_add((count + 1) * 4096, Ordering::Relaxed),
-    ))
 }

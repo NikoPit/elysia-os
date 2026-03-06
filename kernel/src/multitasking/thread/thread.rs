@@ -2,7 +2,6 @@ use alloc::sync::Arc;
 use spin::Mutex;
 
 use crate::multitasking::{
-    memory::{allocate_kernel_stack, allocate_stack},
     process::{Process, ProcessRef},
     thread::{
         ThreadRef,
@@ -36,20 +35,23 @@ impl Thread {
 
 impl Thread {
     pub fn new(entry_point: u64, parent: ProcessRef) -> Self {
-        let stack = allocate_stack(16, &mut parent.lock().addrspace.page_table.inner);
-        let kernel_stack_top =
-            allocate_kernel_stack(16, &mut parent.lock().addrspace.page_table.inner)
-                .finish()
-                .as_u64();
+        let mut parent_lock = parent.lock();
+        let (_, stack) = parent_lock.addrspace.allocate_user(16);
+        let kernel_stack_top = parent_lock
+            .addrspace
+            .allocate_kernel(16)
+            .1
+            .finish()
+            .as_u64();
         Self {
             snapshot: ThreadSnapshot::new(
                 entry_point,
-                &mut parent.clone().lock().addrspace.page_table,
+                &mut parent.clone().lock().addrspace,
                 stack.finish().as_u64(),
                 ThreadSnapshotType::Thread,
             ),
             executor_snapshot: ThreadSnapshot::new_executor(),
-            parent,
+            parent: parent.clone(),
             kernel_stack_top,
             state: State::Ready,
             id: ThreadID::default(),

@@ -27,9 +27,7 @@ pub static mut CPU_CORE_CONTEXT: &mut CpuCoreContext = &mut CpuCoreContext {
 pub fn init() {
     unsafe {
         CPU_CORE_CONTEXT = Box::leak(Box::new(CpuCoreContext {
-            gs_kernel_stack_top: allocate_kernel_stack(16, &mut MAPPER.get().unwrap().lock())
-                .finish()
-                .as_u64(),
+            gs_kernel_stack_top: allocate_kernel_stack(16).finish().as_u64(),
             gs_user_stack_top: 0,
         }))
     };

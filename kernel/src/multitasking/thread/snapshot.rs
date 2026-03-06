@@ -1,7 +1,6 @@
-
 use crate::{
     gdt::GDT,
-    memory::{page_table_wrapper::PageTableWrapped, paging::MAPPER},
+    memory::{addrspace::AddrSpace, page_table_wrapper::PageTableWrapped, paging::MAPPER},
     misc::snapshot::Snapshot,
     multitasking::memory::allocate_kernel_stack,
 };
@@ -29,7 +28,7 @@ pub enum ThreadSnapshotType {
 impl ThreadSnapshot {
     pub fn new(
         entry_point: u64,
-        table: &mut PageTableWrapped,
+        addrspace: &mut AddrSpace,
         virt_stack_addr: u64,
         snapshot_type: ThreadSnapshotType,
     ) -> Self {
@@ -41,9 +40,7 @@ impl ThreadSnapshot {
                 virt_stack_addr,
                 GDT.1.user_data.0,
             ),
-            kernel_rsp: allocate_kernel_stack(16, &mut table.inner)
-                .finish()
-                .as_u64(),
+            kernel_rsp: addrspace.allocate_kernel(16).1.finish().as_u64(),
             snapshot_type,
             ..Default::default()
         }
@@ -52,9 +49,7 @@ impl ThreadSnapshot {
     pub fn new_executor() -> Self {
         Self {
             snapshot_type: ThreadSnapshotType::Executor,
-            kernel_rsp: allocate_kernel_stack(16, &mut *MAPPER.get().unwrap().lock())
-                .finish()
-                .as_u64(),
+            kernel_rsp: allocate_kernel_stack(16).finish().as_u64(),
             ..Default::default()
         }
     }
