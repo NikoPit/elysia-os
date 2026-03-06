@@ -25,6 +25,10 @@ pub fn exit() -> SyscallResult {
     syscall!(Exit)
 }
 
+pub fn fork() -> SyscallResult {
+    syscall!(Fork)
+}
+
 wrap_c!(set_fs(addr: u64));
 pub fn set_fs(addr: u64) -> SyscallResult {
     syscall!(SetFs, addr)
