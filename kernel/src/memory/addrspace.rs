@@ -24,8 +24,8 @@ pub struct AddrSpace {
     pub used_memories: Vec<MemoryRegion>,
     pub page_table: PageTableWrapped,
 
-    user_mem: VirtAddr,
-    kernel_mem: VirtAddr,
+    pub user_mem: VirtAddr,
+    pub kernel_mem: VirtAddr,
 }
 
 impl Default for AddrSpace {
