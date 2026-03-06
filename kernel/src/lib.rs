@@ -59,27 +59,19 @@ pub fn init(bootinfo: &'static mut BootInfo) -> ! {
         bootinfo.physical_memory_offset.into_option().unwrap(),
         &bootinfo.memory_regions,
     );
+    initrd::init(
+        bootinfo.ramdisk_addr.into_option().expect("No ramdisk."),
+        bootinfo.ramdisk_len,
+    );
+
+    VirtualFS.lock().init().unwrap();
     graphics::init(bootinfo.framebuffer.as_mut().unwrap());
     gdt::init();
     misc::init();
     systemcall::init();
     acpi::init();
     let mut executor = kernel_task::init();
-    initrd::init(
-        bootinfo.ramdisk_addr.into_option().expect("No ramdisk."),
-        bootinfo.ramdisk_len,
-    );
-
-    {
-        let mut vfs = VirtualFS.lock();
-
-        vfs.init().unwrap();
-
-        s_print!("{:?}", vfs.list_contents(Path::new("/programs")));
-    }
-
     multitasking::init();
-
     interrupts::init();
 
     executor.run();
