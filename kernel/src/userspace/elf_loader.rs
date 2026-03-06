@@ -20,12 +20,14 @@ pub type Function = *const extern "C" fn() -> !;
 // which parts are memory, and which parts of the memory are read-only.
 #[derive(Debug)]
 pub struct ElfLoader<'a> {
-    page_table: &'a mut AddrSpace,
+    addrspace: &'a mut AddrSpace,
 }
 
 impl<'a> ElfLoader<'a> {
     pub fn new(page_table: &'a mut AddrSpace) -> Self {
-        Self { page_table }
+        Self {
+            addrspace: page_table,
+        }
     }
 }
 
@@ -41,7 +43,7 @@ impl<'a> elfloader::ElfLoader for ElfLoader<'a> {
                 | PageTableFlags::WRITABLE;
             let pages = (header.mem_size() + 4095) / 4096;
 
-            self.page_table
+            self.addrspace
                 .map(VirtAddr::new(header.virtual_addr()), pages, flags);
         }
         Ok(())
@@ -58,7 +60,7 @@ impl<'a> elfloader::ElfLoader for ElfLoader<'a> {
 
         while offset < region.len() {
             let addr = addr + offset as u64;
-            let phys_addr = self.page_table.translate_addr(addr).unwrap();
+            let phys_addr = self.addrspace.translate_addr(addr).unwrap();
             let phys_addr = apply_offset(phys_addr.as_u64());
 
             // Get how long the page lasts (We dont want to accidently write to
