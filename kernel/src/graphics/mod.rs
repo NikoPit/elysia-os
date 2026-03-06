@@ -22,6 +22,8 @@ use crate::{
     println, s_println,
 };
 
+const FONT_PATH: &str = "/misc/fonts/maplem~1.ttf";
+
 pub mod framebuffer;
 pub mod object;
 pub mod object_config;
@@ -34,19 +36,13 @@ pub fn init(boot_info: &'static mut bootloader_api::info::FrameBuffer) {
         .lock();
 
     let mut vfs = VirtualFS.lock();
-
-    let font_normal_path = Path::new("/misc/fonts/maplem~1.ttf");
-    s_println!("{:?}", vfs.list_contents(Path::new("/misc/fonts")));
-    let font_normal: &'static mut [u8] = Box::leak(
-        Box::new(vec![
-            0u8;
-            vfs.file_info(font_normal_path.clone()).unwrap().size
-        ])
-        .into_boxed_slice(),
+    let font_path = Path::new(FONT_PATH);
+    let font: &'static mut [u8] = Box::leak(
+        Box::new(vec![0u8; vfs.file_info(font_path.clone()).unwrap().size]).into_boxed_slice(),
     );
-    vfs.read_file(font_normal_path, font_normal).unwrap();
+    vfs.read_file(font_path, font).unwrap();
 
-    let font_manager = TrueTypeFont::new(13.0, font_normal);
+    let font_manager = TrueTypeFont::new(13.0, font);
 
     terminal.set_font_manager(Box::new(font_manager));
     terminal.set_crnl_mapping(true);

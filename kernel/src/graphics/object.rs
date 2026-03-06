@@ -19,6 +19,7 @@ impl Object for TtyObject {
         Some(self)
     }
 }
+
 impl Writable for TtyObject {
     fn write(&self, buffer: &[u8]) -> crate::object::ObjectResult<usize> {
         let mut terminal = TERMINAL.get().unwrap().lock();
