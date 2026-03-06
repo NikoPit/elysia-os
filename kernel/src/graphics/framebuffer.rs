@@ -2,7 +2,7 @@ use bootloader_api::info::PixelFormat;
 use conquer_once::spin::OnceCell;
 use spin::Mutex;
 
-use crate::graphics::tty::Color;
+use crate::graphics::terminal::Color;
 
 pub static FRAME_BUFFER: OnceCell<Mutex<Canvas>> = OnceCell::uninit();
 

@@ -1,7 +1,7 @@
-use core::str::from_utf8;
+use core::{fmt::Write, str::from_utf8};
 
 use crate::{
-    graphics::tty::TTY,
+    graphics::terminal::TERMINAL,
     object::{Object, Writable},
 };
 
@@ -21,9 +21,11 @@ impl Object for TtyObject {
 }
 impl Writable for TtyObject {
     fn write(&self, buffer: &[u8]) -> crate::object::ObjectResult<usize> {
-        let mut tty = TTY.get().unwrap().lock();
+        let mut terminal = TERMINAL.get().unwrap().lock();
 
-        tty.print_string(from_utf8(buffer).unwrap_or("Unsupported character"));
+        terminal
+            .write_str(from_utf8(buffer).unwrap_or("Unsupported character"))
+            .unwrap();
 
         Ok(buffer.len())
     }

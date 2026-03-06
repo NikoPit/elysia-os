@@ -1,7 +1,7 @@
 use core::ptr::write_volatile;
 
 use crate::{
-    graphics::{object::TtyObject, tty::TTY},
+    graphics::{object::TtyObject, terminal::TERMINAL},
     object::config::{Configuratable, ConfigurateRequest},
 };
 
@@ -53,15 +53,15 @@ impl Configuratable for TtyObject {
         &self,
         request: crate::object::config::ConfigurateRequest,
     ) -> crate::object::ObjectResult<isize> {
-        let tty = TTY.get().unwrap().lock();
+        let terminal = TERMINAL.get().unwrap().lock();
 
         match request {
             ConfigurateRequest::GetWindowSize(window_size) => unsafe {
                 write_volatile(
                     window_size,
                     WindowSizeInfo {
-                        rows: tty.max_rows,
-                        cols: tty.max_cols,
+                        rows: terminal.rows() as u16,
+                        cols: terminal.columns() as u16,
                         ws_xpixel: 0,
                         ws_ypixel: 0,
                     },
