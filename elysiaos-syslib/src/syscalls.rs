@@ -64,3 +64,11 @@ pub fn get_thread_id() -> SyscallResult {
     // TODO not yet implemented
     get_process_id()
 }
+
+pub fn execve(path: &str) -> SyscallResult {
+    syscall!(
+        Execve,
+        path.as_bytes().as_ptr() as u64,
+        path.bytes().len() as u64
+    )
+}

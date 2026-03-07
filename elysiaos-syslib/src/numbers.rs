@@ -16,4 +16,5 @@ pub enum SyscallNumber {
     GetCurrentDirectory,
     FileInfo,
     Fork,
+    Execve,
 }
