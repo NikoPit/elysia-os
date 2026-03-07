@@ -36,7 +36,7 @@ impl Thread {
 impl Thread {
     pub fn new(entry_point: u64, parent: ProcessRef) -> Self {
         let mut parent_lock = parent.lock();
-        let (_, stack) = parent_lock.addrspace.allocate_user(16);
+        let (_, stack) = parent_lock.addrspace.allocate_user(32);
         let kernel_stack_top = parent_lock
             .addrspace
             .allocate_kernel(16)

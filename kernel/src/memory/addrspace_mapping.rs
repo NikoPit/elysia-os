@@ -19,7 +19,7 @@ impl AddrSpace {
 
         self.used_memories.push(region);
 
-        self.apply_region(region, true)
+        self.apply_region(region, false)
     }
 
     pub fn map_no_guard_page(

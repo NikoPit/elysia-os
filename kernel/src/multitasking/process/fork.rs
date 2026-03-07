@@ -15,9 +15,8 @@ use crate::{
 };
 
 impl Process {
-    pub fn fork(&self, ref_to_self: ProcessRef, mut manager: MutexGuard<Manager>) {
+    pub fn fork(&self, manager: &mut MutexGuard<Manager>) {
         s_println!("inside fork!");
-        let mut new_threads = Vec::new();
         let pid = ProcessID::default();
         let current_thread = THREAD_MANAGER
             .get()
@@ -26,21 +25,23 @@ impl Process {
             .current
             .clone()
             .unwrap();
-
-        let new_thread = current_thread.lock().clone_and_spawn(ref_to_self.clone());
-
-        new_thread.lock().snapshot.inner.rax = 0;
-
-        new_threads.push(Arc::downgrade(&new_thread));
+        s_println!(
+            "Forking. Parent Current RSP: {:x}",
+            current_thread.lock().snapshot.inner.rsp
+        );
 
         let new_process = Arc::new(Mutex::new(Self {
             pid,
             addrspace: self.addrspace.clone_all(),
             kernel_stack_top: self.kernel_stack_top,
-            threads: new_threads,
+            threads: Vec::new(),
             objects: self.objects.clone(),
             current_directory: self.current_directory.clone(),
         }));
+
+        let new_thread = current_thread.lock().clone_and_spawn(new_process.clone());
+        new_thread.lock().snapshot.inner.rax = 0;
+        new_process.lock().threads.push(Arc::downgrade(&new_thread));
 
         manager.processes.insert(pid, new_process);
     }

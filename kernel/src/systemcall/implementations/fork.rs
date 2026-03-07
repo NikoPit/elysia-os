@@ -17,11 +17,11 @@ impl SyscallImpl for ForkImpl {
         arg5: u64,
         arg6: u64,
     ) -> Result<usize, crate::systemcall::error::SyscallError> {
-        let manager = MANAGER.lock();
+        let mut manager = MANAGER.lock();
 
         s_println!("start fork");
         let current = manager.current.clone().unwrap();
-        current.lock().fork(current.clone(), manager);
+        current.lock().fork(&mut manager);
         s_println!("end fork");
 
         Ok(0)
