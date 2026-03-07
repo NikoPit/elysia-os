@@ -19,7 +19,7 @@ impl AddrSpace {
 
         self.used_memories.push(region);
 
-        self.apply_region(region, false)
+        self.apply_region(region)
     }
 
     pub fn map_no_guard_page(
@@ -32,18 +32,11 @@ impl AddrSpace {
 
         self.used_memories.push(region);
 
-        self.apply_region(region, false)
+        self.apply_region(region)
     }
 
-    fn apply_region(&mut self, region: MemoryRegion, use_guard_page: bool) -> AllocResult {
-        let guard_page = region.start_page();
-        let start = {
-            if use_guard_page {
-                guard_page + 1
-            } else {
-                guard_page
-            }
-        };
+    fn apply_region(&mut self, region: MemoryRegion) -> AllocResult {
+        let start = region.start_page();
         let pages = region.pages();
 
         let mut last_frame = None;
