@@ -9,6 +9,7 @@ use crate::{
         MANAGER,
         thread::{THREAD_MANAGER, ThreadRef, misc::State, snapshot::ThreadSnapshot},
     },
+    println, s_println,
     tss::TSS,
 };
 
@@ -36,6 +37,7 @@ impl Future for ThreadFuture {
         self: core::pin::Pin<&mut Self>,
         cx: &mut core::task::Context<'_>,
     ) -> core::task::Poll<Self::Output> {
+        s_println!("thread future got polled {:?}", self.0.lock().id);
         let (thread_snapshot, executor_snapshot) = {
             without_interrupts(|| {
                 let mut manager = THREAD_MANAGER.get().unwrap().lock();
@@ -81,6 +83,7 @@ impl Future for ThreadFuture {
             )
         };
 
+        s_println!("thread future retuend");
         match self.0.lock().state {
             State::Zombie => Poll::Ready(()),
             State::Running => {
