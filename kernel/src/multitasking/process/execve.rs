@@ -7,17 +7,20 @@ use crate::{
             Process,
             misc::{init_objects, init_stack_layout},
         },
+        scheduling::return_to_executor_no_save,
         thread::{
             THREAD_MANAGER,
             snapshot::{ThreadSnapshot, ThreadSnapshotType},
             thread::Thread,
         },
     },
+    s_println,
     userspace::elf_loader::load_elf,
 };
 
 impl Process {
     pub fn execve(&mut self, path: Path, args: Vec<String>) -> Result<(), FSError> {
+        s_println!("in execve");
         self.addrspace.clean();
 
         let thread = THREAD_MANAGER
@@ -28,11 +31,11 @@ impl Process {
             .clone()
             .unwrap();
 
-        let mut program = alloc::vec![0u8; VirtualFS.lock().file_info(path.clone())?.size as usize];
+        let mut program = alloc::vec![0u8; VirtualFS.lock().file_info(path.clone())?.size];
         VirtualFS.lock().read_file(path.clone(), &mut program)?;
 
         let mut stack_builder = self.addrspace.allocate_user(16).1;
-        let program = load_elf(&mut self.addrspace, &mut program);
+        let program = load_elf(&mut self.addrspace, &program);
 
         // Reallocates the kernel stack top (just in case)
         self.kernel_stack_top = self.addrspace.allocate_kernel(16).1.finish();
@@ -50,6 +53,8 @@ impl Process {
 
         init_objects(&mut self.objects);
 
-        Ok(())
+        s_println!("execve done. returning to executor");
+        return_to_executor_no_save();
+        panic!("What the fuck");
     }
 }
