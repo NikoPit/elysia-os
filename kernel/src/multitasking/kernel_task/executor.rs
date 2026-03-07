@@ -10,7 +10,8 @@ use crate::{
         TASK_SPAWNER,
         spawner::TaskSpawner,
         task::{Task, TaskID, TaskWaker},
-    }, s_println,
+    },
+    s_println,
 };
 
 // When a task was awoken, the taskid will be pushed to the
@@ -45,12 +46,10 @@ impl Executor {
             wakers,
         } = self;
 
-        let mut tasks = tasks.lock();
-
         while let Some(taskid) = task_queue.pop() {
-            let task = match tasks.get_mut(&taskid) {
-                Some(task) => task,
-                None => continue,
+            let mut task = {
+                let mut task_guard = tasks.lock();
+                task_guard.remove(&taskid).unwrap()
             };
             let waker = wakers
                 .entry(taskid)
@@ -61,10 +60,12 @@ impl Executor {
             match task.poll(&mut context) {
                 Poll::Ready(()) => {
                     // remove the task and waker if completed
-                    tasks.remove(&taskid);
+                    tasks.lock().remove(&taskid);
                     wakers.remove(&taskid);
                 }
-                Poll::Pending => {}
+                Poll::Pending => {
+                    tasks.lock().insert(taskid, task);
+                }
             }
         }
     }

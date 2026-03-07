@@ -3,40 +3,38 @@ use core::fmt::Arguments;
 use alloc::sync::Arc;
 use spin::mutex::Mutex;
 
-use crate::multitasking::{
-    kernel_task::{TASK_SPAWNER, task::Task},
-    process::ProcessRef,
-    thread::{
-        THREAD_MANAGER, ThreadRef,
-        future::ThreadFuture,
-        misc::{State, ThreadID},
-        snapshot::ThreadSnapshot,
-        thread::Thread,
+use crate::{
+    multitasking::{
+        kernel_task::{TASK_SPAWNER, task::Task},
+        process::ProcessRef,
+        thread::{
+            THREAD_MANAGER, ThreadRef,
+            future::ThreadFuture,
+            misc::{State, ThreadID},
+            snapshot::ThreadSnapshot,
+            thread::Thread,
+        },
     },
+    s_println,
 };
 
 impl Thread {
     pub fn fork(&self, process: ProcessRef) -> ThreadRef {
+        s_println!("inside thread fork");
         let id = ThreadID::default();
-        let thread = Arc::new(Mutex::new(Self {
+        let thread = Self {
             parent: process.clone(),
             id,
             snapshot: self.snapshot,
             executor_snapshot: ThreadSnapshot::new_executor(),
             state: State::Ready,
             kernel_stack_top: self.kernel_stack_top,
-        }));
+        };
 
+        s_println!("thredad mgr lock start");
         let mut manager = THREAD_MANAGER.get().unwrap().lock();
+        s_println!("fd");
 
-        manager.threads.insert(id, thread.clone());
-
-        TASK_SPAWNER
-            .get()
-            .unwrap()
-            .lock()
-            .spawn(Task::new(ThreadFuture(thread.clone())));
-
-        thread
+        manager.spawn(thread)
     }
 }

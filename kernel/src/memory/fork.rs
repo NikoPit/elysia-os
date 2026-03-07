@@ -1,34 +1,46 @@
 use core::ptr::copy_nonoverlapping;
 
 use acpi::registers;
-use x86_64::structures::paging::{
-    FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB, Translate,
+use x86_64::{
+    VirtAddr,
+    structures::paging::{FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB, Translate},
 };
 
-use crate::memory::{
-    addrspace::AddrSpace, page_table_wrapper::PageTableWrapped, paging::FRAME_ALLOCATOR,
-    utils::apply_offset,
+use crate::{
+    memory::{
+        addrspace::AddrSpace, page_table_wrapper::PageTableWrapped, paging::FRAME_ALLOCATOR,
+        utils::apply_offset,
+    },
+    s_println,
 };
+
+const KERNEL_MEM_START: u64 = 0xffff_8000_0000_0000;
 
 impl AddrSpace {
     /// Clone all the memory thats in [`self`] to [`target`]
     pub fn fork(&self) -> Self {
+        s_println!("addrspace fork");
         let mut frame_allocator = FRAME_ALLOCATOR.get().unwrap().lock();
+        s_println!("framealloc locked!");
 
-        let mut new_page_table = PageTableWrapped::default();
+        let mut new_page_table = PageTableWrapped::new_with_frame_allocator(&mut frame_allocator);
         let old_page_table = &self.page_table;
 
         for region in self.used_memories.clone() {
-            let pages = Page::<Size4KiB>::range_inclusive(
+            let pages = Page::<Size4KiB>::range(
                 Page::containing_address(region.start),
                 Page::containing_address(region.end),
             );
+            s_println!("a");
 
             for page in pages {
-                if let Some(addr) = old_page_table.inner.translate_addr(page.start_address()) {
+                if let Some(addr) = old_page_table.inner.translate_addr(page.start_address())
+                    && page.start_address() < VirtAddr::new(KERNEL_MEM_START)
+                {
                     let old_addr = apply_offset(addr.as_u64());
                     let frame = frame_allocator.allocate_frame().unwrap();
                     let new_addr = apply_offset(frame.start_address().as_u64());
+                    s_println!("mapping: {:p}", page.start_address());
 
                     unsafe {
                         new_page_table
@@ -49,6 +61,7 @@ impl AddrSpace {
                         copy_nonoverlapping(old_addr as *const u8, new_addr as *mut u8, 4096)
                     };
                 }
+                s_println!("cloning or smth");
             }
         }
 

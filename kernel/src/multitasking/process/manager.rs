@@ -7,6 +7,7 @@ use x86_64::instructions::interrupts::without_interrupts;
 use crate::{
     filesystem::{path::Path, vfs::VirtualFS},
     multitasking::process::{Process, ProcessRef, misc::ProcessID},
+    println,
 };
 
 #[derive(Debug, Default)]
@@ -25,6 +26,13 @@ impl Manager {
             self.processes
                 .insert(kernel_process.lock().pid, kernel_process.clone());
 
+            println!(
+                "{:?}",
+                VirtualFS
+                    .lock()
+                    .list_contents(Path::new("/programs"))
+                    .unwrap()
+            );
             self.spawn(Path::new("/programs/mash.elf"));
         });
     }

@@ -1,5 +1,6 @@
 use crate::{
     multitasking::MANAGER,
+    s_println,
     systemcall::{implementations::utils::SyscallImpl, syscall_no::SyscallNo},
 };
 
@@ -18,7 +19,10 @@ impl SyscallImpl for ForkImpl {
     ) -> Result<usize, crate::systemcall::error::SyscallError> {
         let manager = MANAGER.lock();
 
-        manager.current.clone().unwrap().lock().fork();
+        s_println!("start fork");
+        let current = manager.current.clone().unwrap();
+        current.lock().fork(current.clone(), manager);
+        s_println!("end fork");
 
         Ok(0)
     }

@@ -14,5 +14,6 @@ pub enum SyscallNumber {
     ConfigurateObject,
     ChangeDirectory,
     GetCurrentDirectory,
+    FileInfo,
     Fork,
 }

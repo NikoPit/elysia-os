@@ -1,3 +1,4 @@
+use spin::MutexGuard;
 use x86_64::{
     PhysAddr, VirtAddr,
     registers::control::{Cr3, Cr3Flags},
@@ -6,7 +7,7 @@ use x86_64::{
 
 use crate::memory::{
     PHYSICAL_MEMORY_OFFSET,
-    paging::FRAME_ALLOCATOR,
+    paging::{BootinfoFrameAllocator, FRAME_ALLOCATOR},
     utils::{apply_offset, copy_kernel_mapping},
 };
 
@@ -25,6 +26,33 @@ impl Default for PageTableWrapped {
             .lock()
             .allocate_frame()
             .expect("No more space");
+
+        let table_addr = VirtAddr::new(apply_offset(page_table_frame.start_address().as_u64()));
+
+        // Get it as a page table
+        let page_table: &mut PageTable = unsafe { &mut *(table_addr.as_mut_ptr()) };
+
+        page_table.zero();
+
+        copy_kernel_mapping(page_table);
+
+        Self {
+            frame: page_table_frame,
+            inner: unsafe {
+                OffsetPageTable::new(
+                    page_table,
+                    VirtAddr::new(*PHYSICAL_MEMORY_OFFSET.get().unwrap()),
+                )
+            },
+        }
+    }
+}
+
+impl PageTableWrapped {
+    pub fn new_with_frame_allocator(
+        frame_allocator: &mut MutexGuard<BootinfoFrameAllocator>,
+    ) -> Self {
+        let page_table_frame = frame_allocator.allocate_frame().expect("No more space");
 
         let table_addr = VirtAddr::new(apply_offset(page_table_frame.start_address().as_u64()));
 

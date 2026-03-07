@@ -2,30 +2,35 @@ use alloc::{
     sync::{Arc, Weak},
     vec::Vec,
 };
-use spin::mutex::Mutex;
+use spin::{MutexGuard, mutex::Mutex};
 
 use crate::{
     memory::{addrspace::AddrSpace, page_table_wrapper::PageTableWrapped},
     multitasking::{
         MANAGER,
-        process::{Process, misc::ProcessID},
+        process::{Process, ProcessRef, manager::Manager, misc::ProcessID},
     },
+    s_println,
 };
 
 impl Process {
-    pub fn fork(&self) {
+    pub fn fork(&self, ref_to_self: ProcessRef, mut manager: MutexGuard<Manager>) {
+        s_println!("inside fork!");
         let mut new_threads = Vec::new();
         let pid = ProcessID::default();
 
         for ele in self.threads.clone() {
+            s_println!("woa");
             new_threads.push(Arc::downgrade(
                 &Weak::upgrade(&ele)
                     .unwrap()
                     .lock()
-                    .fork(MANAGER.lock().current.clone().unwrap().clone()),
+                    .fork(ref_to_self.clone()),
             ));
+            s_println!("wopa end");
         }
 
+        s_println!("f");
         let new_process = Arc::new(Mutex::new(Self {
             pid,
             addrspace: self.addrspace.fork(),
@@ -34,7 +39,8 @@ impl Process {
             objects: self.objects.clone(),
             current_directory: self.current_directory.clone(),
         }));
+        s_println!("da");
 
-        MANAGER.lock().processes.insert(pid, new_process);
+        manager.processes.insert(pid, new_process);
     }
 }
