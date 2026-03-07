@@ -1,7 +1,7 @@
-use alloc::{str::pattern::StrSearcher, string::String, vec::Vec};
+use alloc::{string::String, vec::Vec};
 
 use crate::{
-    filesystem::{path::Path, vfs::VirtualFS},
+    filesystem::{errors::FSError, path::Path, vfs::VirtualFS},
     multitasking::{
         process::{
             Process,
@@ -17,7 +17,7 @@ use crate::{
 };
 
 impl Process {
-    pub fn execve(&mut self, path: Path, args: Vec<String>) {
+    pub fn execve(&mut self, path: Path, args: Vec<String>) -> Result<(), FSError> {
         self.addrspace.clean();
 
         let thread = THREAD_MANAGER
@@ -28,9 +28,8 @@ impl Process {
             .clone()
             .unwrap();
 
-        let mut program =
-            alloc::vec![0u8; VirtualFS.lock().file_info(path.clone()).unwrap().size as usize];
-        VirtualFS.lock().read_file(path.clone(), &mut program);
+        let mut program = alloc::vec![0u8; VirtualFS.lock().file_info(path.clone())?.size as usize];
+        VirtualFS.lock().read_file(path.clone(), &mut program)?;
 
         let mut stack_builder = self.addrspace.allocate_user(16).1;
         let program = load_elf(&mut self.addrspace, &mut program);
@@ -50,5 +49,7 @@ impl Process {
         );
 
         init_objects(&mut self.objects);
+
+        Ok(())
     }
 }

@@ -1,6 +1,7 @@
 pub mod allocate_mem;
 pub mod configurate_object;
 pub mod directory;
+pub mod execve;
 pub mod exit;
 pub mod file_info;
 pub mod fork;
