@@ -18,6 +18,8 @@ use crate::{
 
 impl Process {
     pub fn execve(&mut self, path: Path, args: Vec<String>) {
+        self.addrspace.clean();
+
         let thread = THREAD_MANAGER
             .get()
             .unwrap()
@@ -30,10 +32,11 @@ impl Process {
             alloc::vec![0u8; VirtualFS.lock().file_info(path.clone()).unwrap().size as usize];
         VirtualFS.lock().read_file(path.clone(), &mut program);
 
-        let kernel_stack_top = self.addrspace.allocate_kernel(16).1.finish();
         let mut stack_builder = self.addrspace.allocate_user(16).1;
         let program = load_elf(&mut self.addrspace, &mut program);
-        self.kernel_stack_top = kernel_stack_top;
+
+        // Reallocates the kernel stack top (just in case)
+        self.kernel_stack_top = self.addrspace.allocate_kernel(16).1.finish();
 
         assert!(!program.is_pie(), "Pie program is not supported for now");
 
