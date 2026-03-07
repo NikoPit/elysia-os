@@ -19,7 +19,7 @@ use crate::{
 };
 
 impl Thread {
-    pub fn fork(&self, process: ProcessRef) -> ThreadRef {
+    pub fn clone_and_spawn(&self, process: ProcessRef) -> ThreadRef {
         s_println!("inside thread fork");
         let id = ThreadID::default();
         let thread = Self {

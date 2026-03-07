@@ -25,7 +25,7 @@ impl Process {
                 &Weak::upgrade(&ele)
                     .unwrap()
                     .lock()
-                    .fork(ref_to_self.clone()),
+                    .clone_and_spawn(ref_to_self.clone()),
             ));
             s_println!("wopa end");
         }
@@ -33,7 +33,7 @@ impl Process {
         s_println!("f");
         let new_process = Arc::new(Mutex::new(Self {
             pid,
-            addrspace: self.addrspace.fork(),
+            addrspace: self.addrspace.clone_all(),
             kernel_stack_top: self.kernel_stack_top,
             threads: new_threads,
             objects: self.objects.clone(),

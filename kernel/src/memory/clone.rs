@@ -17,8 +17,7 @@ use crate::{
 const KERNEL_MEM_START: u64 = 0xffff_8000_0000_0000;
 
 impl AddrSpace {
-    /// Clone all the memory thats in [`self`] to [`target`]
-    pub fn fork(&self) -> Self {
+    pub fn clone_all(&self) -> Self {
         s_println!("addrspace fork");
         let mut frame_allocator = FRAME_ALLOCATOR.get().unwrap().lock();
         s_println!("framealloc locked!");
