@@ -29,11 +29,10 @@ impl Process {
 
         let new_thread = current_thread.lock().clone_and_spawn(ref_to_self.clone());
 
-        s_println!("woa");
-        new_threads.push(Arc::downgrade(&new_thread));
-        s_println!("wopa end");
+        new_thread.lock().snapshot.inner.rax = 0;
 
-        s_println!("f");
+        new_threads.push(Arc::downgrade(&new_thread));
+
         let new_process = Arc::new(Mutex::new(Self {
             pid,
             addrspace: self.addrspace.clone_all(),
@@ -42,7 +41,6 @@ impl Process {
             objects: self.objects.clone(),
             current_directory: self.current_directory.clone(),
         }));
-        s_println!("da");
 
         manager.processes.insert(pid, new_process);
     }
