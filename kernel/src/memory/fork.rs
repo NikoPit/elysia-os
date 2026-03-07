@@ -31,7 +31,6 @@ impl AddrSpace {
                 Page::containing_address(region.start),
                 Page::containing_address(region.end),
             );
-            s_println!("a");
 
             for page in pages {
                 if let Some(addr) = old_page_table.inner.translate_addr(page.start_address())
@@ -40,7 +39,6 @@ impl AddrSpace {
                     let old_addr = apply_offset(addr.as_u64());
                     let frame = frame_allocator.allocate_frame().unwrap();
                     let new_addr = apply_offset(frame.start_address().as_u64());
-                    s_println!("mapping: {:p}", page.start_address());
 
                     unsafe {
                         new_page_table
@@ -61,7 +59,6 @@ impl AddrSpace {
                         copy_nonoverlapping(old_addr as *const u8, new_addr as *mut u8, 4096)
                     };
                 }
-                s_println!("cloning or smth");
             }
         }
 
