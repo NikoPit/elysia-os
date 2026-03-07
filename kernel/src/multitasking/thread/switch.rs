@@ -10,6 +10,7 @@ use x86_64::{
 use crate::{
     misc::{CPU_CORE_CONTEXT, others::CpuCoreContext, snapshot::Snapshot},
     multitasking::thread::snapshot::{ThreadSnapshot, ThreadSnapshotType},
+    s_println,
 };
 
 impl ThreadSnapshot {
@@ -30,7 +31,9 @@ impl ThreadSnapshot {
                 }
 
                 // Saves the current state of the system (snapshot)
-                source.inner = *snapshot.unwrap();
+                if let Some(snapshot) = snapshot {
+                    source.inner = *snapshot;
+                }
                 source.save_msr();
             }
 
