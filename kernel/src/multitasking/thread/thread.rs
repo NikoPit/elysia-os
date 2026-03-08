@@ -17,6 +17,8 @@ pub struct Thread {
     pub snapshot: ThreadSnapshot,
     pub executor_snapshot: ThreadSnapshot,
     pub state: State,
+    // Kernel stack for the cpu to switch to a clean stack on interrupts
+    // not to be confused with the kernel_rsp in ThreadSnapshot
     pub kernel_stack_top: u64,
 }
 
